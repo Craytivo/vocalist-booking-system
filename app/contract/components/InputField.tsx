@@ -1,0 +1,90 @@
+import { ChangeEvent, useState } from "react";
+
+interface InputFieldProps {
+  label: string;
+  value: string;
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  type?: string;
+  placeholder?: string;
+  required?: boolean;
+  fieldName?: string;
+  error?: string;
+}
+
+export default function InputField({
+  label,
+  value,
+  onChange,
+  type = "text",
+  placeholder,
+  required = false,
+  fieldName,
+  error,
+}: InputFieldProps) {
+  const [touched, setTouched] = useState(false);
+  const [localError, setLocalError] = useState<string>("");
+
+  const validateField = (val: string) => {
+    if (required && !val.trim()) {
+      return `${label} is required`;
+    }
+    if (type === "email" && val) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(val)) {
+        return "Please enter a valid email address";
+      }
+    }
+    if (type === "tel" && val) {
+      const phoneRegex = /^[\d\s\+\-\(\)]+$/;
+      if (!phoneRegex.test(val)) {
+        return "Please enter a valid phone number";
+      }
+    }
+    if (type === "number" && val && parseFloat(val) < 0) {
+      return "Value must be positive";
+    }
+    return "";
+  };
+
+  const handleBlur = () => {
+    setTouched(true);
+    setLocalError(validateField(value));
+  };
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    onChange(e);
+    if (touched) {
+      setLocalError(validateField(e.target.value));
+    }
+  };
+
+  const currentError = error || localError;
+  const isValid = value.length > 0 && !currentError;
+  const showValidation = touched && (currentError || isValid);
+
+  return (
+    <label className="block">
+      <span className="mb-2.5 flex items-center justify-between gap-3">
+        <span className="text-sm font-semibold text-neutral-800 dark:text-stone-200 lg:text-base">{label}{required && <span className="text-red-500 ml-1">*</span>}</span>
+        {showValidation && (
+          <span className={`text-xs font-medium ${currentError ? 'text-red-600' : 'text-emerald-600'}`}>
+            {currentError ? currentError : '✓ Valid'}
+          </span>
+        )}
+      </span>
+      <input
+        type={type}
+        value={value}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        placeholder={placeholder}
+        className={`w-full rounded-xl border bg-white px-4 py-3.5 text-sm text-neutral-950 outline-none transition-all hover:border-amber-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 min-h-[48px] dark:bg-stone-900/70 dark:text-stone-100 dark:hover:bg-stone-900 lg:text-base lg:py-4 ${
+          currentError ? 'border-red-500 focus:border-red-600 focus:ring-red-100' : showValidation && isValid ? 'border-emerald-500 focus:border-emerald-600 focus:ring-emerald-100' : 'border-neutral-300'
+        }`}
+      />
+      {currentError && (
+        <p className="mt-1 text-xs text-red-600">{currentError}</p>
+      )}
+    </label>
+  );
+}

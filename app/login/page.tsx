@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../utils/supabaseClient";
+import { FONT_SIZE_CLASSES, LINE_HEIGHT_CLASSES, FONT_FAMILY_CLASSES, BUTTON_SIZE_CLASSES, FONT_WEIGHT_CLASSES } from "../components/GlobalTypography";
 
 function LoginContent() {
   const router = useRouter();
@@ -174,17 +175,17 @@ function LoginContent() {
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-stone-950 mb-2 dark:text-amber-50">Setlist</h1>
-            <p className="text-sm text-stone-600 dark:text-stone-300">
+            <h1 className={`${FONT_SIZE_CLASSES.headingLg} ${FONT_WEIGHT_CLASSES.bold} text-stone-950 mb-2 dark:text-amber-50 ${FONT_FAMILY_CLASSES.heading} ${LINE_HEIGHT_CLASSES.tight}`}>Setlist</h1>
+            <p className={`${FONT_SIZE_CLASSES.bodyMd} text-stone-600 dark:text-stone-300 ${FONT_FAMILY_CLASSES.body} ${LINE_HEIGHT_CLASSES.normal}`}>
               {isSetNewPassword ? "Set your new password" : isResetPassword ? "Reset your password" : isLogin ? "Sign in to access your contracts" : "Create your account"}
             </p>
             {isSetNewPassword && (
-              <p className="mt-2 text-xs text-stone-500 dark:text-stone-400">
+              <p className={`mt-2 ${FONT_SIZE_CLASSES.uiSm} text-stone-500 dark:text-stone-400 ${FONT_FAMILY_CLASSES.body} ${LINE_HEIGHT_CLASSES.normal}`}>
                 Enter your new password below. Use at least 6 characters.
               </p>
             )}
             {!isLogin && !isResetPassword && !isSetNewPassword && (
-              <p className="mt-2 text-xs text-stone-500 dark:text-stone-400">
+              <p className={`mt-2 ${FONT_SIZE_CLASSES.uiSm} text-stone-500 dark:text-stone-400 ${FONT_FAMILY_CLASSES.body} ${LINE_HEIGHT_CLASSES.normal}`}>
                 Use at least 6 characters. You may need to verify your email before full access.
               </p>
             )}
@@ -192,20 +193,20 @@ function LoginContent() {
 
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg dark:bg-red-950/40 dark:border-red-800" role="alert">
-              <p className="text-sm text-red-700 dark:text-red-200">{error}</p>
+              <p className={`${FONT_SIZE_CLASSES.bodyMd} text-red-700 dark:text-red-200 ${FONT_FAMILY_CLASSES.body}`}>{error}</p>
             </div>
           )}
 
           {success && (
             <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg dark:bg-emerald-950/40 dark:border-emerald-800" role="status" aria-live="polite">
-              <p className="text-sm text-emerald-700 dark:text-emerald-200">{success}</p>
+              <p className={`${FONT_SIZE_CLASSES.bodyMd} text-emerald-700 dark:text-emerald-200 ${FONT_FAMILY_CLASSES.body}`}>{success}</p>
             </div>
           )}
 
           {isSetNewPassword ? (
             <form onSubmit={handleSetNewPassword} className="space-y-4">
               <div>
-                <label htmlFor="new-password" className="block text-sm font-semibold text-stone-700 mb-2 dark:text-stone-200">
+                <label htmlFor="new-password" className={`block ${FONT_SIZE_CLASSES.uiMd} ${FONT_WEIGHT_CLASSES.semibold} text-stone-700 mb-2 dark:text-stone-200 ${FONT_FAMILY_CLASSES.heading}`}>
                   New Password
                 </label>
                 <input
@@ -213,7 +214,7 @@ function LoginContent() {
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full rounded-lg border border-amber-200 bg-white/80 px-4 py-3 text-sm text-stone-900 outline-none transition-all hover:border-amber-400 hover:bg-amber-50 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 min-h-[48px] dark:border-amber-500/20 dark:bg-stone-900/70 dark:text-stone-100 dark:hover:bg-stone-900"
+                  className={`w-full rounded-lg border border-amber-200 bg-white/80 px-4 py-3 ${FONT_SIZE_CLASSES.uiLg} text-stone-900 outline-none transition-all hover:border-amber-400 hover:bg-amber-50 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 min-h-[48px] dark:border-amber-500/20 dark:bg-stone-900/70 dark:text-stone-100 dark:hover:bg-stone-900 ${FONT_FAMILY_CLASSES.body}`}
                   placeholder="••••••••"
                   required
                   minLength={6}
@@ -222,7 +223,7 @@ function LoginContent() {
               </div>
 
               <div>
-                <label htmlFor="confirm-password" className="block text-sm font-semibold text-stone-700 mb-2 dark:text-stone-200">
+                <label htmlFor="confirm-password" className={`block ${FONT_SIZE_CLASSES.uiMd} ${FONT_WEIGHT_CLASSES.semibold} text-stone-700 mb-2 dark:text-stone-200 ${FONT_FAMILY_CLASSES.heading}`}>
                   Confirm Password
                 </label>
                 <input
@@ -230,7 +231,7 @@ function LoginContent() {
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full rounded-lg border border-amber-200 bg-white/80 px-4 py-3 text-sm text-stone-900 outline-none transition-all hover:border-amber-400 hover:bg-amber-50 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 min-h-[48px] dark:border-amber-500/20 dark:bg-stone-900/70 dark:text-stone-100 dark:hover:bg-stone-900"
+                  className={`w-full rounded-lg border border-amber-200 bg-white/80 px-4 py-3 ${FONT_SIZE_CLASSES.uiLg} text-stone-900 outline-none transition-all hover:border-amber-400 hover:bg-amber-50 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 min-h-[48px] dark:border-amber-500/20 dark:bg-stone-900/70 dark:text-stone-100 dark:hover:bg-stone-900 ${FONT_FAMILY_CLASSES.body}`}
                   placeholder="••••••••"
                   required
                   minLength={6}
@@ -241,7 +242,7 @@ function LoginContent() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-lg border border-amber-300/70 bg-stone-950 px-4 py-3 text-sm font-semibold text-amber-100 transition-all hover:border-amber-400 hover:bg-stone-900 hover:shadow-sm active:scale-95 min-h-[48px] disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 dark:bg-amber-200 dark:text-stone-950 dark:hover:bg-amber-100"
+                className={`w-full rounded-lg border border-amber-300/70 bg-stone-950 ${BUTTON_SIZE_CLASSES.primary.md} ${FONT_WEIGHT_CLASSES.semibold} text-amber-100 transition-all hover:border-amber-400 hover:bg-stone-900 hover:shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 dark:bg-amber-200 dark:text-stone-950 dark:hover:bg-amber-100`}
               >
                 {loading ? "Updating..." : "Set New Password"}
               </button>
@@ -255,7 +256,7 @@ function LoginContent() {
                     setError("");
                     setSuccess("");
                   }}
-                  className="text-sm text-amber-700 hover:text-amber-900 font-medium dark:text-amber-300 dark:hover:text-amber-200"
+                  className={`${FONT_SIZE_CLASSES.bodyMd} text-amber-700 hover:text-amber-900 ${FONT_WEIGHT_CLASSES.medium} dark:text-amber-300 dark:hover:text-amber-200 ${FONT_FAMILY_CLASSES.body}`}
                 >
                   Back to sign in
                 </button>
@@ -264,7 +265,7 @@ function LoginContent() {
           ) : isResetPassword ? (
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div>
-                <label htmlFor="reset-email" className="block text-sm font-semibold text-stone-700 mb-2 dark:text-stone-200">
+                <label htmlFor="reset-email" className={`block ${FONT_SIZE_CLASSES.uiMd} ${FONT_WEIGHT_CLASSES.semibold} text-stone-700 mb-2 dark:text-stone-200 ${FONT_FAMILY_CLASSES.heading}`}>
                   Email
                 </label>
                 <input
@@ -272,7 +273,7 @@ function LoginContent() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-lg border border-amber-200 bg-white/80 px-4 py-3 text-sm text-stone-900 outline-none transition-all hover:border-amber-400 hover:bg-amber-50 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 min-h-[48px] dark:border-amber-500/20 dark:bg-stone-900/70 dark:text-stone-100 dark:hover:bg-stone-900"
+                  className={`w-full rounded-lg border border-amber-200 bg-white/80 px-4 py-3 ${FONT_SIZE_CLASSES.uiLg} text-stone-900 outline-none transition-all hover:border-amber-400 hover:bg-amber-50 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 min-h-[48px] dark:border-amber-500/20 dark:bg-stone-900/70 dark:text-stone-100 dark:hover:bg-stone-900 ${FONT_FAMILY_CLASSES.body}`}
                   placeholder="you@example.com"
                   required
                 />
@@ -281,7 +282,7 @@ function LoginContent() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-lg border border-amber-300/70 bg-stone-950 px-4 py-3 text-sm font-semibold text-amber-100 transition-all hover:border-amber-400 hover:bg-stone-900 hover:shadow-sm active:scale-95 min-h-[48px] disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 dark:bg-amber-200 dark:text-stone-950 dark:hover:bg-amber-100"
+                className={`w-full rounded-lg border border-amber-300/70 bg-stone-950 ${BUTTON_SIZE_CLASSES.primary.md} ${FONT_WEIGHT_CLASSES.semibold} text-amber-100 transition-all hover:border-amber-400 hover:bg-stone-900 hover:shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 dark:bg-amber-200 dark:text-stone-950 dark:hover:bg-amber-100`}
               >
                 {loading ? "Sending..." : "Send Reset Link"}
               </button>
@@ -294,7 +295,7 @@ function LoginContent() {
                     setError("");
                     setSuccess("");
                   }}
-                  className="text-sm text-amber-700 hover:text-amber-900 font-medium dark:text-amber-300 dark:hover:text-amber-200"
+                  className={`${FONT_SIZE_CLASSES.bodyMd} text-amber-700 hover:text-amber-900 ${FONT_WEIGHT_CLASSES.medium} dark:text-amber-300 dark:hover:text-amber-200 ${FONT_FAMILY_CLASSES.body}`}
                 >
                   Back to sign in
                 </button>
@@ -307,7 +308,7 @@ function LoginContent() {
                 <button
                   type="button"
                   onClick={handleGoogleSignIn}
-                  className="w-full flex items-center justify-center gap-3 rounded-lg border border-amber-200 bg-white/80 px-4 py-3 text-sm font-medium text-stone-700 transition-all hover:bg-amber-50 hover:border-amber-400 mb-4 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 dark:border-amber-500/20 dark:bg-stone-900/70 dark:text-stone-100 dark:hover:bg-stone-900"
+                  className={`w-full flex items-center justify-center gap-3 rounded-lg border border-amber-200 bg-white/80 px-4 py-3 ${FONT_SIZE_CLASSES.uiLg} ${FONT_WEIGHT_CLASSES.medium} text-stone-700 transition-all hover:bg-amber-50 hover:border-amber-400 mb-4 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 dark:border-amber-500/20 dark:bg-stone-900/70 dark:text-stone-100 dark:hover:bg-stone-900 ${BUTTON_SIZE_CLASSES.primary.md} ${FONT_FAMILY_CLASSES.body}`}
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -323,14 +324,14 @@ function LoginContent() {
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-amber-200 dark:border-amber-500/20"></div>
                 </div>
-                <div className="relative flex justify-center text-xs">
-                  <span className="px-2 bg-white/90 text-stone-500 dark:bg-stone-950 dark:text-stone-400">Or continue with email</span>
+                <div className="relative flex justify-center">
+                  <span className={`px-2 bg-white/90 text-stone-500 dark:bg-stone-950 dark:text-stone-400 ${FONT_SIZE_CLASSES.uiXs} ${FONT_FAMILY_CLASSES.body}`}>Or continue with email</span>
                 </div>
               </div>
 
               <form onSubmit={handleAuth} className="space-y-4">
                 <div>
-                  <label htmlFor="email" className="block text-sm font-semibold text-stone-700 mb-2 dark:text-stone-200">
+                  <label htmlFor="email" className={`block ${FONT_SIZE_CLASSES.uiMd} ${FONT_WEIGHT_CLASSES.semibold} text-stone-700 mb-2 dark:text-stone-200 ${FONT_FAMILY_CLASSES.heading}`}>
                     Email
                   </label>
                   <input
@@ -338,14 +339,14 @@ function LoginContent() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-lg border border-amber-200 bg-white/80 px-4 py-3 text-sm text-stone-900 outline-none transition-all hover:border-amber-400 hover:bg-amber-50 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 min-h-[48px] dark:border-amber-500/20 dark:bg-stone-900/70 dark:text-stone-100 dark:hover:bg-stone-900"
+                    className={`w-full rounded-lg border border-amber-200 bg-white/80 px-4 py-3 ${FONT_SIZE_CLASSES.uiLg} text-stone-900 outline-none transition-all hover:border-amber-400 hover:bg-amber-50 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 min-h-[48px] dark:border-amber-500/20 dark:bg-stone-900/70 dark:text-stone-100 dark:hover:bg-stone-900 ${FONT_FAMILY_CLASSES.body}`}
                     placeholder="you@example.com"
                     required
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="password" className="block text-sm font-semibold text-stone-700 mb-2 dark:text-stone-200">
+                  <label htmlFor="password" className={`block ${FONT_SIZE_CLASSES.uiMd} ${FONT_WEIGHT_CLASSES.semibold} text-stone-700 mb-2 dark:text-stone-200 ${FONT_FAMILY_CLASSES.heading}`}>
                     Password
                   </label>
                   <input
@@ -353,7 +354,7 @@ function LoginContent() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-lg border border-amber-200 bg-white/80 px-4 py-3 text-sm text-stone-900 outline-none transition-all hover:border-amber-400 hover:bg-amber-50 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 min-h-[48px] dark:border-amber-500/20 dark:bg-stone-900/70 dark:text-stone-100 dark:hover:bg-stone-900"
+                    className={`w-full rounded-lg border border-amber-200 bg-white/80 px-4 py-3 ${FONT_SIZE_CLASSES.uiLg} text-stone-900 outline-none transition-all hover:border-amber-400 hover:bg-amber-50 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 min-h-[48px] dark:border-amber-500/20 dark:bg-stone-900/70 dark:text-stone-100 dark:hover:bg-stone-900 ${FONT_FAMILY_CLASSES.body}`}
                     placeholder="••••••••"
                     required
                     minLength={6}
@@ -364,7 +365,7 @@ function LoginContent() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full rounded-lg border border-amber-300/70 bg-stone-950 px-4 py-3 text-sm font-semibold text-amber-100 transition-all hover:border-amber-400 hover:bg-stone-900 hover:shadow-sm active:scale-95 min-h-[48px] disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 dark:bg-amber-200 dark:text-stone-950 dark:hover:bg-amber-100"
+                  className={`w-full rounded-lg border border-amber-300/70 bg-stone-950 ${BUTTON_SIZE_CLASSES.primary.md} ${FONT_WEIGHT_CLASSES.semibold} text-amber-100 transition-all hover:border-amber-400 hover:bg-stone-900 hover:shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 dark:bg-amber-200 dark:text-stone-950 dark:hover:bg-amber-100`}
                 >
                   {loading ? "Processing..." : isLogin ? "Sign In" : "Create Account"}
                 </button>
@@ -379,7 +380,7 @@ function LoginContent() {
                       setError("");
                       setSuccess("");
                     }}
-                    className="text-sm text-amber-700 hover:text-amber-900 font-medium dark:text-amber-300 dark:hover:text-amber-200"
+                    className={`${FONT_SIZE_CLASSES.bodyMd} text-amber-700 hover:text-amber-900 ${FONT_WEIGHT_CLASSES.medium} dark:text-amber-300 dark:hover:text-amber-200 ${FONT_FAMILY_CLASSES.body}`}
                   >
                     Forgot password?
                   </button>
@@ -393,7 +394,7 @@ function LoginContent() {
                     setIsLogin(!isLogin);
                     setError("");
                   }}
-                  className="text-sm text-amber-700 hover:text-amber-900 font-medium dark:text-amber-300 dark:hover:text-amber-200"
+                  className={`${FONT_SIZE_CLASSES.bodyMd} text-amber-700 hover:text-amber-900 ${FONT_WEIGHT_CLASSES.medium} dark:text-amber-300 dark:hover:text-amber-200 ${FONT_FAMILY_CLASSES.body}`}
                 >
                   {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
                 </button>
@@ -402,7 +403,7 @@ function LoginContent() {
           )}
 
           {!supabase && (
-            <p className="mt-4 text-center text-xs text-stone-500 dark:text-stone-400">
+            <p className={`mt-4 text-center ${FONT_SIZE_CLASSES.uiXs} text-stone-500 dark:text-stone-400 ${FONT_FAMILY_CLASSES.body}`}>
               Add Supabase credentials to .env.local to enable authentication
             </p>
           )}

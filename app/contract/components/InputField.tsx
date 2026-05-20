@@ -1,4 +1,5 @@
 import { ChangeEvent, useState } from "react";
+import { FONT_SIZE_CLASSES, LINE_HEIGHT_CLASSES, FONT_FAMILY_CLASSES, FONT_WEIGHT_CLASSES } from "../../components/GlobalTypography";
 
 interface InputFieldProps {
   label: string;
@@ -65,9 +66,9 @@ export default function InputField({
   return (
     <label className="block">
       <span className="mb-2.5 flex items-center justify-between gap-3">
-        <span className="text-sm font-semibold text-neutral-800 dark:text-stone-200 lg:text-base">{label}{required && <span className="text-red-500 ml-1">*</span>}</span>
+        <span className={`${FONT_SIZE_CLASSES.uiMd} ${FONT_WEIGHT_CLASSES.semibold} text-neutral-800 dark:text-stone-200 lg:text-base ${FONT_FAMILY_CLASSES.heading}`}>{label}{required && <span className="text-red-500 ml-1">*</span>}</span>
         {showValidation && (
-          <span className={`text-xs font-medium ${currentError ? 'text-red-600' : 'text-emerald-600'}`}>
+          <span className={`${FONT_SIZE_CLASSES.uiXs} ${FONT_WEIGHT_CLASSES.medium} ${currentError ? 'text-red-600' : 'text-emerald-600'}`}>
             {currentError ? currentError : '✓ Valid'}
           </span>
         )}
@@ -78,12 +79,12 @@ export default function InputField({
         onChange={handleChange}
         onBlur={handleBlur}
         placeholder={placeholder}
-        className={`w-full rounded-xl border bg-white px-4 py-3.5 text-sm text-neutral-950 outline-none transition-all hover:border-amber-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 min-h-[48px] dark:bg-stone-900/70 dark:text-stone-100 dark:hover:bg-stone-900 lg:text-base lg:py-4 ${
+        className={`w-full rounded-xl border bg-white px-4 py-3.5 ${FONT_SIZE_CLASSES.uiLg} text-neutral-950 outline-none transition-all hover:border-amber-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 min-h-[48px] dark:bg-stone-900/70 dark:text-stone-100 dark:hover:bg-stone-900 lg:text-base lg:py-4 ${FONT_FAMILY_CLASSES.body} ${
           currentError ? 'border-red-500 focus:border-red-600 focus:ring-red-100' : showValidation && isValid ? 'border-emerald-500 focus:border-emerald-600 focus:ring-emerald-100' : 'border-neutral-300'
         }`}
       />
       {currentError && (
-        <p className="mt-1 text-xs text-red-600">{currentError}</p>
+        <p className={`mt-1 ${FONT_SIZE_CLASSES.uiXs} text-red-600 ${FONT_FAMILY_CLASSES.body}`}>{currentError}</p>
       )}
     </label>
   );

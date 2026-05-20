@@ -1,4 +1,5 @@
 import { ChangeEvent } from "react";
+import { FONT_SIZE_CLASSES, FONT_FAMILY_CLASSES, FONT_WEIGHT_CLASSES } from "../../components/GlobalTypography";
 
 interface SelectFieldProps {
   label: string;
@@ -17,14 +18,14 @@ export default function SelectField({
 }: SelectFieldProps) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-semibold text-neutral-700 tracking-wide dark:text-stone-200 lg:text-base">
+      <span className={`mb-2 block ${FONT_SIZE_CLASSES.uiMd} ${FONT_WEIGHT_CLASSES.semibold} text-neutral-700 tracking-wide dark:text-stone-200 lg:text-base ${FONT_FAMILY_CLASSES.heading}`}>
         {label}
       </span>
       <div className="relative">
         <select
           value={value}
           onChange={onChange}
-          className="w-full appearance-none rounded-lg border border-amber-200 bg-white/80 px-4 py-3 pr-10 text-sm text-stone-900 outline-none transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 focus:border-amber-600 focus:ring-2 focus:ring-amber-200 focus:shadow-sm min-h-[44px] dark:border-amber-500/20 dark:bg-stone-900/70 dark:text-stone-100 dark:hover:bg-stone-900 lg:text-base lg:py-3.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
+          className={`w-full appearance-none rounded-lg border border-amber-200 bg-white/80 px-4 py-3 pr-10 ${FONT_SIZE_CLASSES.uiLg} text-stone-900 outline-none transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 focus:border-amber-600 focus:ring-2 focus:ring-amber-200 focus:shadow-sm min-h-[44px] dark:border-amber-500/20 dark:bg-stone-900/70 dark:text-stone-100 dark:hover:bg-stone-900 lg:text-base lg:py-3.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 ${FONT_FAMILY_CLASSES.body}`}
         >
           {placeholder && <option value="">{placeholder}</option>}
           {options.map((option) => (

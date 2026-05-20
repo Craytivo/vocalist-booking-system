@@ -1,12 +1,12 @@
 "use client";
 
 import React, {
-  ChangeEvent,
-  RefObject,
-  useCallback,
+  useState,
   useEffect,
   useRef,
-  useState,
+  ChangeEvent,
+  useMemo,
+  useCallback,
 } from "react";
 import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
@@ -20,6 +20,9 @@ import StorageWarningBanner from "./components/StorageWarningBanner";
 import Header from "./components/Header";
 import FormPanel from "./components/FormPanel";
 import ContractPreview from "./components/ContractPreview";
+import ContractWizard from "./components/ContractWizard";
+import ContractActions from "./components/ContractActions";
+import ContractModals from "./components/ContractModals";
 import { getErrorMessage } from "./utils/errorHandling";
 import { downloadPdf } from "./utils/pdf";
 import { generateCalendarEvent } from "./utils/calendar";
@@ -30,6 +33,7 @@ import { useContractAutosave } from "./hooks/useContractAutosave";
 import { useContractTemplates } from "./hooks/useContractTemplates";
 import { useOfflineDraft } from "./hooks/useOfflineDraft";
 import { useContractForm } from "./hooks/useContractForm";
+import { ContractForm } from "./types/contract";
 
 // Custom scrollbar styles
 const customScrollbarStyles = `
@@ -110,82 +114,6 @@ class ErrorBoundary extends React.Component<
     return this.props.children;
   }
 }
-
-type ContractForm = {
-  artistName: string;
-  artistEmail: string;
-  artistLogo: string;
-  bookingPreset: string;
-  contractStatus: string;
-  clientName: string;
-  representativeName: string;
-  email: string;
-  phoneNumber: string;
-  eventName: string;
-  eventDates: string;
-  venueLocation: string;
-  services: string[];
-  totalFee: string;
-  depositPercentage: string;
-  travelRequired: boolean;
-  depositTerms: string;
-  travelTerms: string;
-  cancellationTerms: string;
-  technicalRequirements: string;
-  performanceDuration: string;
-  paymentMethod: string;
-  dateOfAgreement: string;
-  mediaRightsAllowed: boolean;
-  mediaRightsTerms: string;
-  forceMajeureIncluded: boolean;
-  forceMajeureTerms: string;
-  independentContractorClause: string;
-  artistSignerName: string;
-  clientSignerName: string;
-  artistSignerTitle: string;
-  clientSignerTitle: string;
-  artistSignature: string;
-  clientSignature: string;
-  signedDate: string;
-  deliverySubject: string;
-  deliveryMessage: string;
-  invoiceNumber: string;
-  invoiceDate: string;
-  invoiceStatus: "Pending" | "Paid" | "Overdue";
-  invoiceDueDate: string;
-  invoiceNotes: string;
-  // New fields for comprehensive contract
-  rehearsalRequired: boolean;
-  rehearsalDetails: string;
-  soundCheckRequired: boolean;
-  soundCheckDetails: string;
-  hospitalityRequired: boolean;
-  hospitalityDetails: string;
-  latePaymentPenalty: string;
-  cancellationFee: string;
-  insuranceRequired: boolean;
-  insuranceDetails: string;
-  imageUsageAllowed: boolean;
-  imageUsageTerms: string;
-  merchandiseSalesAllowed: boolean;
-  merchandiseTerms: string;
-  guestListCount: string;
-  securityRequired: boolean;
-  securityDetails: string;
-  parkingProvided: boolean;
-  parkingDetails: string;
-  governingLaw: string;
-  disputeResolution: string;
-  // Phase 2 additions
-  technicalRiderRequired: boolean;
-  technicalRiderDetails: string;
-  accommodationRequired: boolean;
-  accommodationDetails: string;
-  perDiemRequired: boolean;
-  perDiemDetails: string;
-  publicityTermsRequired: boolean;
-  publicityTerms: string;
-};
 
 type ContractRow = {
   id: string;
@@ -491,7 +419,7 @@ const contractRowToForm = (row: ContractRow): ContractForm => ({
   artistEmail: row.artist_email ?? "",
   artistLogo: row.artist_logo ?? "",
   bookingPreset: row.booking_preset ?? "",
-  contractStatus: row.contract_status ?? row.status ?? "Draft",
+  contractStatus: (row.contract_status ?? row.status ?? "Draft") as "Draft" | "Ready" | "Sent" | "Signed",
   clientName: row.client_name ?? "",
   representativeName: row.representative_name ?? "",
   email: row.email ?? "",
@@ -738,28 +666,34 @@ function ContractPage() {
   const [wizardStep, setWizardStep] = useState(1);
   const [activeTab, setActiveTab] = useState("all");
 
-  // Define wizard steps
-  const wizardSteps = [
-    { id: 1, name: "Event Info", sections: ["eventInfo"] },
-    { id: 2, name: "Services", sections: ["services"] },
-    { id: 3, name: "Payment", sections: ["payment"] },
-    { id: 4, name: "Options", sections: ["options", "rightsUsage", "operational"] },
-    { id: 5, name: "Requirements", sections: ["performanceRequirements", "technicalRider"] },
-    { id: 6, name: "Legal", sections: ["financialLegal", "contractLanguage"] },
-    { id: 7, name: "Logistics", sections: ["accommodation", "perDiem", "publicity"] },
-  ];
+  // Define wizard steps (memoized for performance)
+  const wizardSteps = useMemo(
+    () => [
+      { id: 1, name: "Event Info", sections: ["eventInfo"] },
+      { id: 2, name: "Services", sections: ["services"] },
+      { id: 3, name: "Payment", sections: ["payment"] },
+      { id: 4, name: "Options", sections: ["options", "rightsUsage", "operational"] },
+      { id: 5, name: "Requirements", sections: ["performanceRequirements", "technicalRider"] },
+      { id: 6, name: "Legal", sections: ["financialLegal", "contractLanguage"] },
+      { id: 7, name: "Logistics", sections: ["accommodation", "perDiem", "publicity"] },
+    ],
+    []
+  );
 
-  // Define tabs
-  const formTabs = [
-    { id: "all", name: "All Sections", sections: [] },
-    { id: "event", name: "Event", sections: ["eventInfo"] },
-    { id: "services", name: "Services", sections: ["services"] },
-    { id: "payment", name: "Payment", sections: ["payment"] },
-    { id: "options", name: "Options", sections: ["options"] },
-    { id: "requirements", name: "Requirements", sections: ["performanceRequirements", "technicalRider"] },
-    { id: "legal", name: "Legal", sections: ["financialLegal", "contractLanguage"] },
-    { id: "logistics", name: "Logistics", sections: ["accommodation", "perDiem", "publicity"] },
-  ];
+  // Define tabs (memoized for performance)
+  const formTabs = useMemo(
+    () => [
+      { id: "all", name: "All Sections", sections: [] },
+      { id: "event", name: "Event", sections: ["eventInfo"] },
+      { id: "services", name: "Services", sections: ["services"] },
+      { id: "payment", name: "Payment", sections: ["payment"] },
+      { id: "options", name: "Options", sections: ["options"] },
+      { id: "requirements", name: "Requirements", sections: ["performanceRequirements", "technicalRider"] },
+      { id: "legal", name: "Legal", sections: ["financialLegal", "contractLanguage"] },
+      { id: "logistics", name: "Logistics", sections: ["accommodation", "perDiem", "publicity"] },
+    ],
+    []
+  );
 
   // Get sections for current wizard step
   const currentWizardSections = wizardMode ? wizardSteps.find(s => s.id === wizardStep)?.sections || [] : [];
@@ -998,6 +932,7 @@ function ContractPage() {
   const signOut = async () => {
     if (!supabase) return;
     await supabase.auth.signOut();
+    router.push("/login");
     showToast("Signed out", "success");
   };
 
@@ -2116,99 +2051,21 @@ ${artistName}`;
           } ${focusMode ? "hidden" : ""}`}
           ref={formRef}
         >
-          <div className="flex flex-col gap-5 sm:gap-6 mb-6">
-          {/* Primary Actions */}
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-700 mb-3">Primary Actions</p>
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setShowQuickStart(true)}
-                className="rounded-lg border border-amber-300/70 bg-stone-950 px-5 py-3 text-body font-bold text-amber-100 shadow-md shadow-stone-950/10 transition-all duration-200 ease-out hover:border-amber-400 hover:bg-stone-900 active:scale-95 flex items-center gap-2 min-h-[48px] focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 dark:border-amber-400/40 dark:bg-amber-200 dark:text-stone-950 dark:hover:bg-amber-100 tracking-normal"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-                </svg>
-                <span>Quick Start</span>
-              </button>
-              <button
-                type="button"
-                onClick={startNewContract}
-                className="rounded-lg border border-amber-200 bg-white/70 px-4 py-3 text-body font-medium text-stone-800 tracking-normal transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 active:scale-95 min-h-[48px] focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2"
-              >
-                New Contract
-              </button>
-            </div>
-          </div>
-
-          {/* Contract Actions */}
-          {draftId && supabase && (
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-700 mb-3">Contract Actions</p>
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowSaveVersionModal(true)}
-                  className="rounded-lg border border-amber-200 bg-white/70 px-4 py-3 text-body font-medium text-stone-800 tracking-normal transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 active:scale-95 min-h-[48px] focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2"
-                >
-                  Save Version
-                </button>
-                <button
-                  type="button"
-                  onClick={() => loadContractVersions(draftId)}
-                  className="rounded-lg border border-amber-200 bg-white/70 px-4 py-3 text-body font-medium text-stone-800 tracking-normal transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 active:scale-95 min-h-[48px] focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2"
-                >
-                  Version History
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Utilities */}
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-700 mb-3">Utilities</p>
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={handleGenerateCalendarEvent}
-                className="rounded-lg border border-amber-200 bg-white/60 px-4 py-3 text-body font-medium text-stone-600 tracking-normal transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 active:scale-95 min-h-[48px] focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2"
-              >
-                Add to Calendar
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowTemplateLibrary(!showTemplateLibrary)}
-                className={`rounded-lg px-4 py-3 text-body font-medium tracking-normal transition-all duration-200 ease-out min-h-[48px] active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${
-                  showTemplateLibrary
-                    ? "bg-stone-950 text-amber-100"
-                    : "border border-amber-200 bg-white/60 text-stone-600 hover:border-amber-400 hover:bg-amber-50"
-                }`}
-              >
-                {showTemplateLibrary ? "Close" : "Templates"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowAnalytics(!showAnalytics)}
-                className={`rounded-lg px-4 py-3 text-body font-medium tracking-normal transition-all duration-200 ease-out min-h-[48px] active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${
-                  showAnalytics
-                    ? "bg-stone-950 text-amber-100"
-                    : "border border-amber-200 bg-white/60 text-stone-600 hover:border-amber-400 hover:bg-amber-50"
-                }`}
-              >
-                {showAnalytics ? "Close" : "Analytics"}
-              </button>
-            </div>
-          </div>
-          </div>
-          <div className="mb-4 rounded-xl border border-amber-200 bg-gradient-to-r from-white/90 to-amber-50/80 px-4 py-3 flex items-center gap-3 shadow-sm shadow-amber-950/5">
-            <span className={`h-2 w-2 rounded-full ${saveStatus.includes("failed") ? "bg-red-500" : saveStatus.includes("Saving") ? "bg-amber-500" : "bg-emerald-500"}`} />
-            <p className="text-sm text-neutral-700">{!isOnline ? "Offline - saved locally" : saveStatus}</p>
-            {!isOnline && (
-              <span className="ml-auto rounded-md bg-amber-50 border border-amber-200 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700">
-                Offline
-              </span>
-            )}
-          </div>
+          <ContractActions
+            draftId={draftId}
+            supabase={supabase}
+            showTemplateLibrary={showTemplateLibrary}
+            showAnalytics={showAnalytics}
+            setShowQuickStart={setShowQuickStart}
+            setShowSaveVersionModal={setShowSaveVersionModal}
+            setShowTemplateLibrary={setShowTemplateLibrary}
+            setShowAnalytics={setShowAnalytics}
+            startNewContract={startNewContract}
+            loadContractVersions={loadContractVersions}
+            handleGenerateCalendarEvent={handleGenerateCalendarEvent}
+            saveStatus={saveStatus}
+            isOnline={isOnline}
+          />
           <div className="mb-4 rounded-lg border border-amber-200/70 bg-white/60 px-3 py-2 shadow-sm shadow-amber-950/5 dark:border-amber-500/20 dark:bg-stone-900/60">
             <div className="flex items-center justify-between gap-3">
               <span className="text-xs font-semibold uppercase tracking-[0.12em] text-stone-600 dark:text-stone-300">Progress</span>
@@ -2496,46 +2353,12 @@ ${artistName}`;
                 </div>
               </div>
             )}
-            {wizardMode && (
-              <div className="mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-neutral-900">Wizard Mode</h2>
-                  <span className="text-sm text-neutral-600">Step {wizardStep} of {wizardSteps.length}</span>
-                </div>
-                <div className="flex items-center gap-2 mb-6">
-                  {wizardSteps.map((step, index) => (
-                    <React.Fragment key={step.id}>
-                      <div
-                        className={`flex-1 h-2 rounded-full transition-all ${
-                          step.id <= wizardStep ? 'bg-gradient-to-r from-amber-400 to-orange-500' : 'bg-amber-100'
-                        }`}
-                      />
-                      {index < wizardSteps.length - 1 && (
-                        <div className="w-2 h-2 rounded-full bg-neutral-200" />
-                      )}
-                    </React.Fragment>
-                  ))}
-                </div>
-                <div className="flex gap-2 flex-wrap">
-                  {wizardSteps.map((step) => (
-                    <button
-                      key={step.id}
-                      type="button"
-                      onClick={() => setWizardStep(step.id)}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                        step.id === wizardStep
-                          ? 'bg-stone-950 text-amber-100 dark:bg-amber-200 dark:text-stone-950'
-                          : step.id < wizardStep
-                          ? 'bg-amber-100 text-amber-800 hover:bg-amber-200'
-                          : 'bg-white/80 text-stone-600 hover:bg-amber-50 border border-amber-100'
-                      }`}
-                    >
-                      {step.id}. {step.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+            <ContractWizard
+              wizardMode={wizardMode}
+              wizardStep={wizardStep}
+              setWizardStep={setWizardStep}
+              wizardSteps={wizardSteps}
+            />
             <fieldset id="section-event-info" className="space-y-6">
               <legend className="text-section-header font-medium text-neutral-900 tracking-normal font-display">
                 1. Artist Information
@@ -3499,11 +3322,11 @@ ${artistName}`;
           ref={previewRef}
         >
           <div className="mx-auto max-w-[950px] px-1 sm:px-0">
-            <div className="mb-4 flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-widest text-amber-800 sm:text-sm">
+            <div className="mb-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-amber-800 sm:text-sm mb-3">
                 Live Contract Preview
               </p>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <button
                   type="button"
                   onClick={() => setZoomLevel(Math.max(50, zoomLevel - 10))}
@@ -3560,434 +3383,56 @@ ${artistName}`;
           )}
         </section>
       </div>
-      
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
-            <div className="mb-6">
-              <h2 className="text-lg font-bold text-neutral-900 leading-tight mb-2">Delete Contract</h2>
-              <p className="text-sm text-neutral-500 leading-relaxed">Are you sure you want to delete this contract? This action cannot be undone.</p>
-            </div>
-            
-            <div className="flex gap-3 pt-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setContractToDelete(null);
-                }}
-                className="flex-1 rounded-lg border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-700 transition-all hover:border-neutral-900 hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={confirmDeleteContract}
-                className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-amber-100 transition-all hover:bg-red-700"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {/* Workspace Modal */}
-      {showWorkspaceModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-neutral-900 leading-tight">Artist Workspace</h2>
-              <button
-                type="button"
-                onClick={() => setShowWorkspaceModal(false)}
-                className="p-2 rounded-lg hover:bg-neutral-100 transition-all focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
-
-            <p className="mb-5 text-sm text-neutral-600">
-              Create a workspace so each artist gets an isolated demo link, saved drafts, and version history.
-            </p>
-
-            <div className="space-y-4">
-              <label className="block">
-                <span className="mb-2 block text-sm font-semibold text-neutral-700">Artist Name</span>
-                <input
-                  type="text"
-                  value={workspaceArtistName}
-                  onChange={(event) => setWorkspaceArtistName(event.target.value)}
-                  className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 outline-none transition-all hover:border-amber-400 focus:border-amber-600 focus:ring-2 focus:ring-amber-200"
-                  placeholder="Artist or performer name"
-                />
-              </label>
-              <label className="block">
-                <span className="mb-2 block text-sm font-semibold text-neutral-700">Artist Email</span>
-                <input
-                  type="email"
-                  value={workspaceArtistEmail}
-                  onChange={(event) => setWorkspaceArtistEmail(event.target.value)}
-                  className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 outline-none transition-all hover:border-amber-400 focus:border-amber-600 focus:ring-2 focus:ring-amber-200"
-                  placeholder="artist@example.com"
-                />
-              </label>
-            </div>
-
-            <div className="mt-6 flex gap-3">
-              <button
-                type="button"
-                onClick={() => setShowWorkspaceModal(false)}
-                className="flex-1 rounded-lg border border-neutral-300 px-4 py-3 text-sm font-semibold text-neutral-700 transition-all hover:border-neutral-900 hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => createWorkspace(workspaceArtistName, workspaceArtistEmail)}
-                className="flex-1 rounded-lg bg-stone-950 px-4 py-3 text-sm font-semibold text-amber-100 transition-all hover:bg-stone-900 dark:hover:bg-amber-100 hover:shadow-sm"
-              >
-                Create Workspace
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Mail Client Modal */}
-      {showMailClientModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-neutral-900 leading-tight">Choose Mail Client</h2>
-              <button
-                type="button"
-                onClick={() => setShowMailClientModal(false)}
-                className="p-2 rounded-lg hover:bg-neutral-100 transition-all focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
-
-            <p className="mb-5 text-sm text-neutral-600">
-              Your contract PDF has been downloaded. Choose where to open the email draft, then attach the downloaded PDF manually.
-            </p>
-
-            <div className="space-y-3">
-              <button
-                type="button"
-                onClick={openGmailDraft}
-                className="w-full rounded-lg bg-stone-950 px-4 py-3 text-sm font-semibold text-amber-100 transition-all duration-200 ease-out hover:bg-stone-900 dark:hover:bg-amber-100 hover:shadow-sm active:scale-95 min-h-[48px]"
-              >
-                Open in Gmail
-              </button>
-              <button
-                type="button"
-                onClick={openDefaultMailClient}
-                className="w-full rounded-lg border border-neutral-300 px-4 py-3 text-sm font-semibold text-neutral-700 transition-all duration-200 ease-out hover:border-neutral-900 hover:bg-neutral-50 hover:text-neutral-900 active:scale-95 min-h-[48px] focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
-              >
-                Open Default Mail App
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Quick Start Modal */}
-      {showQuickStart && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-neutral-900 leading-tight">Quick Start</h2>
-              <button
-                type="button"
-                onClick={() => setShowQuickStart(false)}
-                className="p-2 rounded-lg hover:bg-neutral-100 transition-all focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
-            
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const formData = new FormData(e.currentTarget);
-              handleQuickStart({
-                artistName: formData.get('artistName') as string,
-                clientName: formData.get('clientName') as string,
-                fee: formData.get('fee') as string,
-                date: formData.get('date') as string,
-                preset: formData.get('preset') as string,
-              });
-            }}>
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-semibold text-neutral-700 tracking-wide mb-2">Artist Name</label>
-                  <input
-                    type="text"
-                    value={quickStartArtistName}
-                    onChange={(event) => setQuickStartArtistName(event.target.value)}
-                    className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 outline-none transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 focus:border-amber-600 focus:ring-2 focus:ring-amber-200 focus:shadow-sm min-h-[48px]"
-                    placeholder="Avery Simone"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-neutral-700 tracking-wide mb-2">Client Name</label>
-                  <input
-                    type="text"
-                    value={quickStartClientName}
-                    onChange={(event) => setQuickStartClientName(event.target.value)}
-                    className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 outline-none transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 focus:border-amber-600 focus:ring-2 focus:ring-amber-200 focus:shadow-sm min-h-[48px]"
-                    placeholder="Acme Events"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-neutral-700 tracking-wide mb-2">Fee (CAD)</label>
-                  <input
-                    type="number"
-                    value={quickStartFee}
-                    onChange={(event) => setQuickStartFee(event.target.value)}
-                    className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 outline-none transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 focus:border-amber-600 focus:ring-2 focus:ring-amber-200 focus:shadow-sm min-h-[48px]"
-                    placeholder="500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-neutral-700 tracking-wide mb-2">Event Date</label>
-                  <input
-                    type="date"
-                    value={quickStartDate}
-                    onChange={(event) => setQuickStartDate(event.target.value)}
-                    className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 outline-none transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 focus:border-amber-600 focus:ring-2 focus:ring-amber-200 focus:shadow-sm min-h-[48px]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-neutral-700 tracking-wide mb-2">Booking Type</label>
-                  <select
-                    value={quickStartBookingType}
-                    onChange={(event) => setQuickStartBookingType(event.target.value)}
-                    className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 outline-none transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 focus:border-amber-600 focus:ring-2 focus:ring-amber-200 focus:shadow-sm min-h-[48px] cursor-pointer"
-                  >
-                    {bookingPresets.map((preset) => (
-                      <option key={preset.label} value={preset.label}>
-                        {preset.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              
-              <div className="mt-6 flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowQuickStart(false)}
-                  className="flex-1 rounded-lg border border-neutral-300 px-4 py-3 text-sm font-semibold text-neutral-700 transition-all duration-200 ease-out hover:border-neutral-900 hover:bg-neutral-50 hover:text-neutral-900 active:scale-95 min-h-[48px] focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 rounded-lg bg-stone-950 px-4 py-3 text-sm font-semibold text-amber-100 transition-all duration-200 ease-out hover:bg-stone-900 dark:hover:bg-amber-100 hover:shadow-sm active:scale-95 min-h-[48px]"
-                >
-                  Create Contract
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-      
-      {/* Save Version Modal */}
-      {showSaveVersionModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-neutral-900 leading-tight">Save Version</h2>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowSaveVersionModal(false);
-                  setVersionNote("");
-                }}
-                className="p-2 rounded-lg hover:bg-neutral-100 transition-all focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
-            
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-neutral-700 tracking-wide mb-2">Version Note (optional)</label>
-              <input
-                type="text"
-                value={versionNote}
-                onChange={(e) => setVersionNote(e.target.value)}
-                placeholder="e.g., Final version before signing"
-                className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 outline-none transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 focus:border-amber-600 focus:ring-2 focus:ring-amber-200 focus:shadow-sm min-h-[48px]"
-              />
-            </div>
-            
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowSaveVersionModal(false);
-                  setVersionNote("");
-                }}
-                className="flex-1 rounded-lg border border-neutral-300 px-4 py-3 text-sm font-semibold text-neutral-700 transition-all duration-200 ease-out hover:border-neutral-900 hover:bg-neutral-50 hover:text-neutral-900 active:scale-95 min-h-[48px] focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  if (draftId) {
-                    await saveContractVersion(draftId, form, versionNote || "Manual save");
-                    await loadContractVersions(draftId);
-                    setShowSaveVersionModal(false);
-                    setVersionNote("");
-                    setShowVersionHistory(true);
-                    showToast("Version saved successfully", "success");
-                  }
-                }}
-                className="flex-1 rounded-lg bg-stone-950 px-4 py-3 text-sm font-semibold text-amber-100 transition-all duration-200 ease-out hover:bg-stone-900 dark:hover:bg-amber-100 hover:shadow-sm active:scale-95 min-h-[48px]"
-              >
-                Save Version
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Restore Confirmation Modal */}
-      {showRestoreConfirmation && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
-            <div className="mb-6">
-              <h2 className="text-lg font-bold text-neutral-900 leading-tight mb-2">Restore Version</h2>
-              <p className="text-sm text-neutral-500 leading-relaxed">
-                Are you sure you want to restore version {versionToRestore?.version_number}? This will replace your current contract with this version.
-              </p>
-            </div>
-            
-            <div className="flex gap-3 pt-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowRestoreConfirmation(false);
-                  setVersionToRestore(null);
-                }}
-                className="flex-1 rounded-lg border border-neutral-300 px-4 py-3 text-sm font-semibold text-neutral-700 transition-all duration-200 ease-out hover:border-neutral-900 hover:bg-neutral-50 hover:text-neutral-900 active:scale-95 min-h-[48px] focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={confirmRestoreVersion}
-                className="flex-1 rounded-lg bg-stone-950 px-4 py-3 text-sm font-semibold text-amber-100 transition-all duration-200 ease-out hover:bg-stone-900 dark:hover:bg-amber-100 hover:shadow-sm active:scale-95 min-h-[48px]"
-              >
-                Restore
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Version History Modal */}
-      {showVersionHistory && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-2xl rounded-xl bg-white p-6 shadow-2xl max-h-[80vh] flex flex-col">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-neutral-900 leading-tight">Version History</h2>
-              <button
-                type="button"
-                onClick={() => setShowVersionHistory(false)}
-                className="p-2 rounded-lg hover:bg-neutral-100 transition-all focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
-            
-            {contractVersions.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-sm text-neutral-500">No version history available</p>
-              </div>
-            ) : (
-              <div className="flex-1 overflow-y-auto space-y-2">
-                {contractVersions.map((version) => (
-                  <div
-                    key={version.id}
-                    className={`flex items-center justify-between p-4 rounded-lg border transition-all ${
-                      activeVersionNumber === version.version_number
-                        ? "border-amber-500 bg-amber-50"
-                        : "border-neutral-300 bg-neutral-50 hover:bg-neutral-100"
-                    }`}
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-semibold text-neutral-900">Version {version.version_number}</span>
-                        <span className="text-xs text-neutral-400">•</span>
-                        <span className="text-xs text-neutral-500">
-                          {new Date(version.created_at).toLocaleDateString()} {new Date(version.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                        </span>
-                        {activeVersionNumber === version.version_number && (
-                          <span className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-stone-950 text-amber-100 dark:bg-amber-200 dark:text-stone-950 rounded-full">Active</span>
-                        )}
-                      </div>
-                      <p className="text-xs text-neutral-600 mb-1">by {version.created_by}</p>
-                      {version.version_note && version.version_note !== "Autosave" && (
-                        <p className="text-xs text-amber-700 font-medium">{version.version_note}</p>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => restoreContractVersion(version)}
-                        className="px-3 py-2 text-sm font-semibold text-neutral-700 border border-neutral-300 rounded-lg hover:bg-white hover:border-neutral-900 transition-all focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
-                      >
-                        Restore
-                      </button>
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          if (supabase && confirm("Are you sure you want to delete this version?")) {
-                            await supabase.from("contract_versions").delete().eq("id", version.id);
-                            if (draftId) {
-                              await loadContractVersions(draftId);
-                            }
-                            showToast("Version deleted", "success");
-                          }
-                        }}
-                        className="px-3 py-2 text-sm font-semibold text-red-600 border border-red-200 rounded-lg hover:bg-red-50 hover:border-red-600 transition-all focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
-                        title="Delete version"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M3 6h18"></path>
-                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      <ContractModals
+        showDeleteModal={showDeleteModal}
+        showWorkspaceModal={showWorkspaceModal}
+        showMailClientModal={showMailClientModal}
+        showQuickStart={showQuickStart}
+        showSaveVersionModal={showSaveVersionModal}
+        showRestoreConfirmation={showRestoreConfirmation}
+        showVersionHistory={showVersionHistory}
+        workspaceArtistName={workspaceArtistName}
+        workspaceArtistEmail={workspaceArtistEmail}
+        versionNote={versionNote}
+        quickStartArtistName={quickStartArtistName}
+        quickStartClientName={quickStartClientName}
+        quickStartFee={quickStartFee}
+        quickStartDate={quickStartDate}
+        quickStartBookingType={quickStartBookingType}
+        versionToRestore={versionToRestore}
+        contractVersions={contractVersions}
+        activeVersionNumber={activeVersionNumber}
+        draftId={draftId}
+        supabase={supabase}
+        bookingPresets={bookingPresets}
+        setShowDeleteModal={setShowDeleteModal}
+        setShowWorkspaceModal={setShowWorkspaceModal}
+        setShowMailClientModal={setShowMailClientModal}
+        setShowQuickStart={setShowQuickStart}
+        setShowSaveVersionModal={setShowSaveVersionModal}
+        setShowRestoreConfirmation={setShowRestoreConfirmation}
+        setShowVersionHistory={setShowVersionHistory}
+        setWorkspaceArtistName={setWorkspaceArtistName}
+        setWorkspaceArtistEmail={setWorkspaceArtistEmail}
+        setVersionNote={setVersionNote}
+        setQuickStartArtistName={setQuickStartArtistName}
+        setQuickStartClientName={setQuickStartClientName}
+        setQuickStartFee={setQuickStartFee}
+        setQuickStartDate={setQuickStartDate}
+        setQuickStartBookingType={setQuickStartBookingType}
+        setVersionToRestore={setVersionToRestore}
+        confirmDeleteContract={confirmDeleteContract}
+        createWorkspace={createWorkspace}
+        openGmailDraft={openGmailDraft}
+        openDefaultMailClient={openDefaultMailClient}
+        handleQuickStart={handleQuickStart}
+        saveContractVersion={saveContractVersion}
+        loadContractVersions={loadContractVersions}
+        restoreContractVersion={restoreContractVersion}
+        confirmRestoreVersion={confirmRestoreVersion}
+        form={form}
+        showToast={showToast}
+      />
 
       {/* Toast Notification */}
       {toast && (

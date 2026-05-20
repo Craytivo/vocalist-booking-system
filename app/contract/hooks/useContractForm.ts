@@ -1,7 +1,98 @@
 import { useState, ChangeEvent } from "react";
 
 interface ContractForm {
-  [key: string]: any;
+  // Artist Information
+  artistName: string;
+  artistEmail: string;
+  artistLogo: string;
+  
+  // Booking & Contract Status
+  bookingPreset: string;
+  contractStatus: string;
+  
+  // Client Information
+  clientName: string;
+  representativeName: string;
+  email: string;
+  phoneNumber: string;
+  
+  // Event Details
+  eventName: string;
+  eventDates: string;
+  venueLocation: string;
+  services: string[];
+  totalFee: string;
+  depositPercentage: string;
+  travelRequired: boolean;
+  
+  // Contract Terms
+  depositTerms: string;
+  travelTerms: string;
+  cancellationTerms: string;
+  technicalRequirements: string;
+  performanceDuration: string;
+  paymentMethod: string;
+  dateOfAgreement: string;
+  
+  // Media & Rights
+  mediaRightsAllowed: boolean;
+  mediaRightsTerms: string;
+  
+  // Legal Clauses
+  forceMajeureIncluded: boolean;
+  forceMajeureTerms: string;
+  independentContractorClause: string;
+  
+  // Signatures
+  artistSignerName: string;
+  clientSignerName: string;
+  artistSignerTitle: string;
+  clientSignerTitle: string;
+  artistSignature: string;
+  clientSignature: string;
+  signedDate: string;
+  
+  // Delivery Package
+  deliverySubject: string;
+  deliveryMessage: string;
+  
+  // Invoice
+  invoiceNumber: string;
+  invoiceDate: string;
+  invoiceStatus: string;
+  invoiceDueDate: string;
+  invoiceNotes: string;
+  
+  // Additional Contract Fields
+  rehearsalRequired: boolean;
+  rehearsalDetails: string;
+  soundCheckRequired: boolean;
+  soundCheckDetails: string;
+  hospitalityRequired: boolean;
+  hospitalityDetails: string;
+  latePaymentPenalty: string;
+  cancellationFee: string;
+  insuranceRequired: boolean;
+  insuranceDetails: string;
+  imageUsageAllowed: boolean;
+  imageUsageTerms: string;
+  merchandiseSalesAllowed: boolean;
+  merchandiseTerms: string;
+  guestListCount: string;
+  securityRequired: boolean;
+  securityDetails: string;
+  parkingProvided: boolean;
+  parkingDetails: string;
+  governingLaw: string;
+  disputeResolution: string;
+  technicalRiderRequired: boolean;
+  technicalRiderDetails: string;
+  accommodationRequired: boolean;
+  accommodationDetails: string;
+  perDiemRequired: boolean;
+  perDiemDetails: string;
+  publicityTermsRequired: boolean;
+  publicityTerms: string;
 }
 
 interface UseContractFormProps {

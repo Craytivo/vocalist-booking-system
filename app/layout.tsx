@@ -3,6 +3,30 @@ import type { ReactNode } from "react";
 import "./globals.css";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { validateEnv } from "./utils/env";
+import { Plus_Jakarta_Sans, Inter, Merriweather } from "next/font/google";
+
+// UI Fonts for the entire site
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-heading",
+  display: "swap",
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-body",
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700"],
+});
+
+// Contract preview font (for legal documents only)
+const merriweather = Merriweather({
+  subsets: ["latin"],
+  variable: "--font-legal",
+  display: "swap",
+  weight: ["300", "400", "700"],
+});
 
 // Validate environment variables on startup
 try {
@@ -22,8 +46,8 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" className={`${plusJakartaSans.variable} ${inter.variable} ${merriweather.variable}`}>
+      <body className="font-sans antialiased">
         <ErrorBoundary>{children}</ErrorBoundary>
       </body>
     </html>

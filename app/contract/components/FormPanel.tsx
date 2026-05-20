@@ -1,3 +1,5 @@
+import React from "react";
+import Button from "../../components/Button";
 import RecentContracts from "./RecentContracts";
 
 interface FormPanelProps {
@@ -80,23 +82,24 @@ export default function FormPanel({
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-700 mb-3">Primary Actions</p>
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
+            <Button
+              variant="primary"
+              size="md"
               onClick={() => setShowQuickStart(true)}
-              className="rounded-lg border border-amber-300/70 bg-stone-950 px-5 py-3 text-sm font-semibold text-amber-100 shadow-md shadow-stone-950/10 transition-all duration-200 ease-out hover:border-amber-400 hover:bg-stone-900 active:scale-95 flex items-center gap-2 min-h-[48px] focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 dark:border-amber-400/40 dark:bg-amber-200 dark:text-stone-950 dark:hover:bg-amber-100"
+              className="flex items-center gap-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
               </svg>
               <span>Quick Start</span>
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="secondary"
+              size="md"
               onClick={startNewContract}
-              className="rounded-lg border border-amber-200 bg-white/70 px-4 py-3 text-sm font-semibold text-stone-800 transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 active:scale-95 min-h-[48px] focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2"
             >
               New Contract
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -105,20 +108,20 @@ export default function FormPanel({
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-700 mb-3">Contract Actions</p>
             <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                size="md"
                 onClick={() => setShowSaveVersionModal(true)}
-                className="rounded-lg border border-amber-200 bg-white/70 px-4 py-3 text-sm font-semibold text-stone-800 transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 active:scale-95 min-h-[48px] focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2"
               >
                 Save Version
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="secondary"
+                size="md"
                 onClick={() => loadContractVersions(draftId)}
-                className="rounded-lg border border-amber-200 bg-white/70 px-4 py-3 text-sm font-semibold text-stone-800 transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 active:scale-95 min-h-[48px] focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2"
               >
                 Version History
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -127,35 +130,27 @@ export default function FormPanel({
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-700 mb-3">Utilities</p>
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="md"
               onClick={generateCalendarEvent}
-              className="rounded-lg border border-amber-200 bg-white/60 px-4 py-3 text-sm font-medium text-stone-600 transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 active:scale-95 min-h-[48px] focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2"
             >
               Add to Calendar
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant={showTemplateLibrary ? "primary" : "secondary"}
+              size="md"
               onClick={() => setShowTemplateLibrary(!showTemplateLibrary)}
-              className={`rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ease-out min-h-[48px] active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${
-                showTemplateLibrary
-                  ? "bg-stone-950 text-amber-100"
-                  : "border border-amber-200 bg-white/60 text-stone-600 hover:border-amber-400 hover:bg-amber-50"
-              }`}
             >
               {showTemplateLibrary ? "Close" : "Templates"}
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant={showAnalytics ? "primary" : "secondary"}
+              size="md"
               onClick={() => setShowAnalytics(!showAnalytics)}
-              className={`rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ease-out min-h-[48px] active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${
-                showAnalytics
-                  ? "bg-stone-950 text-amber-100"
-                  : "border border-amber-200 bg-white/60 text-stone-600 hover:border-amber-400 hover:bg-amber-50"
-              }`}
             >
               {showAnalytics ? "Close" : "Analytics"}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

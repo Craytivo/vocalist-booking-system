@@ -1,5 +1,6 @@
 import React, { useCallback, memo } from "react";
-import { FONT_SIZE_CLASSES, FONT_FAMILY_CLASSES, FONT_WEIGHT_CLASSES, BUTTON_SIZE_CLASSES } from "../../components/GlobalTypography";
+import { FONT_SIZE_CLASSES, FONT_FAMILY_CLASSES, FONT_WEIGHT_CLASSES } from "../../components/GlobalTypography";
+import Button from "../../components/Button";
 
 interface ContractActionsProps {
   draftId: string | null;
@@ -63,25 +64,26 @@ function ContractActions({
           Primary Actions
         </p>
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
+          <Button
+            variant="primary"
+            size="md"
             onClick={handleQuickStart}
-            className={`rounded-lg border border-amber-300/70 bg-stone-950 ${BUTTON_SIZE_CLASSES.primary.md} ${FONT_WEIGHT_CLASSES.bold} text-amber-100 shadow-md shadow-stone-950/10 transition-all duration-200 ease-out hover:border-amber-400 hover:bg-stone-900 active:scale-95 flex items-center gap-2 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 dark:border-amber-400/40 dark:bg-amber-200 dark:text-stone-950 dark:hover:bg-amber-100 tracking-normal ${FONT_FAMILY_CLASSES.body}`}
             title="Start a new contract with a quick setup wizard"
+            className="flex items-center gap-2"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
             </svg>
             <span>Quick Start</span>
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="secondary"
+            size="md"
             onClick={startNewContract}
-            className={`rounded-lg border border-amber-200 bg-white/70 ${BUTTON_SIZE_CLASSES.primary.md} ${FONT_WEIGHT_CLASSES.medium} text-stone-800 tracking-normal transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${FONT_FAMILY_CLASSES.body}`}
             title="Create a blank new contract"
           >
             New Contract
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -92,22 +94,22 @@ function ContractActions({
             Contract Actions
           </p>
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="md"
               onClick={handleSaveVersion}
-              className={`rounded-lg border border-amber-200 bg-white/70 ${BUTTON_SIZE_CLASSES.primary.md} ${FONT_WEIGHT_CLASSES.medium} text-stone-800 tracking-normal transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${FONT_FAMILY_CLASSES.body}`}
               title="Save a version of this contract"
             >
               Save Version
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="secondary"
+              size="md"
               onClick={handleVersionHistory}
-              className={`rounded-lg border border-amber-200 bg-white/70 ${BUTTON_SIZE_CLASSES.primary.md} ${FONT_WEIGHT_CLASSES.medium} text-stone-800 tracking-normal transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${FONT_FAMILY_CLASSES.body}`}
               title="View version history"
             >
               Version History
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -118,30 +120,30 @@ function ContractActions({
           Utilities
         </p>
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            size="md"
             onClick={handleGenerateCalendarEvent}
-            className={`rounded-lg border border-amber-200 bg-white/70 ${BUTTON_SIZE_CLASSES.primary.md} ${FONT_WEIGHT_CLASSES.medium} text-stone-800 tracking-normal transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${FONT_FAMILY_CLASSES.body}`}
             title="Generate calendar event"
           >
             Calendar Event
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="secondary"
+            size="md"
             onClick={handleToggleTemplates}
-            className={`rounded-lg border border-amber-200 bg-white/70 ${BUTTON_SIZE_CLASSES.primary.md} ${FONT_WEIGHT_CLASSES.medium} text-stone-800 tracking-normal transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${FONT_FAMILY_CLASSES.body}`}
             title="Toggle template library"
           >
             Templates
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="secondary"
+            size="md"
             onClick={handleToggleAnalytics}
-            className={`rounded-lg border border-amber-200 bg-white/70 ${BUTTON_SIZE_CLASSES.primary.md} ${FONT_WEIGHT_CLASSES.medium} text-stone-800 tracking-normal transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${FONT_FAMILY_CLASSES.body}`}
             title={showAnalytics ? "Close analytics" : "View analytics"}
           >
             {showAnalytics ? "Close" : "Analytics"}
-          </button>
+          </Button>
         </div>
       </div>
 

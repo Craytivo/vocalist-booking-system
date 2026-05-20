@@ -2,6 +2,9 @@
 
 import React, { memo, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Button from "../../components/Button";
+import InputField from "./InputField";
+import SelectField from "./SelectField";
 
 interface ContractVersion {
   id: string;
@@ -251,43 +254,38 @@ function ContractModals({
             </p>
 
             <div className="space-y-4">
-              <label className="block">
-                <span className="mb-2 block text-sm font-semibold text-neutral-700">Artist Name</span>
-                <input
-                  type="text"
-                  value={workspaceArtistName}
-                  onChange={(event) => setWorkspaceArtistName(event.target.value)}
-                  className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 outline-none transition-all hover:border-amber-400 focus:border-amber-600 focus:ring-2 focus:ring-amber-200 min-h-[48px]"
-                  placeholder="Artist or performer name"
-                />
-              </label>
-              <label className="block">
-                <span className="mb-2 block text-sm font-semibold text-neutral-700">Artist Email</span>
-                <input
-                  type="email"
-                  value={workspaceArtistEmail}
-                  onChange={(event) => setWorkspaceArtistEmail(event.target.value)}
-                  className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 outline-none transition-all hover:border-amber-400 focus:border-amber-600 focus:ring-2 focus:ring-amber-200 min-h-[48px]"
-                  placeholder="artist@example.com"
-                />
-              </label>
+              <InputField
+                label="Artist Name"
+                value={workspaceArtistName}
+                onChange={(event) => setWorkspaceArtistName(event.target.value)}
+                placeholder="Artist or performer name"
+              />
+              <InputField
+                label="Artist Email"
+                type="email"
+                value={workspaceArtistEmail}
+                onChange={(event) => setWorkspaceArtistEmail(event.target.value)}
+                placeholder="artist@example.com"
+              />
             </div>
 
             <div className="mt-6 flex gap-3">
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                size="md"
                 onClick={handleCloseWorkspaceModal}
-                className="flex-1 rounded-lg border border-neutral-300 px-4 py-3 text-sm font-semibold text-neutral-700 transition-all hover:border-neutral-900 hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
+                fullWidth
               >
                 Cancel
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="primary"
+                size="md"
                 onClick={() => createWorkspace(workspaceArtistName, workspaceArtistEmail)}
-                className="flex-1 rounded-lg bg-stone-950 px-4 py-3 text-sm font-semibold text-amber-100 transition-all hover:bg-stone-900 dark:hover:bg-amber-100 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
+                fullWidth
               >
                 Create Workspace
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -316,20 +314,22 @@ function ContractModals({
             </p>
 
             <div className="space-y-3">
-              <button
-                type="button"
+              <Button
+                variant="primary"
+                size="md"
                 onClick={openGmailDraft}
-                className="w-full rounded-lg bg-stone-950 px-4 py-3 text-sm font-semibold text-amber-100 transition-all duration-200 ease-out hover:bg-stone-900 dark:hover:bg-amber-100 hover:shadow-sm active:scale-95 min-h-[48px] focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
+                fullWidth
               >
                 Open in Gmail
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="secondary"
+                size="md"
                 onClick={openDefaultMailClient}
-                className="w-full rounded-lg border border-neutral-300 px-4 py-3 text-sm font-semibold text-neutral-700 transition-all duration-200 ease-out hover:border-neutral-900 hover:bg-neutral-50 hover:text-neutral-900 active:scale-95 min-h-[48px] focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
+                fullWidth
               >
                 Open Default Mail App
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -367,75 +367,56 @@ function ContractModals({
               }}
             >
               <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-semibold text-neutral-700 tracking-wide mb-2">Artist Name</label>
-                  <input
-                    type="text"
-                    value={quickStartArtistName}
-                    onChange={(event) => setQuickStartArtistName(event.target.value)}
-                    className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 outline-none transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 focus:border-amber-600 focus:ring-2 focus:ring-amber-200 focus:shadow-sm min-h-[48px]"
-                    placeholder="Avery Simone"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-neutral-700 tracking-wide mb-2">Client Name</label>
-                  <input
-                    type="text"
-                    value={quickStartClientName}
-                    onChange={(event) => setQuickStartClientName(event.target.value)}
-                    className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 outline-none transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 focus:border-amber-600 focus:ring-2 focus:ring-amber-200 focus:shadow-sm min-h-[48px]"
-                    placeholder="Acme Events"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-neutral-700 tracking-wide mb-2">Fee (CAD)</label>
-                  <input
-                    type="number"
-                    value={quickStartFee}
-                    onChange={(event) => setQuickStartFee(event.target.value)}
-                    className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 outline-none transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 focus:border-amber-600 focus:ring-2 focus:ring-amber-200 focus:shadow-sm min-h-[48px]"
-                    placeholder="500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-neutral-700 tracking-wide mb-2">Event Date</label>
-                  <input
-                    type="date"
-                    value={quickStartDate}
-                    onChange={(event) => setQuickStartDate(event.target.value)}
-                    className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 outline-none transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 focus:border-amber-600 focus:ring-2 focus:ring-amber-200 focus:shadow-sm min-h-[48px]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-neutral-700 tracking-wide mb-2">Booking Type</label>
-                  <select
-                    value={quickStartBookingType}
-                    onChange={(event) => setQuickStartBookingType(event.target.value)}
-                    className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 outline-none transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 focus:border-amber-600 focus:ring-2 focus:ring-amber-200 focus:shadow-sm min-h-[48px] cursor-pointer"
-                  >
-                    {bookingPresets.map((preset) => (
-                      <option key={preset.label} value={preset.label}>
-                        {preset.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <InputField
+                  label="Artist Name"
+                  value={quickStartArtistName}
+                  onChange={(event) => setQuickStartArtistName(event.target.value)}
+                  placeholder="Avery Simone"
+                />
+                <InputField
+                  label="Client Name"
+                  value={quickStartClientName}
+                  onChange={(event) => setQuickStartClientName(event.target.value)}
+                  placeholder="Acme Events"
+                />
+                <InputField
+                  label="Fee (CAD)"
+                  type="number"
+                  value={quickStartFee}
+                  onChange={(event) => setQuickStartFee(event.target.value)}
+                  placeholder="500"
+                />
+                <InputField
+                  label="Event Date"
+                  type="date"
+                  value={quickStartDate}
+                  onChange={(event) => setQuickStartDate(event.target.value)}
+                />
+                <SelectField
+                  label="Booking Type"
+                  value={quickStartBookingType}
+                  onChange={(event) => setQuickStartBookingType(event.target.value)}
+                  options={bookingPresets.map((preset) => preset.label)}
+                />
               </div>
 
               <div className="mt-6 flex gap-3">
-                <button
-                  type="button"
+                <Button
+                  variant="secondary"
+                  size="md"
                   onClick={handleCloseQuickStart}
-                  className="flex-1 rounded-lg border border-neutral-300 px-4 py-3 text-sm font-semibold text-neutral-700 transition-all duration-200 ease-out hover:border-neutral-900 hover:bg-neutral-50 hover:text-neutral-900 active:scale-95 min-h-[48px] focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
+                  fullWidth
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="primary"
+                  size="md"
                   type="submit"
-                  className="flex-1 rounded-lg bg-stone-950 px-4 py-3 text-sm font-semibold text-amber-100 transition-all duration-200 ease-out hover:bg-stone-900 dark:hover:bg-amber-100 hover:shadow-sm active:scale-95 min-h-[48px] focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
+                  fullWidth
                 >
                   Create Contract
-                </button>
+                </Button>
               </div>
             </form>
           </div>
@@ -461,26 +442,26 @@ function ContractModals({
             </div>
 
             <div className="mb-6">
-              <label className="block text-sm font-semibold text-neutral-700 tracking-wide mb-2">Version Note (optional)</label>
-              <input
-                type="text"
+              <InputField
+                label="Version Note (optional)"
                 value={versionNote}
                 onChange={(e) => setVersionNote(e.target.value)}
                 placeholder="e.g., Final version before signing"
-                className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 outline-none transition-all duration-200 ease-out hover:border-amber-400 hover:bg-amber-50 focus:border-amber-600 focus:ring-2 focus:ring-amber-200 focus:shadow-sm min-h-[48px]"
               />
             </div>
 
             <div className="flex gap-3">
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                size="md"
                 onClick={handleCloseSaveVersionModal}
-                className="flex-1 rounded-lg border border-neutral-300 px-4 py-3 text-sm font-semibold text-neutral-700 transition-all duration-200 ease-out hover:border-neutral-900 hover:bg-neutral-50 hover:text-neutral-900 active:scale-95 min-h-[48px] focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
+                fullWidth
               >
                 Cancel
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="primary"
+                size="md"
                 onClick={async () => {
                   if (draftId) {
                     await saveContractVersion(draftId, form, versionNote || "Manual save");
@@ -491,10 +472,10 @@ function ContractModals({
                     showToast("Version saved successfully", "success");
                   }
                 }}
-                className="flex-1 rounded-lg bg-stone-950 px-4 py-3 text-sm font-semibold text-amber-100 transition-all duration-200 ease-out hover:bg-stone-900 dark:hover:bg-amber-100 hover:shadow-sm active:scale-95 min-h-[48px] focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
+                fullWidth
               >
                 Save Version
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -512,20 +493,22 @@ function ContractModals({
             </div>
 
             <div className="flex gap-3 pt-4">
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                size="md"
                 onClick={handleCloseRestoreConfirmation}
-                className="flex-1 rounded-lg border border-neutral-300 px-4 py-3 text-sm font-semibold text-neutral-700 transition-all duration-200 ease-out hover:border-neutral-900 hover:bg-neutral-50 hover:text-neutral-900 active:scale-95 min-h-[48px] focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
+                fullWidth
               >
                 Cancel
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="primary"
+                size="md"
                 onClick={confirmRestoreVersion}
-                className="flex-1 rounded-lg bg-stone-950 px-4 py-3 text-sm font-semibold text-amber-100 transition-all duration-200 ease-out hover:bg-stone-900 dark:hover:bg-amber-100 hover:shadow-sm active:scale-95 min-h-[48px] focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
+                fullWidth
               >
                 Restore
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -584,15 +567,16 @@ function ContractModals({
                       )}
                     </div>
                     <div className="flex gap-2">
-                      <button
-                        type="button"
+                      <Button
+                        variant="secondary"
+                        size="sm"
                         onClick={() => restoreContractVersion(version)}
-                        className="px-3 py-2 text-sm font-semibold text-neutral-700 border border-neutral-300 rounded-lg hover:bg-white hover:border-neutral-900 transition-all focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
                       >
                         Restore
-                      </button>
-                      <button
-                        type="button"
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
                         onClick={async () => {
                           if (supabase && confirm("Are you sure you want to delete this version?")) {
                             await supabase.from("contract_versions").delete().eq("id", version.id);
@@ -602,15 +586,10 @@ function ContractModals({
                             showToast("Version deleted", "success");
                           }
                         }}
-                        className="px-3 py-2 text-sm font-semibold text-red-600 border border-red-200 rounded-lg hover:bg-red-50 hover:border-red-600 transition-all focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
                         title="Delete version"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M3 6h18"></path>
-                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                        </svg>
-                      </button>
+                        Delete
+                      </Button>
                     </div>
                   </div>
                 ))}

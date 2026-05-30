@@ -166,25 +166,19 @@ function LoginContent() {
   }, [searchParams]);
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 dark:from-stone-950 dark:via-stone-900 dark:to-stone-800 px-4 py-10 text-stone-950 dark:text-stone-100 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-amber-200/30 via-transparent to-orange-200/30 dark:from-amber-900/20 dark:via-transparent dark:to-orange-900/20 blur-3xl animate-pulse" />
-        <div className="absolute top-1/2 -right-1/2 w-full h-full bg-gradient-to-bl from-orange-200/30 via-transparent to-amber-200/30 dark:from-orange-900/20 dark:via-transparent dark:to-amber-900/20 blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-      </div>
-
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-stone-950 dark:via-stone-900 dark:to-stone-800 px-4 py-10 text-stone-950 dark:text-stone-100 relative overflow-hidden">
       <div className="w-full max-w-md relative z-10">
-        <div className="relative rounded-3xl border border-white/40 bg-white/70 backdrop-blur-xl p-8 shadow-2xl shadow-amber-900/10 dark:border-white/10 dark:bg-stone-900/60 dark:shadow-black/40">
-          {/* Glassmorphism shine effect */}
-          <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/50 via-transparent to-white/20 dark:from-white/10 dark:via-transparent dark:to-white/5 pointer-events-none" />
+        <div className="relative rounded-3xl border border-white/50 bg-white/60 backdrop-blur-2xl p-8 shadow-2xl shadow-gray-900/10 dark:border-white/20 dark:bg-stone-900/70 dark:shadow-black/50">
+          {/* Enhanced glassmorphism shine effect */}
+          <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/70 via-transparent to-white/30 dark:from-white/20 dark:via-transparent dark:to-white/10 pointer-events-none" />
           
           <div className="relative z-10 text-center mb-8">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-300/30 bg-gradient-to-br from-amber-100 to-amber-50 shadow-lg shadow-amber-900/20 dark:border-amber-500/30 dark:from-stone-800 dark:to-stone-900 dark:shadow-amber-500/20">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" className="text-amber-600 dark:text-amber-400">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="text-stone-800 dark:text-stone-200">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
               </svg>
             </div>
-            <h1 className={`${FONT_SIZE_CLASSES.headingLg} ${FONT_WEIGHT_CLASSES.bold} bg-gradient-to-r from-stone-900 to-stone-700 bg-clip-text text-transparent mb-2 dark:from-amber-100 dark:to-amber-300 ${FONT_FAMILY_CLASSES.heading} ${LINE_HEIGHT_CLASSES.tight}`}>Setlist</h1>
+            <h1 className={`${FONT_SIZE_CLASSES.headingLg} ${FONT_WEIGHT_CLASSES.medium} text-stone-900 mb-2 dark:text-stone-100 ${FONT_FAMILY_CLASSES.heading} ${LINE_HEIGHT_CLASSES.tight}`}>Setlist</h1>
             <p className={`${FONT_SIZE_CLASSES.bodyMd} text-stone-600 dark:text-stone-300 ${FONT_FAMILY_CLASSES.body} ${LINE_HEIGHT_CLASSES.normal}`}>
               {isSetNewPassword ? "Set your new password" : isResetPassword ? "Reset your password" : isLogin ? "Sign in to access your contracts" : "Create your account"}
             </p>
@@ -201,21 +195,21 @@ function LoginContent() {
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-50/80 backdrop-blur border border-red-200/60 rounded-xl dark:bg-red-950/40 dark:border-red-800/60 shadow-sm" role="alert">
-              <p className={`${FONT_SIZE_CLASSES.bodyMd} text-red-700 dark:text-red-200 ${FONT_FAMILY_CLASSES.body}`}>{error}</p>
+            <div className="mb-4 p-3 bg-gray-100/80 backdrop-blur border border-gray-300/60 rounded-xl dark:bg-stone-800/60 dark:border-stone-600/60 shadow-sm" role="alert">
+              <p className={`${FONT_SIZE_CLASSES.bodyMd} text-stone-700 dark:text-stone-200 ${FONT_FAMILY_CLASSES.body}`}>{error}</p>
             </div>
           )}
 
           {success && (
-            <div className="mb-4 p-3 bg-emerald-50/80 backdrop-blur border border-emerald-200/60 rounded-xl dark:bg-emerald-950/40 dark:border-emerald-800/60 shadow-sm" role="status" aria-live="polite">
-              <p className={`${FONT_SIZE_CLASSES.bodyMd} text-emerald-700 dark:text-emerald-200 ${FONT_FAMILY_CLASSES.body}`}>{success}</p>
+            <div className="mb-4 p-3 bg-stone-100/80 backdrop-blur border border-stone-300/60 rounded-xl dark:bg-stone-800/60 dark:border-stone-600/60 shadow-sm" role="status" aria-live="polite">
+              <p className={`${FONT_SIZE_CLASSES.bodyMd} text-stone-700 dark:text-stone-200 ${FONT_FAMILY_CLASSES.body}`}>{success}</p>
             </div>
           )}
 
           {isSetNewPassword ? (
             <form onSubmit={handleSetNewPassword} className="space-y-4">
               <div>
-                <label htmlFor="new-password" className={`block ${FONT_SIZE_CLASSES.uiMd} ${FONT_WEIGHT_CLASSES.semibold} text-stone-700 mb-2 dark:text-stone-200 ${FONT_FAMILY_CLASSES.heading}`}>
+                <label htmlFor="new-password" className={`block ${FONT_SIZE_CLASSES.uiMd} ${FONT_WEIGHT_CLASSES.medium} text-stone-700 mb-2 dark:text-stone-200 ${FONT_FAMILY_CLASSES.heading}`}>
                   New Password
                 </label>
                 <input
@@ -223,7 +217,7 @@ function LoginContent() {
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className={`w-full rounded-xl border border-amber-200/60 bg-white/60 backdrop-blur-sm px-4 py-3 ${FONT_SIZE_CLASSES.uiLg} text-stone-900 outline-none transition-all hover:border-amber-400 hover:bg-white/80 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:bg-white/90 min-h-[48px] dark:border-amber-500/30 dark:bg-stone-900/60 dark:text-stone-100 dark:hover:bg-stone-900/80 dark:focus:bg-stone-900/90 ${FONT_FAMILY_CLASSES.body} shadow-sm`}
+                  className={`w-full rounded-xl border border-gray-300/60 bg-white/60 backdrop-blur-sm px-4 py-3 ${FONT_SIZE_CLASSES.uiLg} text-stone-900 outline-none transition-all hover:border-gray-400 hover:bg-white/80 focus:border-gray-500 focus:ring-2 focus:ring-gray-200 focus:bg-white/90 min-h-[48px] dark:border-stone-600/40 dark:bg-stone-900/60 dark:text-stone-100 dark:hover:bg-stone-900/80 dark:focus:bg-stone-900/90 ${FONT_FAMILY_CLASSES.body} shadow-sm`}
                   placeholder="••••••••"
                   required
                   minLength={6}
@@ -232,7 +226,7 @@ function LoginContent() {
               </div>
 
               <div>
-                <label htmlFor="confirm-password" className={`block ${FONT_SIZE_CLASSES.uiMd} ${FONT_WEIGHT_CLASSES.semibold} text-stone-700 mb-2 dark:text-stone-200 ${FONT_FAMILY_CLASSES.heading}`}>
+                <label htmlFor="confirm-password" className={`block ${FONT_SIZE_CLASSES.uiMd} ${FONT_WEIGHT_CLASSES.medium} text-stone-700 mb-2 dark:text-stone-200 ${FONT_FAMILY_CLASSES.heading}`}>
                   Confirm Password
                 </label>
                 <input
@@ -240,7 +234,7 @@ function LoginContent() {
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className={`w-full rounded-xl border border-amber-200/60 bg-white/60 backdrop-blur-sm px-4 py-3 ${FONT_SIZE_CLASSES.uiLg} text-stone-900 outline-none transition-all hover:border-amber-400 hover:bg-white/80 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:bg-white/90 min-h-[48px] dark:border-amber-500/30 dark:bg-stone-900/60 dark:text-stone-100 dark:hover:bg-stone-900/80 dark:focus:bg-stone-900/90 ${FONT_FAMILY_CLASSES.body} shadow-sm`}
+                  className={`w-full rounded-xl border border-gray-300/60 bg-white/60 backdrop-blur-sm px-4 py-3 ${FONT_SIZE_CLASSES.uiLg} text-stone-900 outline-none transition-all hover:border-gray-400 hover:bg-white/80 focus:border-gray-500 focus:ring-2 focus:ring-gray-200 focus:bg-white/90 min-h-[48px] dark:border-stone-600/40 dark:bg-stone-900/60 dark:text-stone-100 dark:hover:bg-stone-900/80 dark:focus:bg-stone-900/90 ${FONT_FAMILY_CLASSES.body} shadow-sm`}
                   placeholder="••••••••"
                   required
                   minLength={6}
@@ -251,7 +245,7 @@ function LoginContent() {
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full rounded-xl border border-amber-300/50 bg-gradient-to-br from-stone-950 to-stone-900 ${BUTTON_SIZE_CLASSES.primary.md} ${FONT_WEIGHT_CLASSES.semibold} text-amber-100 transition-all hover:border-amber-400 hover:from-stone-900 hover:to-stone-800 hover:shadow-lg hover:shadow-amber-900/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 dark:from-amber-200 dark:to-amber-300 dark:text-stone-950 dark:hover:from-amber-300 dark:hover:to-amber-400 dark:hover:shadow-amber-500/20`}
+                className={`w-full rounded-xl border border-gray-400/50 bg-gradient-to-br from-stone-900 to-stone-800 ${BUTTON_SIZE_CLASSES.primary.md} ${FONT_WEIGHT_CLASSES.semibold} text-white transition-all hover:border-gray-500 hover:from-stone-800 hover:to-stone-700 hover:shadow-lg hover:shadow-gray-900/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 dark:from-white dark:to-gray-100 dark:text-stone-900 dark:hover:from-gray-100 dark:hover:to-gray-200 dark:hover:shadow-gray-500/20`}
               >
                 {loading ? "Updating..." : "Set New Password"}
               </button>
@@ -265,7 +259,7 @@ function LoginContent() {
                     setError("");
                     setSuccess("");
                   }}
-                  className={`${FONT_SIZE_CLASSES.bodyMd} text-amber-700 hover:text-amber-900 ${FONT_WEIGHT_CLASSES.medium} dark:text-amber-300 dark:hover:text-amber-200 ${FONT_FAMILY_CLASSES.body}`}
+                  className={`${FONT_SIZE_CLASSES.uiSm} text-stone-600 hover:text-stone-900 ${FONT_WEIGHT_CLASSES.medium} dark:text-stone-400 dark:hover:text-stone-200 ${FONT_FAMILY_CLASSES.body}`}
                 >
                   Back to sign in
                 </button>
@@ -274,7 +268,7 @@ function LoginContent() {
           ) : isResetPassword ? (
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div>
-                <label htmlFor="reset-email" className={`block ${FONT_SIZE_CLASSES.uiMd} ${FONT_WEIGHT_CLASSES.semibold} text-stone-700 mb-2 dark:text-stone-200 ${FONT_FAMILY_CLASSES.heading}`}>
+                <label htmlFor="reset-email" className={`block ${FONT_SIZE_CLASSES.uiMd} ${FONT_WEIGHT_CLASSES.medium} text-stone-700 mb-2 dark:text-stone-200 ${FONT_FAMILY_CLASSES.heading}`}>
                   Email
                 </label>
                 <input
@@ -282,7 +276,7 @@ function LoginContent() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`w-full rounded-xl border border-amber-200/60 bg-white/60 backdrop-blur-sm px-4 py-3 ${FONT_SIZE_CLASSES.uiLg} text-stone-900 outline-none transition-all hover:border-amber-400 hover:bg-white/80 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:bg-white/90 min-h-[48px] dark:border-amber-500/30 dark:bg-stone-900/60 dark:text-stone-100 dark:hover:bg-stone-900/80 dark:focus:bg-stone-900/90 ${FONT_FAMILY_CLASSES.body} shadow-sm`}
+                  className={`w-full rounded-xl border border-gray-300/60 bg-white/60 backdrop-blur-sm px-4 py-3 ${FONT_SIZE_CLASSES.uiLg} text-stone-900 outline-none transition-all hover:border-gray-400 hover:bg-white/80 focus:border-gray-500 focus:ring-2 focus:ring-gray-200 focus:bg-white/90 min-h-[48px] dark:border-stone-600/40 dark:bg-stone-900/60 dark:text-stone-100 dark:hover:bg-stone-900/80 dark:focus:bg-stone-900/90 ${FONT_FAMILY_CLASSES.body} shadow-sm`}
                   placeholder="you@example.com"
                   required
                 />
@@ -291,7 +285,7 @@ function LoginContent() {
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full rounded-xl border border-amber-300/50 bg-gradient-to-br from-stone-950 to-stone-900 ${BUTTON_SIZE_CLASSES.primary.md} ${FONT_WEIGHT_CLASSES.semibold} text-amber-100 transition-all hover:border-amber-400 hover:from-stone-900 hover:to-stone-800 hover:shadow-lg hover:shadow-amber-900/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 dark:from-amber-200 dark:to-amber-300 dark:text-stone-950 dark:hover:from-amber-300 dark:hover:to-amber-400 dark:hover:shadow-amber-500/20`}
+                className={`w-full rounded-xl border border-gray-400/50 bg-gradient-to-br from-stone-900 to-stone-800 ${BUTTON_SIZE_CLASSES.primary.md} ${FONT_WEIGHT_CLASSES.semibold} text-white transition-all hover:border-gray-500 hover:from-stone-800 hover:to-stone-700 hover:shadow-lg hover:shadow-gray-900/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 dark:from-white dark:to-gray-100 dark:text-stone-900 dark:hover:from-gray-100 dark:hover:to-gray-200 dark:hover:shadow-gray-500/20`}
               >
                 {loading ? "Sending..." : "Send Reset Link"}
               </button>
@@ -304,7 +298,7 @@ function LoginContent() {
                     setError("");
                     setSuccess("");
                   }}
-                  className={`${FONT_SIZE_CLASSES.bodyMd} text-amber-700 hover:text-amber-900 ${FONT_WEIGHT_CLASSES.medium} dark:text-amber-300 dark:hover:text-amber-200 ${FONT_FAMILY_CLASSES.body}`}
+                  className={`${FONT_SIZE_CLASSES.uiSm} text-stone-600 hover:text-stone-900 ${FONT_WEIGHT_CLASSES.medium} dark:text-stone-400 dark:hover:text-stone-200 ${FONT_FAMILY_CLASSES.body}`}
                 >
                   Back to sign in
                 </button>
@@ -317,7 +311,7 @@ function LoginContent() {
                 <button
                   type="button"
                   onClick={handleGoogleSignIn}
-                  className={`w-full flex items-center justify-center gap-3 rounded-xl border border-amber-200/60 bg-white/60 backdrop-blur-sm px-4 py-3 ${FONT_SIZE_CLASSES.uiLg} ${FONT_WEIGHT_CLASSES.medium} text-stone-700 transition-all hover:bg-white/80 hover:border-amber-400 hover:shadow-md mb-4 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 dark:border-amber-500/30 dark:bg-stone-900/60 dark:text-stone-100 dark:hover:bg-stone-900/80 ${BUTTON_SIZE_CLASSES.primary.md} ${FONT_FAMILY_CLASSES.body} shadow-sm`}
+                  className={`w-full flex items-center justify-center gap-3 rounded-xl border border-gray-300/60 bg-white/60 backdrop-blur-sm px-4 py-3 ${FONT_SIZE_CLASSES.uiLg} ${FONT_WEIGHT_CLASSES.medium} text-stone-700 transition-all hover:bg-white/80 hover:border-gray-400 hover:shadow-md mb-4 focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 dark:border-stone-600/40 dark:bg-stone-900/60 dark:text-stone-100 dark:hover:bg-stone-900/80 ${BUTTON_SIZE_CLASSES.primary.md} ${FONT_FAMILY_CLASSES.body} shadow-sm`}
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -331,7 +325,7 @@ function LoginContent() {
 
               <div className="relative mb-4">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-amber-200/60 dark:border-amber-500/30"></div>
+                  <div className="w-full border-t border-gray-300/60 dark:border-stone-600/40"></div>
                 </div>
                 <div className="relative flex justify-center">
                   <span className={`px-3 bg-white/70 backdrop-blur-sm text-stone-500 dark:bg-stone-900/70 dark:text-stone-400 ${FONT_SIZE_CLASSES.uiXs} ${FONT_FAMILY_CLASSES.body} shadow-sm rounded-full`}>Or continue with email</span>
@@ -340,7 +334,7 @@ function LoginContent() {
 
               <form onSubmit={handleAuth} className="space-y-4">
                 <div>
-                  <label htmlFor="email" className={`block ${FONT_SIZE_CLASSES.uiMd} ${FONT_WEIGHT_CLASSES.semibold} text-stone-700 mb-2 dark:text-stone-200 ${FONT_FAMILY_CLASSES.heading}`}>
+                  <label htmlFor="email" className={`block ${FONT_SIZE_CLASSES.uiMd} ${FONT_WEIGHT_CLASSES.medium} text-stone-700 mb-2 dark:text-stone-200 ${FONT_FAMILY_CLASSES.heading}`}>
                     Email
                   </label>
                   <input
@@ -348,14 +342,14 @@ function LoginContent() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className={`w-full rounded-xl border border-amber-200/60 bg-white/60 backdrop-blur-sm px-4 py-3 ${FONT_SIZE_CLASSES.uiLg} text-stone-900 outline-none transition-all hover:border-amber-400 hover:bg-white/80 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:bg-white/90 min-h-[48px] dark:border-amber-500/30 dark:bg-stone-900/60 dark:text-stone-100 dark:hover:bg-stone-900/80 dark:focus:bg-stone-900/90 ${FONT_FAMILY_CLASSES.body} shadow-sm`}
+                    className={`w-full rounded-xl border border-gray-300/60 bg-white/60 backdrop-blur-sm px-4 py-3 ${FONT_SIZE_CLASSES.uiLg} text-stone-900 outline-none transition-all hover:border-gray-400 hover:bg-white/80 focus:border-gray-500 focus:ring-2 focus:ring-gray-200 focus:bg-white/90 min-h-[48px] dark:border-stone-600/40 dark:bg-stone-900/60 dark:text-stone-100 dark:hover:bg-stone-900/80 dark:focus:bg-stone-900/90 ${FONT_FAMILY_CLASSES.body} shadow-sm`}
                     placeholder="you@example.com"
                     required
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="password" className={`block ${FONT_SIZE_CLASSES.uiMd} ${FONT_WEIGHT_CLASSES.semibold} text-stone-700 mb-2 dark:text-stone-200 ${FONT_FAMILY_CLASSES.heading}`}>
+                  <label htmlFor="password" className={`block ${FONT_SIZE_CLASSES.uiMd} ${FONT_WEIGHT_CLASSES.medium} text-stone-700 mb-2 dark:text-stone-200 ${FONT_FAMILY_CLASSES.heading}`}>
                     Password
                   </label>
                   <input
@@ -363,7 +357,7 @@ function LoginContent() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className={`w-full rounded-xl border border-amber-200/60 bg-white/60 backdrop-blur-sm px-4 py-3 ${FONT_SIZE_CLASSES.uiLg} text-stone-900 outline-none transition-all hover:border-amber-400 hover:bg-white/80 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:bg-white/90 min-h-[48px] dark:border-amber-500/30 dark:bg-stone-900/60 dark:text-stone-100 dark:hover:bg-stone-900/80 dark:focus:bg-stone-900/90 ${FONT_FAMILY_CLASSES.body} shadow-sm`}
+                    className={`w-full rounded-xl border border-gray-300/60 bg-white/60 backdrop-blur-sm px-4 py-3 ${FONT_SIZE_CLASSES.uiLg} text-stone-900 outline-none transition-all hover:border-gray-400 hover:bg-white/80 focus:border-gray-500 focus:ring-2 focus:ring-gray-200 focus:bg-white/90 min-h-[48px] dark:border-stone-600/40 dark:bg-stone-900/60 dark:text-stone-100 dark:hover:bg-stone-900/80 dark:focus:bg-stone-900/90 ${FONT_FAMILY_CLASSES.body} shadow-sm`}
                     placeholder="••••••••"
                     required
                     minLength={6}
@@ -374,7 +368,7 @@ function LoginContent() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`w-full rounded-xl border border-amber-300/50 bg-gradient-to-br from-stone-950 to-stone-900 ${BUTTON_SIZE_CLASSES.primary.md} ${FONT_WEIGHT_CLASSES.semibold} text-amber-100 transition-all hover:border-amber-400 hover:from-stone-900 hover:to-stone-800 hover:shadow-lg hover:shadow-amber-900/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 dark:from-amber-200 dark:to-amber-300 dark:text-stone-950 dark:hover:from-amber-300 dark:hover:to-amber-400 dark:hover:shadow-amber-500/20`}
+                  className={`w-full rounded-xl border border-gray-400/50 bg-gradient-to-br from-stone-900 to-stone-800 ${BUTTON_SIZE_CLASSES.primary.md} ${FONT_WEIGHT_CLASSES.semibold} text-white transition-all hover:border-gray-500 hover:from-stone-800 hover:to-stone-700 hover:shadow-lg hover:shadow-gray-900/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 dark:from-white dark:to-gray-100 dark:text-stone-900 dark:hover:from-gray-100 dark:hover:to-gray-200 dark:hover:shadow-gray-500/20`}
                 >
                   {loading ? "Processing..." : isLogin ? "Sign In" : "Create Account"}
                 </button>
@@ -389,7 +383,7 @@ function LoginContent() {
                       setError("");
                       setSuccess("");
                     }}
-                    className={`${FONT_SIZE_CLASSES.bodyMd} text-amber-700 hover:text-amber-900 ${FONT_WEIGHT_CLASSES.medium} dark:text-amber-300 dark:hover:text-amber-200 ${FONT_FAMILY_CLASSES.body}`}
+                    className={`${FONT_SIZE_CLASSES.uiSm} text-stone-600 hover:text-stone-900 ${FONT_WEIGHT_CLASSES.medium} dark:text-stone-400 dark:hover:text-stone-200 ${FONT_FAMILY_CLASSES.body}`}
                   >
                     Forgot password?
                   </button>
@@ -403,7 +397,7 @@ function LoginContent() {
                     setIsLogin(!isLogin);
                     setError("");
                   }}
-                  className={`${FONT_SIZE_CLASSES.bodyMd} text-amber-700 hover:text-amber-900 ${FONT_WEIGHT_CLASSES.medium} dark:text-amber-300 dark:hover:text-amber-200 ${FONT_FAMILY_CLASSES.body}`}
+                  className={`${FONT_SIZE_CLASSES.uiSm} text-stone-600 hover:text-stone-900 ${FONT_WEIGHT_CLASSES.medium} dark:text-stone-400 dark:hover:text-stone-200 ${FONT_FAMILY_CLASSES.body}`}
                 >
                   {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
                 </button>
@@ -425,12 +419,7 @@ function LoginContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 dark:from-stone-950 dark:via-stone-900 dark:to-stone-800 px-4 py-10 text-stone-950 dark:text-stone-100 relative overflow-hidden">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-amber-200/30 via-transparent to-orange-200/30 dark:from-amber-900/20 dark:via-transparent dark:to-orange-900/20 blur-3xl animate-pulse" />
-          <div className="absolute top-1/2 -right-1/2 w-full h-full bg-gradient-to-bl from-orange-200/30 via-transparent to-amber-200/30 dark:from-orange-900/20 dark:via-transparent dark:to-amber-900/20 blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        </div>
+      <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-stone-950 dark:via-stone-900 dark:to-stone-800 px-4 py-10 text-stone-950 dark:text-stone-100 relative overflow-hidden">
         <div className="relative z-10 text-center">
           <div className="text-stone-600 dark:text-stone-300">Loading...</div>
         </div>

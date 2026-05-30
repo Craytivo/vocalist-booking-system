@@ -6,30 +6,30 @@
  */
 export const PRINT_STYLES = `
   @media print {
-    /* Reset print margins */
+    /* Reset print margins and page size */
     @page {
       size: A4;
-      margin: 0.75in;
+      margin: 15mm;
     }
 
-    /* Ensure text doesn't overflow */
-    body {
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+    /* Hide everything by default */
+    body * {
+      visibility: hidden;
     }
 
-    /* Prevent page breaks inside critical sections */
-    .break-inside-avoid {
-      break-inside: avoid;
+    /* Show only the contract container and its contents */
+    .print-contract, .print-contract * {
+      visibility: visible;
     }
 
-    .break-after-avoid {
-      break-after: avoid;
-    }
-
-    /* Force page breaks before signatures */
-    .break-before-page {
-      break-before: page;
+    /* Position the contract properly */
+    .print-contract {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      margin: 0;
+      padding: 0;
     }
 
     /* Hide UI elements in print */
@@ -37,31 +37,91 @@ export const PRINT_STYLES = `
       display: none !important;
     }
 
-    /* Ensure footer stays at bottom of each page */
-    .print-footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: white;
-      padding: 0.5in;
-      border-top: 1px solid #e5e5e5;
-    }
-
-    /* Optimize text for print */
-    * {
+    /* Ensure text doesn't overflow - contract-appropriate font sizing */
+    .print-contract {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
       color: #000 !important;
       text-shadow: none !important;
-    }
-
-    /* Remove shadows in print */
-    * {
       box-shadow: none !important;
+      border: none !important;
+      font-size: 11pt !important;
+      line-height: 1.4 !important;
+      orphans: 2;
+      widows: 2;
     }
 
-    /* Ensure borders print correctly */
-    * {
-      border-color: #000 !important;
+    /* Contract headings */
+    .print-contract h1 {
+      font-size: 16pt !important;
+      font-weight: bold !important;
+      break-after: avoid;
+      break-inside: avoid;
+    }
+
+    .print-contract h2, .print-contract h3 {
+      font-size: 12pt !important;
+      font-weight: bold !important;
+      break-after: avoid;
+      break-inside: avoid;
+    }
+
+    /* Prevent page breaks inside critical sections */
+    .break-inside-avoid {
+      break-inside: avoid !important;
+      page-break-inside: avoid !important;
+    }
+
+    .break-after-avoid {
+      break-after: avoid !important;
+      page-break-after: avoid !important;
+    }
+
+    .break-before-avoid {
+      break-before: avoid !important;
+      page-break-before: avoid !important;
+    }
+
+    /* Force page break before signatures */
+    .break-before-page {
+      break-before: page !important;
+      page-break-before: always !important;
+    }
+
+    /* Add space between sections */
+    .print-contract > div > div {
+      margin-bottom: 24pt !important;
+      break-inside: avoid !important;
+      page-break-inside: avoid !important;
+    }
+
+    /* Prevent paragraphs from being split at the end of pages */
+    .print-contract p {
+      orphans: 3 !important;
+      widows: 3 !important;
+      break-inside: avoid !important;
+      page-break-inside: avoid !important;
+    }
+
+    /* Prevent lists from being split */
+    .print-contract ul, .print-contract ol {
+      break-inside: avoid !important;
+      page-break-inside: avoid !important;
+    }
+
+    /* Remove all margins/padding for body during print */
+    body, html {
+      margin: 0 !important;
+      padding: 0 !important;
+      background: white !important;
+    }
+
+    /* Adobe Reader compatibility */
+    @supports (-ms-ime-align: auto) {
+      .print-contract {
+        -ms-text-size-adjust: 100%;
+        -webkit-text-size-adjust: 100%;
+      }
     }
   }
 `;
@@ -123,8 +183,8 @@ export function calculatePageCount(
  * Get print-specific CSS classes for contract elements
  */
 export const PRINT_CLASSES = {
-  container: "print:shadow-none print:border-none print:box-border print:min-h-[1123px] print:px-14 print:py-20 print:text-sm",
-  section: "print:pb-8 break-after-avoid",
+  container: "print:shadow-none print:border-none print:box-border print:px-14 print:py-20 print:text-sm",
+  section: "print:pb-8 break-after-avoid print:break-inside-avoid",
   footer: "print:fixed print:bottom-0 print:left-0 print:right-0 print:border-t print:border-neutral-300 print:bg-white print:px-14 print:py-4",
   watermark: "print:hidden",
 } as const;

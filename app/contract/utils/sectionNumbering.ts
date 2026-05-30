@@ -143,7 +143,7 @@ export function getSectionNumber(sectionId: string, form: ContractForm): number 
   const targetSection = CONTRACT_SECTIONS.find(s => s.id === sectionId);
   if (!targetSection) return 1;
 
-  // Count how many sections before this one are visible
+  // Count how many visible sections come before this one
   let visibleCount = 0;
   for (const section of CONTRACT_SECTIONS) {
     if (section.baseNumber < targetSection.baseNumber && section.isVisible(form)) {
@@ -151,7 +151,8 @@ export function getSectionNumber(sectionId: string, form: ContractForm): number 
     }
   }
 
-  return targetSection.baseNumber - visibleCount;
+  // The actual number is the count of visible sections before it, plus 1
+  return visibleCount + 1;
 }
 
 /**

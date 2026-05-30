@@ -1,0 +1,2232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Paystub Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #1a1a1a;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+
+        .form-section h2 {
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #0066cc;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .section-title {
+            font-weight: 700;
+            color: #0066cc;
+            margin: 20px 0 15px 0;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .deductions-section {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+
+        .deduction-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn-add-deduction {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        .btn-add-deduction:hover {
+            background: #0052a3;
+        }
+
+        .btn-remove-deduction {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .btn-remove-deduction:hover {
+            background: #c82333;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f0f7ff;
+            border-radius: 4px;
+            border: 1px solid #b3d7ff;
+        }
+
+        .toggle-container label {
+            font-weight: 600;
+            color: #0066cc;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #0066cc;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .auto-deductions-section {
+            background: #f0f7ff;
+            padding: 20px;
+            border-radius: 4px;
+            border: 1px solid #b3d7ff;
+            margin-top: 15px;
+        }
+
+        .auto-deductions-section h3 {
+            color: #0066cc;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .deduction-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .deduction-row label {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .deduction-row input[type="checkbox"] {
+            width: auto;
+        }
+
+        .deduction-row select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        .ytd-section {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #ffc107;
+            margin-top: 15px;
+        }
+
+        .ytd-section h4 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .ytd-section p {
+            font-size: 0.85rem;
+            color: #856404;
+            margin-bottom: 5px;
+        }
+
+        .logo-upload {
+            margin-bottom: 15px;
+        }
+
+        .logo-upload input[type="file"] {
+            display: none;
+        }
+
+        .logo-upload label {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border: 2px dashed #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            width: 100%;
+        }
+
+        .logo-upload label:hover {
+            background: #e8e8e8;
+            border-color: #0066cc;
+        }
+
+        .logo-preview {
+            max-width: 150px;
+            max-height: 80px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .preview-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .preview-section h2 {
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .paystub {
+            background: white;
+            padding: 30px;
+            border: 1px solid #000;
+            min-height: 700px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .paystub-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #000;
+        }
+
+        .paystub-logo {
+            max-width: 80px;
+            max-height: 50px;
+            display: none;
+        }
+
+        .paystub-company {
+            flex: 1;
+            text-align: center;
+        }
+
+        .paystub-company h3 {
+            font-size: 14px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+        }
+
+        .paystub-company .address {
+            font-size: 10px;
+            color: #000;
+        }
+
+        .paystub-dates {
+            text-align: right;
+            font-size: 10px;
+        }
+
+        .paystub-dates p {
+            margin: 2px 0;
+        }
+
+        .paystub-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #000;
+            text-align: center;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .paystub-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .info-block {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        .info-block h4 {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-block p {
+            margin: 5px 0;
+            font-size: 0.95rem;
+            color: #000;
+        }
+
+        .info-block strong {
+            color: #000;
+        }
+
+        .paystub-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 10px;
+        }
+
+        .paystub-table th {
+            background: #fff;
+            color: #000;
+            padding: 5px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 9px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #000;
+        }
+
+        .paystub-table td {
+            padding: 3px 5px;
+            border-bottom: 1px solid #000;
+            border-left: none;
+            border-right: none;
+            border-top: none;
+            font-size: 10px;
+        }
+
+        .paystub-table .amount {
+            text-align: right;
+            font-weight: normal;
+        }
+
+        .paystub-table .hours {
+            text-align: right;
+        }
+
+        .paystub-table .ytd {
+            text-align: right;
+        }
+
+        .paystub-table .rate {
+            text-align: right;
+        }
+
+        .paystub-table .date {
+            text-align: center;
+        }
+
+        .paystub-table .total-row {
+            font-weight: bold;
+            background: #f5f5f5;
+        }
+
+        .deductions-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .deductions-column {
+            border: 1px solid #000;
+            padding: 10px;
+        }
+
+        .deductions-column table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+        }
+
+        .deductions-column th {
+            background: #fff;
+            color: #000;
+            padding: 5px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 9px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #000;
+        }
+
+        .deductions-column td {
+            padding: 3px 5px;
+            border-bottom: 1px solid #000;
+            border-left: none;
+            border-right: none;
+            border-top: none;
+            font-size: 10px;
+        }
+
+        .paystub-footer {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #000;
+            font-size: 10px;
+        }
+
+        .paystub-footer-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .footer-left {
+            text-align: left;
+        }
+
+        .footer-center {
+            text-align: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .footer-right {
+            text-align: right;
+        }
+
+        .footer-right p {
+            margin: 2px 0;
+        }
+
+        .footer-right .label {
+            font-weight: bold;
+        }
+
+        .deposit-notification {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 10px;
+        }
+
+        .summary-section {
+            background: #f8f8f8;
+            padding: 20px;
+            border-radius: 4px;
+            margin-top: 30px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .summary-row.total {
+            font-weight: 700;
+            font-size: 1.1rem;
+            border-top: 2px solid #000;
+            margin-top: 10px;
+            padding-top: 15px;
+        }
+
+        .summary-row.total .amount {
+            color: #0066cc;
+        }
+
+        .summary-row .label {
+            color: #333;
+        }
+
+        .summary-row .amount {
+            color: #000;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #0066cc;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0052a3;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .history-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 30px;
+        }
+
+        .history-section h2 {
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .history-list {
+            list-style: none;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .history-item:hover {
+            background: #f0f0f0;
+        }
+
+        .history-info {
+            flex: 1;
+        }
+
+        .history-info strong {
+            display: block;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .history-info span {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .history-actions button {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        .btn-load {
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .empty-history {
+            text-align: center;
+            color: #999;
+            padding: 30px;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .container {
+                max-width: none;
+                padding: 0;
+            }
+
+            .header,
+            .form-section,
+            .action-buttons,
+            .history-section {
+                display: none;
+            }
+
+            .main-content {
+                display: block;
+            }
+
+            .preview-section {
+                box-shadow: none;
+                padding: 0;
+            }
+
+            .paystub {
+                border: none;
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .deduction-item {
+                grid-template-columns: 1fr;
+            }
+
+            .paystub-info {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Professional Paystub Generator</h1>
+            <p>Enter payroll details and download a formatted PDF paystub</p>
+        </div>
+
+        <div class="main-content">
+            <div class="form-section">
+                <h2>Payroll Information</h2>
+                
+                <div class="logo-upload">
+                    <label for="logoInput">
+                        <span id="logoLabel">📁 Upload Company Logo (Optional)</span>
+                    </label>
+                    <input type="file" id="logoInput" accept="image/*">
+                    <img id="logoPreview" class="logo-preview" alt="Company Logo">
+                </div>
+
+                <div class="section-title">Company Information</div>
+                <div class="form-group">
+                    <label for="employerName">Employer Name *</label>
+                    <input type="text" id="employerName" placeholder="MILLENNIUM PROCESS GROUP INC">
+                </div>
+                <div class="form-group">
+                    <label for="employerAddress">Employer Address</label>
+                    <input type="text" id="employerAddress" placeholder="123 Main St, Calgary, AB T2P 1V4">
+                </div>
+
+                <div class="section-title">Employee Information</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="employeeName">Employee Name *</label>
+                        <input type="text" id="employeeName" placeholder="John Doe">
+                    </div>
+                    <div class="form-group">
+                        <label for="employeeId">Employee ID *</label>
+                        <input type="text" id="employeeId" placeholder="EMP-001">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="employeeSin">SIN / Empl. ID</label>
+                        <input type="text" id="employeeSin" placeholder="123-456-789">
+                    </div>
+                    <div class="form-group">
+                        <label for="employeeOccupation">Occupation</label>
+                        <input type="text" id="employeeOccupation" placeholder="Technician">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="employeeAddress">Employee Address</label>
+                    <input type="text" id="employeeAddress" placeholder="456 Oak Ave, Calgary, AB T2P 2W5">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="payPeriodNumber">Pay Period Number</label>
+                        <input type="number" id="payPeriodNumber" placeholder="1" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="bankAccount">Bank Account (Last 4 digits)</label>
+                        <input type="text" id="bankAccount" placeholder="4388" maxlength="4">
+                    </div>
+                </div>
+
+                <div class="section-title">Pay Period</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="periodStart">Period Start Date *</label>
+                        <input type="date" id="periodStart">
+                    </div>
+                    <div class="form-group">
+                        <label for="periodEnd">Period End Date *</label>
+                        <input type="date" id="periodEnd">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="payDate">Pay Date *</label>
+                    <input type="date" id="payDate">
+                </div>
+
+                <div class="section-title">Current Pay Period Summary</div>
+                <div class="ytd-note">
+                    <p style="font-size: 11px; color: #666; margin-bottom: 10px;">
+                        <strong>Note:</strong> Regular hours is 75 (bi-weekly). Pay = Regular Hours × Hourly Rate + (OT Hours × OT Rate).
+                        Enter values below to calculate current period earnings and deductions.
+                    </p>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="regularHours">Regular Hours *</label>
+                        <input type="number" id="regularHours" placeholder="75" min="0" step="0.5" value="75">
+                    </div>
+                    <div class="form-group">
+                        <label for="hourlyRate">Hourly Rate ($) *</label>
+                        <input type="number" id="hourlyRate" placeholder="25.00" min="0" step="0.01" value="28.60">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="overtimeHours">Overtime Hours (Optional)</label>
+                        <input type="number" id="overtimeHours" placeholder="0" min="0" step="0.5">
+                    </div>
+                    <div class="form-group">
+                        <label for="overtimeRate">Overtime Rate (Optional)</label>
+                        <input type="number" id="overtimeRate" placeholder="Auto-calculated" min="0" step="0.01">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="currentRegularPayInput">Regular Pay ($)</label>
+                        <input type="number" id="currentRegularPayInput" placeholder="Reg Hours × Rate" min="0" step="0.01" style="background: #f5f5f5;">
+                    </div>
+                    <div class="form-group">
+                        <label for="currentOvertimePayInput">Overtime Pay ($)</label>
+                        <input type="number" id="currentOvertimePayInput" placeholder="OT Hours × OT Rate" min="0" step="0.01" readonly style="background: #f5f5f5;">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="currentGrossPayInput">Gross Pay ($)</label>
+                        <input type="number" id="currentGrossPayInput" placeholder="Reg Pay + OT Pay" min="0" step="0.01" readonly style="background: #f5f5f5;">
+                    </div>
+                    <div class="form-group">
+                        <label for="currentNetPayInput">Net Pay ($)</label>
+                        <input type="number" id="currentNetPayInput" placeholder="Gross Pay - Deductions" min="0" step="0.01" readonly style="background: #f5f5f5;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="currentDeductionsInput">Total Deductions ($)</label>
+                    <input type="number" id="currentDeductionsInput" placeholder="Sum of all deductions" min="0" step="0.01" readonly style="background: #f5f5f5;">
+                </div>
+
+                <div class="section-title">Deductions - Alberta, Canada 2025 Rates</div>
+                <div class="toggle-container">
+                    <label for="autoDeductionsToggle">Automatic Canadian Deductions</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="autoDeductionsToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="auto-deductions-section" id="autoDeductionsSection" style="display: block;">
+                    <p style="font-size: 11px; color: #666; margin-bottom: 15px;">
+                        <strong>Note:</strong> Current period deduction amounts are automatically calculated based on earnings. 
+                        Enter YTD earnings before this period to ensure deductions don't exceed annual maximums.
+                    </p>
+                    
+                    <div class="form-group">
+                        <label for="ytdearnings">YTD Earnings Before This Period ($)</label>
+                        <input type="number" id="ytdearnings" placeholder="0.00" min="0" step="0.01">
+                    </div>
+                    
+                    <div class="deduction-row">
+                        <label>
+                            <input type="checkbox" id="includeEI" checked> EI (Employment Insurance)
+                        </label>
+                        <span>1.64% (Max: $1,077.48/year)</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Current Period EI ($)</label>
+                        <input type="number" id="ytdEi" placeholder="Auto-calculated" min="0" step="0.01" readonly style="background: #f5f5f5;">
+                    </div>
+                    
+                    <div class="deduction-row">
+                        <label>
+                            <input type="checkbox" id="includeCPP" checked> CPP (Govt Pension)
+                        </label>
+                        <span>5.95% (Max: $4,034.10/year)</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Current Period CPP ($)</label>
+                        <input type="number" id="ytdCpp" placeholder="Auto-calculated" min="0" step="0.01" readonly style="background: #f5f5f5;">
+                    </div>
+                    
+                    <div class="deduction-row">
+                        <label>
+                            <input type="checkbox" id="includeFedTax" checked> Federal Tax
+                        </label>
+                        <span>Progressive brackets</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Current Period Federal Tax ($)</label>
+                        <input type="number" id="ytdFedTax" placeholder="Auto-calculated" min="0" step="0.01" readonly style="background: #f5f5f5;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Current Period Alberta Tax ($)</label>
+                        <input type="number" id="ytdLtd" placeholder="Auto-calculated" min="0" step="0.01" readonly style="background: #f5f5f5;">
+                    </div>
+                    
+                    <div class="deduction-row">
+                        <label>
+                            <input type="checkbox" id="includeLTD"> Long Term Disability
+                        </label>
+                        <select id="ltdType">
+                            <option value="fixed">Fixed Amount</option>
+                            <option value="percent">Percentage</option>
+                        </select>
+                        <input type="number" id="ltdAmount" placeholder="0.00" min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Current Period LTD ($)</label>
+                        <input type="number" id="ytdDental" placeholder="Auto-calculated" min="0" step="0.01" readonly style="background: #f5f5f5;">
+                    </div>
+                    
+                    <div class="deduction-row">
+                        <label>
+                            <input type="checkbox" id="includeDental"> EE Dental
+                        </label>
+                        <select id="dentalType">
+                            <option value="fixed">Fixed Amount</option>
+                            <option value="percent">Percentage</option>
+                        </select>
+                        <input type="number" id="dentalAmount" placeholder="0.00" min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Current Period Dental ($)</label>
+                        <input type="number" id="ytdHealth" placeholder="Auto-calculated" min="0" step="0.01" readonly style="background: #f5f5f5;">
+                    </div>
+                    
+                    <div class="deduction-row">
+                        <label>
+                            <input type="checkbox" id="includeHealth"> EE Health
+                        </label>
+                        <select id="healthType">
+                            <option value="fixed">Fixed Amount</option>
+                            <option value="percent">Percentage</option>
+                        </select>
+                        <input type="number" id="healthAmount" placeholder="0.00" min="0" step="0.01">
+                    </div>
+                </div>
+
+                <div class="deductions-section" id="manualDeductionsSection" style="display: none;">
+                    <div class="deduction-item">
+                        <input type="text" class="deduction-name" placeholder="Deduction name (e.g., Federal Tax)">
+                        <input type="number" class="deduction-amount" placeholder="Amount" min="0" step="0.01">
+                    </div>
+                </div>
+                <button type="button" class="btn-add-deduction" id="addDeductionBtn">+ Add Deduction</button>
+
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-secondary" id="saveBtn">💾 Save to History</button>
+                    <button type="button" class="btn btn-success" id="duplicateBtn">📋 Duplicate Paystub</button>
+                    <button type="button" class="btn btn-primary" id="testCalcBtn">🔧 Test Calculate</button>
+                </div>
+            </div>
+
+            <div class="preview-section">
+                <h2>Live Preview</h2>
+                <div class="paystub" id="paystub">
+                    <div class="paystub-header">
+                        <div class="paystub-logo-container">
+                            <img id="paystubLogo" class="paystub-logo" alt="Company Logo">
+                        </div>
+                        <div class="paystub-company">
+                            <h3 id="previewEmployer">EMPLOYER NAME</h3>
+                            <div class="address" id="previewEmployerAddress">Address Line 1<br>City, Province Postal Code</div>
+                        </div>
+                        <div class="paystub-dates">
+                            <p><strong>PAYMENT DATE:</strong> <span id="previewPaymentDate">--</span></p>
+                            <p><strong>PAY END DATE:</strong> <span id="previewPayEndDate">--</span></p>
+                        </div>
+                    </div>
+
+                    <div class="paystub-title">STATEMENT OF EARNINGS AND DEDUCTIONS</div>
+
+                    <table class="paystub-table">
+                        <thead>
+                            <tr>
+                                <th>EARNINGS</th>
+                                <th class="date">DATE YMMDD</th>
+                                <th class="rate">RATE</th>
+                                <th class="hours">CURRENT HRS/UNITS</th>
+                                <th class="amount">CURRENT AMOUNT</th>
+                                <th class="hours">YTD HRS/UNITS</th>
+                                <th class="amount">YTD AMOUNT</th>
+                            </tr>
+                        </thead>
+                        <tbody id="earningsTableBody">
+                            <tr>
+                                <td>REGULAR</td>
+                                <td class="date" id="previewPayDateShort">--</td>
+                                <td class="rate" id="previewHourlyRate">0.00</td>
+                                <td class="hours" id="previewRegularHours">0.00</td>
+                                <td class="amount" id="previewRegularPay">0.00</td>
+                                <td class="hours" id="ytdRegularHours">0.00</td>
+                                <td class="amount" id="ytdRegularPay">0.00</td>
+                            </tr>
+                            <tr id="overtimeRow" style="display: none;">
+                                <td>OVERTIME</td>
+                                <td class="date" id="previewPayDateShortOT">--</td>
+                                <td class="rate" id="previewOvertimeRate">0.00</td>
+                                <td class="hours" id="previewOvertimeHours">0.00</td>
+                                <td class="amount" id="previewOvertimePay">0.00</td>
+                                <td class="hours" id="ytdOvertimeHours">0.00</td>
+                                <td class="amount" id="ytdOvertimePay">0.00</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td>TOTAL EARNINGS</td>
+                                <td></td>
+                                <td></td>
+                                <td class="hours" id="totalCurrentHours">0.00</td>
+                                <td class="amount" id="previewGrossPay">0.00</td>
+                                <td class="hours" id="totalYTDHours">0.00</td>
+                                <td class="amount" id="ytdGrossPay">0.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="deductions-container">
+                        <div class="deductions-column">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>DEDUCTIONS</th>
+                                        <th class="amount">CURRENT AMOUNT</th>
+                                        <th class="amount">YTD AMOUNT</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="deductionsLeftBody">
+                                    <tr>
+                                        <td colspan="3" style="text-align: center; color: #999;">--</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="deductions-column">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>DEDUCTIONS</th>
+                                        <th class="amount">CURRENT AMOUNT</th>
+                                        <th class="amount">YTD AMOUNT</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="deductionsRightBody">
+                                    <tr>
+                                        <td colspan="3" style="text-align: center; color: #999;">--</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <table class="paystub-table">
+                        <tbody>
+                            <tr class="total-row">
+                                <td>TOTAL DEDUCTIONS</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="amount" id="previewTotalDeductions">0.00</td>
+                                <td></td>
+                                <td class="amount" id="ytdTotalDeductions">0.00</td>
+                            </tr>
+                            <tr class="total-row" style="background: #e8e8e8;">
+                                <td>NET PAY</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="amount" id="previewNetPay">0.00</td>
+                                <td></td>
+                                <td class="amount" id="ytdNetPay">0.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="paystub-footer">
+                        <div class="paystub-footer-grid">
+                            <div class="footer-left">
+                                <p><strong id="previewEmployeeNameFooter">EMPLOYEE NAME</strong></p>
+                                <p id="previewEmployeeAddress">Employee Address<br>City, Province Postal Code</p>
+                            </div>
+                            <div class="footer-center">
+                                <p>NON NEGOTIABLE</p>
+                            </div>
+                            <div class="footer-right">
+                                <p><span class="label">ASSOCIATE ID:</span> <span id="previewEmployeeIdFooter">--</span></p>
+                                <p><span class="label">EMPL./PAYEE ID.:</span> <span id="previewEmployeeIdSin">--</span></p>
+                                <p><span class="label">OCCUPATION:</span> <span id="previewOccupation">--</span></p>
+                                <p><span class="label">NO. PAY PER.:</span> <span id="previewPayPeriod">--</span></p>
+                                <p><span class="label">NET PAY:</span> $<span id="previewNetPayFooter">0.00</span></p>
+                            </div>
+                        </div>
+                        <div class="deposit-notification">
+                            NOTIFICATION OF DEPOSIT TO ACCT.: XXXXXXXXXXXX<span id="lastFourDigits">4388</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-primary" id="downloadBtn">📥 Download Paystub PDF</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <h2>Saved Paystubs</h2>
+            <ul class="history-list" id="historyList">
+                <li class="empty-history">No saved paystubs yet</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements (will be initialized after DOM is ready)
+        let employerName, employerAddress, employeeName, employeeId, employeeSin, employeeOccupation,
+            employeeAddress, payPeriodNumber, bankAccount, periodStart, periodEnd, payDate,
+            regularHours, hourlyRate, overtimeHours, overtimeRate,
+            currentRegularPayInput, currentOvertimePayInput,
+            currentGrossPayInput, currentNetPayInput, currentDeductionsInput, deductionsContainer,
+            addDeductionBtn, testCalcBtn, logoInput, logoPreview, logoLabel, paystubLogo, downloadBtn,
+            saveBtn, duplicateBtn, historyList, autoDeductionsToggle, autoDeductionsSection,
+            manualDeductionsSection, includeEI, includeCPP, includeFedTax, includeLTD,
+            includeDental, includeHealth, ltdType, ltdAmount, dentalType, dentalAmount,
+            healthType, healthAmount, ytdearnings, ytdei, ytdcpp, ytdEi, ytdCpp,
+            ytdFedTax, ytdLtd, ytdDental, ytdHealth, previewEmployer, previewEmployerAddress,
+            previewPaymentDate, previewPayEndDate, previewPayDateShort, previewPayDateShortOT,
+            previewEmployeeNameFooter, previewEmployeeAddress, previewEmployeeIdFooter,
+            previewEmployeeIdSin, previewOccupation, previewPayPeriod, previewNetPayFooter,
+            lastFourDigits, previewRegularHours, previewHourlyRate, previewRegularPay,
+            ytdRegularHours, ytdRegularPay, previewOvertimeHours, previewOvertimeRate,
+            previewOvertimePay, ytdOvertimeHours, ytdOvertimePay, overtimeRow,
+            totalCurrentHours, totalYTDHours, earningsTableBody, deductionsLeftBody,
+            deductionsRightBody, previewGrossPay, ytdGrossPay, previewTotalDeductions,
+            ytdTotalDeductions, previewNetPay, ytdNetPay;
+
+        // State
+        let logoDataUrl = null;
+        let paystubHistory = JSON.parse(localStorage.getItem('paystubHistory')) || [];
+
+        // Initialize
+        function init() {
+            // Initialize DOM elements
+            employerName = document.getElementById('employerName');
+            employerAddress = document.getElementById('employerAddress');
+            employeeName = document.getElementById('employeeName');
+            employeeId = document.getElementById('employeeId');
+            employeeSin = document.getElementById('employeeSin');
+            employeeOccupation = document.getElementById('employeeOccupation');
+            employeeAddress = document.getElementById('employeeAddress');
+            payPeriodNumber = document.getElementById('payPeriodNumber');
+            bankAccount = document.getElementById('bankAccount');
+            periodStart = document.getElementById('periodStart');
+            periodEnd = document.getElementById('periodEnd');
+            payDate = document.getElementById('payDate');
+            regularHours = document.getElementById('regularHours');
+            hourlyRate = document.getElementById('hourlyRate');
+            overtimeHours = document.getElementById('overtimeHours');
+            overtimeRate = document.getElementById('overtimeRate');
+            currentRegularPayInput = document.getElementById('currentRegularPayInput');
+            currentOvertimePayInput = document.getElementById('currentOvertimePayInput');
+            currentGrossPayInput = document.getElementById('currentGrossPayInput');
+            currentNetPayInput = document.getElementById('currentNetPayInput');
+            currentDeductionsInput = document.getElementById('currentDeductionsInput');
+            ytdEi = document.getElementById('ytdEi');
+            ytdCpp = document.getElementById('ytdCpp');
+            ytdFedTax = document.getElementById('ytdFedTax');
+            ytdLtd = document.getElementById('ytdLtd');
+            ytdDental = document.getElementById('ytdDental');
+            ytdHealth = document.getElementById('ytdHealth');
+            manualDeductionsSection = document.getElementById('manualDeductionsSection');
+            autoDeductionsSection = document.getElementById('autoDeductionsSection');
+            includeEI = document.getElementById('includeEI');
+            includeCPP = document.getElementById('includeCPP');
+            includeFedTax = document.getElementById('includeFedTax');
+            includeLTD = document.getElementById('includeLTD');
+            includeDental = document.getElementById('includeDental');
+            includeHealth = document.getElementById('includeHealth');
+            ltdType = document.getElementById('ltdType');
+            ltdAmount = document.getElementById('ltdAmount');
+            dentalType = document.getElementById('dentalType');
+            dentalAmount = document.getElementById('dentalAmount');
+            healthType = document.getElementById('healthType');
+            healthAmount = document.getElementById('healthAmount');
+            ytdearnings = document.getElementById('ytdearnings');
+            ytdei = document.getElementById('ytdei');
+            ytdcpp = document.getElementById('ytdcpp');
+            addDeductionBtn = document.getElementById('addDeductionBtn');
+            testCalcBtn = document.getElementById('testCalcBtn');
+            autoDeductionsToggle = document.getElementById('autoDeductionsToggle');
+            previewEmployer = document.getElementById('previewEmployer');
+            previewEmployerAddress = document.getElementById('previewEmployerAddress');
+            previewPaymentDate = document.getElementById('previewPaymentDate');
+            previewPayEndDate = document.getElementById('previewPayEndDate');
+            previewPayDateShort = document.getElementById('previewPayDateShort');
+            previewPayDateShortOT = document.getElementById('previewPayDateShortOT');
+            previewEmployeeNameFooter = document.getElementById('previewEmployeeNameFooter');
+            previewEmployeeAddress = document.getElementById('previewEmployeeAddress');
+            previewEmployeeIdFooter = document.getElementById('previewEmployeeIdFooter');
+            previewEmployeeIdSin = document.getElementById('previewEmployeeIdSin');
+            previewOccupation = document.getElementById('previewOccupation');
+            previewPayPeriod = document.getElementById('previewPayPeriod');
+            previewNetPayFooter = document.getElementById('previewNetPayFooter');
+            lastFourDigits = document.getElementById('lastFourDigits');
+            previewRegularHours = document.getElementById('previewRegularHours');
+            previewHourlyRate = document.getElementById('previewHourlyRate');
+            previewRegularPay = document.getElementById('previewRegularPay');
+            ytdRegularHours = document.getElementById('ytdRegularHours');
+            ytdRegularPay = document.getElementById('ytdRegularPay');
+            previewOvertimeHours = document.getElementById('previewOvertimeHours');
+            previewOvertimeRate = document.getElementById('previewOvertimeRate');
+            previewOvertimePay = document.getElementById('previewOvertimePay');
+            ytdOvertimeHours = document.getElementById('ytdOvertimeHours');
+            ytdOvertimePay = document.getElementById('ytdOvertimePay');
+            overtimeRow = document.getElementById('overtimeRow');
+            totalCurrentHours = document.getElementById('totalCurrentHours');
+            totalYTDHours = document.getElementById('totalYTDHours');
+            earningsTableBody = document.getElementById('earningsTableBody');
+            deductionsLeftBody = document.getElementById('deductionsLeftBody');
+            deductionsRightBody = document.getElementById('deductionsRightBody');
+            previewGrossPay = document.getElementById('previewGrossPay');
+            ytdGrossPay = document.getElementById('ytdGrossPay');
+            previewTotalDeductions = document.getElementById('previewTotalDeductions');
+            ytdTotalDeductions = document.getElementById('ytdTotalDeductions');
+            previewNetPay = document.getElementById('previewNetPay');
+            ytdNetPay = document.getElementById('ytdNetPay');
+            
+            // Additional elements needed for other functions
+            deductionsContainer = document.getElementById('deductionsContainer');
+            logoInput = document.getElementById('logoInput');
+            logoPreview = document.getElementById('logoPreview');
+            logoLabel = document.getElementById('logoLabel');
+            paystubLogo = document.getElementById('paystubLogo');
+            downloadBtn = document.getElementById('downloadBtn');
+            saveBtn = document.getElementById('saveBtn');
+            duplicateBtn = document.getElementById('duplicateBtn');
+            historyList = document.getElementById('historyList');
+            
+            console.log('DOM elements initialized');
+            console.log('Employer name element:', employerName);
+            console.log('Preview employer element:', previewEmployer);
+            console.log('Preview employee ID footer element:', previewEmployeeIdFooter);
+            
+            loadFormData();
+            setupEventListeners();
+            renderHistory();
+            
+            // Ensure manual deductions section has at least one item
+            if (manualDeductionsSection.querySelectorAll('.deduction-item').length === 0) {
+                addDeduction();
+            }
+            
+            // Enable auto-deductions by default if not already set
+            if (!autoDeductionsToggle.checked) {
+                autoDeductionsToggle.checked = true;
+                autoDeductionsSection.style.display = 'block';
+                manualDeductionsSection.style.display = 'none';
+                addDeductionBtn.style.display = 'none';
+            }
+            
+            updatePreview();
+        }
+
+        // Event Listeners
+        function setupEventListeners() {
+            const inputs = [employerName, employerAddress, employeeName, employeeId, employeeSin, employeeOccupation, 
+                          employeeAddress, payPeriodNumber, bankAccount, periodStart, periodEnd, payDate, 
+                          regularHours, hourlyRate, overtimeHours, overtimeRate,
+                          ytdearnings, ytdEi, ytdCpp, ytdFedTax,
+                          ytdLtd, ytdDental, ytdHealth];
+            
+            inputs.forEach(input => {
+                if (input) {
+                    input.addEventListener('input', updatePreview);
+                }
+            });
+
+            // Auto deductions toggle
+            autoDeductionsToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    autoDeductionsSection.style.display = 'block';
+                    manualDeductionsSection.style.display = 'none';
+                    addDeductionBtn.style.display = 'none';
+                } else {
+                    autoDeductionsSection.style.display = 'none';
+                    manualDeductionsSection.style.display = 'block';
+                    addDeductionBtn.style.display = 'block';
+                }
+                updatePreview();
+            });
+
+            // Auto deduction inputs
+            const autoDeductionInputs = [includeEI, includeCPP, includeFedTax, includeLTD, includeDental, includeHealth,
+                                        ltdType, ltdAmount, dentalType, dentalAmount, healthType, healthAmount,
+                                        ytdearnings, ytdei, ytdcpp];
+            autoDeductionInputs.forEach(input => {
+                input.addEventListener('input', updatePreview);
+                input.addEventListener('change', updatePreview);
+            });
+
+            manualDeductionsSection.addEventListener('input', updatePreview);
+            manualDeductionsSection.addEventListener('click', handleDeductionClick);
+            
+            addDeductionBtn.addEventListener('click', addDeduction);
+            testCalcBtn.addEventListener('click', updatePreview);
+            logoInput.addEventListener('change', handleLogoUpload);
+            downloadBtn.addEventListener('click', downloadPDF);
+            saveBtn.addEventListener('click', saveToHistory);
+            duplicateBtn.addEventListener('click', duplicatePaystub);
+        }
+
+        // Logo Upload
+        function handleLogoUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    logoDataUrl = event.target.result;
+                    logoPreview.src = logoDataUrl;
+                    logoPreview.style.display = 'block';
+                    paystubLogo.src = logoDataUrl;
+                    paystubLogo.style.display = 'block';
+                    logoLabel.textContent = '✓ Logo uploaded';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Canadian Payroll Constants (2025)
+        const CANADIAN_PAYROLL = {
+            ei: {
+                rate: 0.0164, // 1.64% (2025)
+                maxInsurableEarnings: 65700,
+                maxAnnualPremium: 1077.48
+            },
+            cpp: {
+                rate: 0.0595, // 5.95% (2025)
+                maxPensionableEarnings: 71300,
+                basicExemption: 3500,
+                maxAnnualContribution: 4034.10
+            },
+            federalTax: {
+                brackets: [
+                    { min: 0, max: 55867, rate: 0.15 },
+                    { min: 55867, max: 111733, rate: 0.205 },
+                    { min: 111733, max: 173205, rate: 0.26 },
+                    { min: 173205, max: 246752, rate: 0.29 },
+                    { min: 246752, max: Infinity, rate: 0.33 }
+                ],
+                basicPersonalAmount: 15000
+            },
+            albertaTax: {
+                brackets: [
+                    { min: 0, max: 148269, rate: 0.10 },
+                    { min: 148269, max: 177922, rate: 0.12 },
+                    { min: 177922, max: 249468, rate: 0.13 },
+                    { min: 249468, max: 355845, rate: 0.14 },
+                    { min: 355845, max: Infinity, rate: 0.15 }
+                ],
+                basicPersonalAmount: 21885
+            }
+        };
+
+        // Calculate EI Premium
+        function calculateEI(grossPay, ytdEarnings, ytdEI) {
+            const remainingInsurableEarnings = Math.max(0, CANADIAN_PAYROLL.ei.maxInsurableEarnings - ytdEarnings);
+            const insurablePayThisPeriod = Math.min(grossPay, remainingInsurableEarnings);
+            const eiThisPeriod = insurablePayThisPeriod * CANADIAN_PAYROLL.ei.rate;
+            const remainingPremiumRoom = Math.max(0, CANADIAN_PAYROLL.ei.maxAnnualPremium - ytdEI);
+            return Math.min(eiThisPeriod, remainingPremiumRoom);
+        }
+
+        // Calculate CPP Contribution
+        function calculateCPP(grossPay, ytdEarnings, ytdCPP) {
+            const remainingPensionableEarnings = Math.max(0, CANADIAN_PAYROLL.cpp.maxPensionableEarnings - ytdEarnings);
+            const pensionablePayThisPeriod = Math.min(grossPay, remainingPensionableEarnings);
+            
+            // Apply basic exemption (pro-rated for pay period)
+            // For simplicity, assuming annual basic exemption
+            const cppThisPeriod = (pensionablePayThisPeriod - CANADIAN_PAYROLL.cpp.basicExemption) * CANADIAN_PAYROLL.cpp.rate;
+            const cppCalc = Math.max(0, cppThisPeriod);
+            
+            const remainingContributionRoom = Math.max(0, CANADIAN_PAYROLL.cpp.maxAnnualContribution - ytdCPP);
+            return Math.min(cppCalc, remainingContributionRoom);
+        }
+
+        // Calculate Federal Tax (simplified)
+        function calculateFederalTax(grossPay, ytdEarnings) {
+            const annualizedEarnings = ytdEarnings + grossPay;
+            let tax = 0;
+            let taxableIncome = Math.max(0, annualizedEarnings - CANADIAN_PAYROLL.federalTax.basicPersonalAmount);
+            
+            // Calculate tax on annualized income
+            for (const bracket of CANADIAN_PAYROLL.federalTax.brackets) {
+                if (taxableIncome <= 0) break;
+                
+                const taxableInBracket = Math.min(taxableIncome, bracket.max - bracket.min);
+                tax += taxableInBracket * bracket.rate;
+                taxableIncome -= taxableInBracket;
+            }
+            
+            // Estimate YTD tax and subtract to get this period's tax
+            // This is a simplified calculation
+            const ytdTaxableIncome = Math.max(0, ytdEarnings - CANADIAN_PAYROLL.federalTax.basicPersonalAmount);
+            let ytdTax = 0;
+            
+            for (const bracket of CANADIAN_PAYROLL.federalTax.brackets) {
+                if (ytdTaxableIncome <= 0) break;
+                
+                const taxableInBracket = Math.min(ytdTaxableIncome, bracket.max - bracket.min);
+                ytdTax += taxableInBracket * bracket.rate;
+                ytdTaxableIncome -= taxableInBracket;
+            }
+            
+            return Math.max(0, tax - ytdTax);
+        }
+
+        // Calculate Alberta Provincial Tax (simplified)
+        function calculateAlbertaTax(grossPay, ytdEarnings) {
+            const annualizedEarnings = ytdEarnings + grossPay;
+            let tax = 0;
+            let taxableIncome = Math.max(0, annualizedEarnings - CANADIAN_PAYROLL.albertaTax.basicPersonalAmount);
+            
+            // Calculate tax on annualized income
+            for (const bracket of CANADIAN_PAYROLL.albertaTax.brackets) {
+                if (taxableIncome <= 0) break;
+                
+                const taxableInBracket = Math.min(taxableIncome, bracket.max - bracket.min);
+                tax += taxableInBracket * bracket.rate;
+                taxableIncome -= taxableInBracket;
+            }
+            
+            // Estimate YTD tax and subtract to get this period's tax
+            const ytdTaxableIncome = Math.max(0, ytdEarnings - CANADIAN_PAYROLL.albertaTax.basicPersonalAmount);
+            let ytdTax = 0;
+            
+            for (const bracket of CANADIAN_PAYROLL.albertaTax.brackets) {
+                if (ytdTaxableIncome <= 0) break;
+                
+                const taxableInBracket = Math.min(ytdTaxableIncome, bracket.max - bracket.min);
+                ytdTax += taxableInBracket * bracket.rate;
+                ytdTaxableIncome -= taxableInBracket;
+            }
+            
+            return Math.max(0, tax - ytdTax);
+        }
+
+        // Calculate benefit deduction
+        function calculateBenefit(grossPay, type, amount, isChecked) {
+            if (!isChecked) return 0;
+            const amt = parseFloat(amount) || 0;
+            if (type === 'percent') {
+                return grossPay * (amt / 100);
+            }
+            return amt;
+        }
+
+        // Deductions
+        function addDeduction() {
+            const deductionItem = document.createElement('div');
+            deductionItem.className = 'deduction-item';
+            deductionItem.innerHTML = `
+                <input type="text" class="deduction-name" placeholder="Deduction name">
+                <input type="number" class="deduction-amount" placeholder="Amount" min="0" step="0.01">
+                <button type="button" class="btn-remove-deduction">Remove</button>
+            `;
+            manualDeductionsSection.appendChild(deductionItem);
+        }
+
+        function handleDeductionClick(e) {
+            if (e.target.classList.contains('btn-remove-deduction')) {
+                const deductionItems = manualDeductionsSection.querySelectorAll('.deduction-item');
+                if (deductionItems.length > 1) {
+                    e.target.closest('.deduction-item').remove();
+                    updatePreview();
+                }
+            }
+        }
+
+        // Calculations
+        function calculatePayroll() {
+            const regHours = parseFloat(regularHours.value) || 0;
+            const rate = parseFloat(hourlyRate.value) || 0;
+            const otHours = parseFloat(overtimeHours.value) || 0;
+            const otRateInput = parseFloat(overtimeRate.value) || 0;
+            
+            const regularPay = regHours * rate;
+            const otRate = otRateInput || (rate * 1.5);
+            const overtimePay = otHours * otRate;
+            const grossPay = regularPay + overtimePay;
+            
+            let totalDeductions = 0;
+            const deductions = [];
+            
+            if (autoDeductionsToggle.checked) {
+                // Auto calculate Canadian deductions
+                const payPeriod = parseInt(payPeriodNumber.value) || 1;
+                const ytdGrossInputVal = parseFloat(ytdearnings.value) || 0;
+                
+                // Calculate YTD earnings automatically if not set
+                const ytdEarningsVal = ytdGrossInputVal > 0 ? ytdGrossInputVal : (payPeriod - 1) * grossPay;
+                
+                const ytdEIVAL = parseFloat(ytdei.value) || 0;
+                const ytdCPPVal = parseFloat(ytdcpp.value) || 0;
+                
+                // EI
+                if (includeEI.checked) {
+                    const eiAmount = calculateEI(grossPay, ytdEarningsVal, ytdEIVAL);
+                    if (eiAmount > 0) {
+                        deductions.push({ name: 'EI (Employment Insurance)', amount: eiAmount });
+                        totalDeductions += eiAmount;
+                    }
+                }
+                
+                // CPP
+                if (includeCPP.checked) {
+                    const cppAmount = calculateCPP(grossPay, ytdEarningsVal, ytdCPPVal);
+                    if (cppAmount > 0) {
+                        deductions.push({ name: 'CPP (Canada Pension Plan)', amount: cppAmount });
+                        totalDeductions += cppAmount;
+                    }
+                }
+                
+                // Federal Tax
+                if (includeFedTax.checked) {
+                    const fedTaxAmount = calculateFederalTax(grossPay, ytdEarningsVal);
+                    if (fedTaxAmount > 0) {
+                        deductions.push({ name: 'Federal Income Tax', amount: fedTaxAmount });
+                        totalDeductions += fedTaxAmount;
+                    }
+                }
+                
+                // Alberta Provincial Tax
+                const albertaTaxAmount = calculateAlbertaTax(grossPay, ytdEarningsVal);
+                if (albertaTaxAmount > 0) {
+                    deductions.push({ name: 'Alberta Provincial Tax', amount: albertaTaxAmount });
+                    totalDeductions += albertaTaxAmount;
+                }
+                
+                // LTD
+                const ltdBenefitAmount = calculateBenefit(grossPay, ltdType.value, ltdAmount.value, includeLTD.checked);
+                if (ltdBenefitAmount > 0) {
+                    deductions.push({ name: 'Long Term Disability', amount: ltdBenefitAmount });
+                    totalDeductions += ltdBenefitAmount;
+                }
+                
+                // Dental
+                const dentalBenefitAmount = calculateBenefit(grossPay, dentalType.value, dentalAmount.value, includeDental.checked);
+                if (dentalBenefitAmount > 0) {
+                    deductions.push({ name: 'EE Dental', amount: dentalBenefitAmount });
+                    totalDeductions += dentalBenefitAmount;
+                }
+                
+                // Health
+                const healthBenefitAmount = calculateBenefit(grossPay, healthType.value, healthAmount.value, includeHealth.checked);
+                if (healthBenefitAmount > 0) {
+                    deductions.push({ name: 'EE Health', amount: healthBenefitAmount });
+                    totalDeductions += healthBenefitAmount;
+                }
+            } else {
+                // Manual deductions
+                const deductionItems = manualDeductionsSection.querySelectorAll('.deduction-item');
+                deductionItems.forEach(item => {
+                    const name = item.querySelector('.deduction-name').value.trim();
+                    const amount = parseFloat(item.querySelector('.deduction-amount').value) || 0;
+                    if (name && amount > 0) {
+                        deductions.push({ name, amount });
+                        totalDeductions += amount;
+                    }
+                });
+            }
+            
+            const netPay = grossPay - totalDeductions;
+            
+            return {
+                regularPay,
+                overtimePay,
+                grossPay,
+                totalDeductions,
+                netPay,
+                otRate,
+                deductions
+            };
+        }
+
+        // Update Preview
+        function updatePreview() {
+            const payroll = calculatePayroll();
+            
+            // Update current period summary fields immediately
+            currentRegularPayInput.value = payroll.regularPay.toFixed(2);
+            currentOvertimePayInput.value = payroll.overtimePay.toFixed(2);
+            currentGrossPayInput.value = payroll.grossPay.toFixed(2);
+            currentNetPayInput.value = payroll.netPay.toFixed(2);
+            currentDeductionsInput.value = payroll.totalDeductions.toFixed(2);
+            
+            // Update current period deduction fields
+            const currentDeductionMap = {
+                'EI': 0,
+                'CPP': 0,
+                'FEDERAL TAX': 0,
+                'ALBERTA TAX': 0,
+                'LTD': 0,
+                'DENTAL': 0,
+                'HEALTH': 0
+            };
+            
+            // Get current period deduction amounts from payroll
+            payroll.deductions.forEach(d => {
+                const upperName = d.name.toUpperCase();
+                if (upperName.includes('EI')) {
+                    currentDeductionMap['EI'] = d.amount;
+                } else if (upperName.includes('CPP')) {
+                    currentDeductionMap['CPP'] = d.amount;
+                } else if (upperName.includes('FEDERAL')) {
+                    currentDeductionMap['FEDERAL TAX'] = d.amount;
+                } else if (upperName.includes('ALBERTA')) {
+                    currentDeductionMap['ALBERTA TAX'] = d.amount;
+                } else if (upperName.includes('LTD')) {
+                    currentDeductionMap['LTD'] = d.amount;
+                } else if (upperName.includes('DENTAL')) {
+                    currentDeductionMap['DENTAL'] = d.amount;
+                } else if (upperName.includes('HEALTH')) {
+                    currentDeductionMap['HEALTH'] = d.amount;
+                }
+            });
+            
+            ytdEi.value = currentDeductionMap['EI'].toFixed(2);
+            ytdCpp.value = currentDeductionMap['CPP'].toFixed(2);
+            ytdFedTax.value = currentDeductionMap['FEDERAL TAX'].toFixed(2);
+            ytdLtd.value = currentDeductionMap['ALBERTA TAX'].toFixed(2);
+            ytdDental.value = currentDeductionMap['LTD'].toFixed(2);
+            ytdHealth.value = currentDeductionMap['DENTAL'].toFixed(2);
+            
+            // Format date functions
+            function formatDateYMMDD(dateStr) {
+                if (!dateStr) return '--';
+                const date = new Date(dateStr);
+                const year = date.getFullYear().toString().slice(-2);
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const day = date.getDate().toString().padStart(2, '0');
+                return `${year}${month}${day}`;
+            }
+            
+            function formatDateFull(dateStr) {
+                if (!dateStr) return '--';
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '');
+            }
+            
+            // Update Header
+            if (previewEmployer) previewEmployer.textContent = (employerName.value || 'EMPLOYER NAME').toUpperCase();
+            if (previewEmployerAddress) previewEmployerAddress.innerHTML = (employerAddress.value || 'Address Line 1<br>City, Province Postal Code').replace(/, /g, '<br>');
+            if (previewPaymentDate) previewPaymentDate.textContent = formatDateFull(payDate.value);
+            if (previewPayEndDate) previewPayEndDate.textContent = formatDateFull(periodEnd.value);
+            
+            // Update Earnings
+            const payDateStr = formatDateYMMDD(payDate.value);
+            if (previewPayDateShort) previewPayDateShort.textContent = payDateStr;
+            if (previewPayDateShortOT) previewPayDateShortOT.textContent = payDateStr;
+            
+            if (previewRegularHours) previewRegularHours.textContent = regHours.toFixed(2);
+            if (previewHourlyRate) previewHourlyRate.textContent = rate.toFixed(2);
+            if (previewRegularPay) previewRegularPay.textContent = payroll.regularPay.toFixed(2);
+            
+            // YTD Regular
+            if (ytdRegularHours) ytdRegularHours.textContent = ytdRegHoursTotal.toFixed(2);
+            if (ytdRegularPay) ytdRegularPay.textContent = ytdRegPayTotal.toFixed(2);
+            
+            // Overtime
+            if (otHours > 0) {
+                if (overtimeRow) overtimeRow.style.display = '';
+                if (previewOvertimeHours) previewOvertimeHours.textContent = otHours.toFixed(2);
+                if (previewOvertimeRate) previewOvertimeRate.textContent = payroll.otRate.toFixed(2);
+                if (previewOvertimePay) previewOvertimePay.textContent = payroll.overtimePay.toFixed(2);
+                if (ytdOvertimeHours) ytdOvertimeHours.textContent = ytdOtHours.toFixed(2);
+                if (ytdOvertimePay) ytdOvertimePay.textContent = ytdOtPayTotal.toFixed(2);
+            } else {
+                if (overtimeRow) overtimeRow.style.display = 'none';
+            }
+            
+            // Totals
+            if (totalCurrentHours) totalCurrentHours.textContent = (regHours + otHours).toFixed(2);
+            if (ytdGrossPay) ytdGrossPay.textContent = ytdGrossTotal.toFixed(2);
+            
+            // Deductions
+            const deductions = payroll.deductions;
+            const midPoint = Math.ceil(deductions.length / 2);
+            const leftDeductions = deductions.slice(0, midPoint);
+            const rightDeductions = deductions.slice(midPoint);
+            
+            if (leftDeductions.length > 0) {
+                deductionsLeftBody.innerHTML = leftDeductions.map(d => {
+                    const upperName = d.name.toUpperCase();
+                    let ytdAmount = d.amount * payPeriod;
+                    if (upperName.includes('EI')) ytdAmount = deductionYTDMap['EI'] || ytdAmount;
+                    else if (upperName.includes('CPP')) ytdAmount = deductionYTDMap['CPP'] || ytdAmount;
+                    else if (upperName.includes('FEDERAL')) ytdAmount = deductionYTDMap['FEDERAL TAX'] || ytdAmount;
+                    else if (upperName.includes('LTD')) ytdAmount = deductionYTDMap['LTD'] || ytdAmount;
+                    else if (upperName.includes('DENTAL')) ytdAmount = deductionYTDMap['DENTAL'] || ytdAmount;
+                    else if (upperName.includes('HEALTH')) ytdAmount = deductionYTDMap['HEALTH'] || ytdAmount;
+                    return `<tr><td>${d.name}</td><td class="amount">${d.amount.toFixed(2)}</td><td class="amount">${ytdAmount.toFixed(2)}</td></tr>`;
+                }).join('');
+            } else {
+                deductionsLeftBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #999;">--</td></tr>';
+            }
+            
+            if (rightDeductions.length > 0) {
+                deductionsRightBody.innerHTML = rightDeductions.map(d => {
+                    const upperName = d.name.toUpperCase();
+                    let ytdAmount = d.amount * payPeriod;
+                    if (upperName.includes('EI')) ytdAmount = deductionYTDMap['EI'] || ytdAmount;
+                    else if (upperName.includes('CPP')) ytdAmount = deductionYTDMap['CPP'] || ytdAmount;
+                    else if (upperName.includes('FEDERAL')) ytdAmount = deductionYTDMap['FEDERAL TAX'] || ytdAmount;
+                    else if (upperName.includes('LTD')) ytdAmount = deductionYTDMap['LTD'] || ytdAmount;
+                    else if (upperName.includes('DENTAL')) ytdAmount = deductionYTDMap['DENTAL'] || ytdAmount;
+                    else if (upperName.includes('HEALTH')) ytdAmount = deductionYTDMap['HEALTH'] || ytdAmount;
+                    return `<tr><td>${d.name}</td><td class="amount">${d.amount.toFixed(2)}</td><td class="amount">${ytdAmount.toFixed(2)}</td></tr>`;
+                }).join('');
+            } else {
+                deductionsRightBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #999;">--</td></tr>';
+            }
+            
+            // Summary
+            if (previewGrossPay) previewGrossPay.textContent = payroll.grossPay.toFixed(2);
+            if (previewTotalDeductions) previewTotalDeductions.textContent = payroll.totalDeductions.toFixed(2);
+            if (previewNetPay) previewNetPay.textContent = payroll.netPay.toFixed(2);
+            if (ytdTotalDeductions) ytdTotalDeductions.textContent = ytdDeductionsTotal.toFixed(2);
+            if (ytdNetPay) ytdNetPay.textContent = ytdNetTotal.toFixed(2);
+            
+            // Footer
+            if (previewEmployeeNameFooter) previewEmployeeNameFooter.textContent = (employeeName.value || 'EMPLOYEE NAME').toUpperCase();
+            if (previewEmployeeAddress) previewEmployeeAddress.innerHTML = (employeeAddress.value || 'Employee Address<br>City, Province Postal Code').replace(/, /g, '<br>');
+            if (previewEmployeeIdFooter) previewEmployeeIdFooter.textContent = employeeId.value || '--';
+            if (previewEmployeeIdSin) previewEmployeeIdSin.textContent = employeeSin.value || '--';
+            if (previewOccupation) previewOccupation.textContent = employeeOccupation.value || '--';
+            if (previewPayPeriod) previewPayPeriod.textContent = payPeriodNumber.value || '--';
+            if (previewNetPayFooter) previewNetPayFooter.textContent = payroll.netPay.toFixed(2);
+            if (lastFourDigits) lastFourDigits.textContent = bankAccount.value || '4388';
+            
+            // Save form data to localStorage
+            saveFormData();
+            
+            console.log('updatePreview completed');
+        }
+
+        // Format Date
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        // Download PDF
+        function downloadPDF() {
+            const element = document.getElementById('paystub');
+            const opt = {
+                margin: 0,
+                filename: 'paystub.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            // Ensure preview is fully updated before generating PDF
+            updatePreview();
+            
+            // Small delay to ensure DOM is fully rendered
+            setTimeout(() => {
+                html2pdf().set(opt).from(element).save();
+            }, 100);
+        }
+
+        // Save to History
+        function saveToHistory() {
+            const payroll = calculatePayroll();
+            const paystubData = {
+                id: Date.now(),
+                employerName: employerName.value,
+                employerAddress: employerAddress.value,
+                employeeName: employeeName.value,
+                employeeId: employeeId.value,
+                employeeSin: employeeSin.value,
+                employeeOccupation: employeeOccupation.value,
+                employeeAddress: employeeAddress.value,
+                payPeriodNumber: payPeriodNumber.value,
+                bankAccount: bankAccount.value,
+                periodStart: periodStart.value,
+                periodEnd: periodEnd.value,
+                payDate: payDate.value,
+                regularHours: regularHours.value,
+                hourlyRate: hourlyRate.value,
+                overtimeHours: overtimeHours.value,
+                overtimeRate: overtimeRate.value,
+                ytdRegularPay: currentRegularPayInput.value,
+                ytdOvertimePay: currentOvertimePayInput.value,
+                ytdGrossPay: currentGrossPayInput.value,
+                ytdNetPay: currentNetPayInput.value,
+                ytdDeductions: currentDeductionsInput.value,
+                autoDeductions: autoDeductionsToggle.checked,
+                includeEI: includeEI.checked,
+                includeCPP: includeCPP.checked,
+                includeFedTax: includeFedTax.checked,
+                includeLTD: includeLTD.checked,
+                includeDental: includeDental.checked,
+                includeHealth: includeHealth.checked,
+                ltdType: ltdType.value,
+                ltdAmount: ltdAmount.value,
+                dentalType: dentalType.value,
+                dentalAmount: dentalAmount.value,
+                healthType: healthType.value,
+                healthAmount: healthAmount.value,
+                ytdearnings: ytdearnings.value,
+                ytdei: ytdei.value,
+                ytdcpp: ytdcpp.value,
+                deductions: [],
+                logo: logoDataUrl,
+                netPay: payroll.netPay
+            };
+            
+            const deductionItems = manualDeductionsSection.querySelectorAll('.deduction-item');
+            deductionItems.forEach(item => {
+                const name = item.querySelector('.deduction-name').value.trim();
+                const amount = item.querySelector('.deduction-amount').value;
+                if (name && amount) {
+                    paystubData.deductions.push({ name, amount });
+                }
+            });
+            
+            paystubHistory.unshift(paystubData);
+            if (paystubHistory.length > 10) {
+                paystubHistory.pop();
+            }
+            
+            localStorage.setItem('paystubHistory', JSON.stringify(paystubHistory));
+            renderHistory();
+            alert('Paystub saved to history!');
+        }
+
+        // Render History
+        function renderHistory() {
+            if (paystubHistory.length === 0) {
+                historyList.innerHTML = '<li class="empty-history">No saved paystubs yet</li>';
+                return;
+            }
+            
+            historyList.innerHTML = paystubHistory.map(item => `
+                <li class="history-item">
+                    <div class="history-info">
+                        <strong>${item.employeeName || 'Unknown'} - ${item.employerName || 'Unknown'}</strong>
+                        <span>Pay Date: ${formatDate(item.payDate)} | Net Pay: $${parseFloat(item.netPay).toFixed(2)}</span>
+                    </div>
+                    <div class="history-actions">
+                        <button class="btn-load" onclick="loadFromHistory(${item.id})">Load</button>
+                        <button class="btn-delete" onclick="deleteFromHistory(${item.id})">Delete</button>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        // Load from History
+        window.loadFromHistory = function(id) {
+            const item = paystubHistory.find(p => p.id === id);
+            if (item) {
+                employerName.value = item.employerName || '';
+                employerAddress.value = item.employerAddress || '';
+                employeeName.value = item.employeeName || '';
+                employeeId.value = item.employeeId || '';
+                employeeSin.value = item.employeeSin || '';
+                employeeOccupation.value = item.employeeOccupation || '';
+                employeeAddress.value = item.employeeAddress || '';
+                payPeriodNumber.value = item.payPeriodNumber || '';
+                bankAccount.value = item.bankAccount || '';
+                periodStart.value = item.periodStart || '';
+                periodEnd.value = item.periodEnd || '';
+                payDate.value = item.payDate || '';
+                regularHours.value = item.regularHours || '';
+                hourlyRate.value = item.hourlyRate || '';
+                overtimeHours.value = item.overtimeHours || '';
+                overtimeRate.value = item.overtimeRate || '';
+                currentRegularPayInput.value = item.ytdRegularPay || '';
+                currentOvertimePayInput.value = item.ytdOvertimePay || '';
+                currentGrossPayInput.value = item.ytdGrossPay || '';
+                currentNetPayInput.value = item.ytdNetPay || '';
+                currentDeductionsInput.value = item.ytdDeductions || '';
+                
+                // Auto deductions toggle
+                autoDeductionsToggle.checked = item.autoDeductions || false;
+                if (autoDeductionsToggle.checked) {
+                    autoDeductionsSection.style.display = 'block';
+                    manualDeductionsSection.style.display = 'none';
+                    addDeductionBtn.style.display = 'none';
+                    
+                    // Load auto deduction settings
+                    includeEI.checked = item.includeEI !== undefined ? item.includeEI : true;
+                    includeCPP.checked = item.includeCPP !== undefined ? item.includeCPP : true;
+                    includeFedTax.checked = item.includeFedTax !== undefined ? item.includeFedTax : true;
+                    includeLTD.checked = item.includeLTD || false;
+                    includeDental.checked = item.includeDental || false;
+                    includeHealth.checked = item.includeHealth || false;
+                    ltdType.value = item.ltdType || 'fixed';
+                    ltdAmount.value = item.ltdAmount || '';
+                    dentalType.value = item.dentalType || 'fixed';
+                    dentalAmount.value = item.dentalAmount || '';
+                    healthType.value = item.healthType || 'fixed';
+                    healthAmount.value = item.healthAmount || '';
+                    ytdearnings.value = item.ytdearnings || '';
+                    ytdei.value = item.ytdei || '';
+                    ytdcpp.value = item.ytdcpp || '';
+                } else {
+                    autoDeductionsSection.style.display = 'none';
+                    manualDeductionsSection.style.display = 'block';
+                    addDeductionBtn.style.display = 'block';
+                }
+                
+                // Clear and reload manual deductions
+                manualDeductionsSection.innerHTML = '';
+                if (item.deductions && item.deductions.length > 0) {
+                    item.deductions.forEach(d => {
+                        const deductionItem = document.createElement('div');
+                        deductionItem.className = 'deduction-item';
+                        deductionItem.innerHTML = `
+                            <input type="text" class="deduction-name" placeholder="Deduction name" value="${d.name}">
+                            <input type="number" class="deduction-amount" placeholder="Amount" min="0" step="0.01" value="${d.amount}">
+                            <button type="button" class="btn-remove-deduction">Remove</button>
+                        `;
+                        manualDeductionsSection.appendChild(deductionItem);
+                    });
+                } else {
+                    addDeduction();
+                }
+                
+                // Load logo
+                if (item.logo) {
+                    logoDataUrl = item.logo;
+                    logoPreview.src = logoDataUrl;
+                    logoPreview.style.display = 'block';
+                    paystubLogo.src = logoDataUrl;
+                    paystubLogo.style.display = 'block';
+                    logoLabel.textContent = '✓ Logo loaded';
+                }
+                
+                updatePreview();
+                alert('Paystub loaded successfully!');
+            }
+        };
+
+        // Delete from History
+        window.deleteFromHistory = function(id) {
+            if (confirm('Are you sure you want to delete this paystub?')) {
+                paystubHistory = paystubHistory.filter(p => p.id !== id);
+                localStorage.setItem('paystubHistory', JSON.stringify(paystubHistory));
+                renderHistory();
+            }
+        };
+
+        // Duplicate Paystub
+        function duplicatePaystub() {
+            const currentData = {
+                employerName: employerName.value,
+                employerAddress: employerAddress.value,
+                employeeName: employeeName.value,
+                employeeId: employeeId.value,
+                employeeSin: employeeSin.value,
+                employeeOccupation: employeeOccupation.value,
+                employeeAddress: employeeAddress.value,
+                payPeriodNumber: payPeriodNumber.value,
+                bankAccount: bankAccount.value,
+                regularHours: regularHours.value,
+                hourlyRate: hourlyRate.value,
+                overtimeRate: overtimeRate.value,
+                autoDeductions: autoDeductionsToggle.checked,
+                includeEI: includeEI.checked,
+                includeCPP: includeCPP.checked,
+                includeFedTax: includeFedTax.checked,
+                includeLTD: includeLTD.checked,
+                includeDental: includeDental.checked,
+                includeHealth: includeHealth.checked,
+                ltdType: ltdType.value,
+                ltdAmount: ltdAmount.value,
+                dentalType: dentalType.value,
+                dentalAmount: dentalAmount.value,
+                healthType: healthType.value,
+                healthAmount: healthAmount.value,
+                logo: logoDataUrl
+            };
+            
+            // Clear dates, hours, and YTD for new paystub
+            periodStart.value = '';
+            periodEnd.value = '';
+            payDate.value = '';
+            regularHours.value = '';
+            overtimeHours.value = '';
+            currentRegularPayInput.value = '';
+            currentOvertimePayInput.value = '';
+            currentGrossPayInput.value = '';
+            currentNetPayInput.value = '';
+            currentDeductionsInput.value = '';
+            ytdearnings.value = '';
+            ytdei.value = '';
+            ytdcpp.value = '';
+            
+            // Keep employer, employee info, rates, logo, and auto-deduction settings
+            employerName.value = currentData.employerName;
+            employerAddress.value = currentData.employerAddress;
+            employeeName.value = currentData.employeeName;
+            employeeId.value = currentData.employeeId;
+            employeeSin.value = currentData.employeeSin;
+            employeeOccupation.value = currentData.employeeOccupation;
+            employeeAddress.value = currentData.employeeAddress;
+            payPeriodNumber.value = currentData.payPeriodNumber;
+            bankAccount.value = currentData.bankAccount;
+            hourlyRate.value = currentData.hourlyRate;
+            overtimeRate.value = currentData.overtimeRate;
+            
+            // Keep auto-deduction toggle state
+            autoDeductionsToggle.checked = currentData.autoDeductions;
+            if (currentData.autoDeductions) {
+                autoDeductionsSection.style.display = 'block';
+                manualDeductionsSection.style.display = 'none';
+                addDeductionBtn.style.display = 'none';
+                
+                includeEI.checked = currentData.includeEI;
+                includeCPP.checked = currentData.includeCPP;
+                includeFedTax.checked = currentData.includeFedTax;
+                includeLTD.checked = currentData.includeLTD;
+                includeDental.checked = currentData.includeDental;
+                includeHealth.checked = currentData.includeHealth;
+                ltdType.value = currentData.ltdType;
+                ltdAmount.value = currentData.ltdAmount;
+                dentalType.value = currentData.dentalType;
+                dentalAmount.value = currentData.dentalAmount;
+                healthType.value = currentData.healthType;
+                healthAmount.value = currentData.healthAmount;
+            } else {
+                autoDeductionsSection.style.display = 'none';
+                manualDeductionsSection.style.display = 'block';
+                addDeductionBtn.style.display = 'block';
+            }
+            
+            if (currentData.logo) {
+                logoDataUrl = currentData.logo;
+                logoPreview.src = logoDataUrl;
+                logoPreview.style.display = 'block';
+                paystubLogo.src = logoDataUrl;
+                paystubLogo.style.display = 'block';
+                logoLabel.textContent = '✓ Logo loaded';
+            }
+            
+            // Reset manual deductions
+            manualDeductionsSection.innerHTML = '';
+            addDeduction();
+            
+            updatePreview();
+            alert('Paystub duplicated! Enter new pay period and hours.');
+        }
+
+        // Save Form Data
+        function saveFormData() {
+            const formData = {
+                employerName: employerName.value,
+                employerAddress: employerAddress.value,
+                employeeName: employeeName.value,
+                employeeId: employeeId.value,
+                employeeSin: employeeSin.value,
+                employeeOccupation: employeeOccupation.value,
+                employeeAddress: employeeAddress.value,
+                payPeriodNumber: payPeriodNumber.value,
+                bankAccount: bankAccount.value,
+                periodStart: periodStart.value,
+                periodEnd: periodEnd.value,
+                payDate: payDate.value,
+                regularHours: regularHours.value,
+                hourlyRate: hourlyRate.value,
+                overtimeHours: overtimeHours.value,
+                overtimeRate: overtimeRate.value,
+                ytdRegularPay: currentRegularPayInput.value,
+                ytdOvertimePay: currentOvertimePayInput.value,
+                ytdGrossPay: currentGrossPayInput.value,
+                ytdNetPay: currentNetPayInput.value,
+                ytdDeductions: currentDeductionsInput.value,
+                ytdEi: ytdEi.value,
+                ytdCpp: ytdCpp.value,
+                ytdFedTax: ytdFedTax.value,
+                ytdLtd: ytdLtd.value,
+                ytdDental: ytdDental.value,
+                ytdHealth: ytdHealth.value,
+                autoDeductions: autoDeductionsToggle.checked,
+                includeEI: includeEI.checked,
+                includeCPP: includeCPP.checked,
+                includeFedTax: includeFedTax.checked,
+                includeLTD: includeLTD.checked,
+                includeDental: includeDental.checked,
+                includeHealth: includeHealth.checked,
+                ltdType: ltdType.value,
+                ltdAmount: ltdAmount.value,
+                dentalType: dentalType.value,
+                dentalAmount: dentalAmount.value,
+                healthType: healthType.value,
+                healthAmount: healthAmount.value,
+                ytdearnings: ytdearnings.value,
+                ytdei: ytdei.value,
+                ytdcpp: ytdcpp.value,
+                logo: logoDataUrl
+            };
+            localStorage.setItem('paystubFormData', JSON.stringify(formData));
+        }
+
+        // Load Form Data
+        function loadFormData() {
+            const formData = JSON.parse(localStorage.getItem('paystubFormData'));
+            if (formData) {
+                employerName.value = formData.employerName || '';
+                employerAddress.value = formData.employerAddress || '';
+                employeeName.value = formData.employeeName || '';
+                employeeId.value = formData.employeeId || '';
+                employeeSin.value = formData.employeeSin || '';
+                employeeOccupation.value = formData.employeeOccupation || '';
+                employeeAddress.value = formData.employeeAddress || '';
+                payPeriodNumber.value = formData.payPeriodNumber || '';
+                bankAccount.value = formData.bankAccount || '';
+                periodStart.value = formData.periodStart || '';
+                periodEnd.value = formData.periodEnd || '';
+                payDate.value = formData.payDate || '';
+                regularHours.value = formData.regularHours || '75';
+                hourlyRate.value = formData.hourlyRate || '28.60';
+                overtimeHours.value = formData.overtimeHours || '';
+                overtimeRate.value = formData.overtimeRate || '';
+                
+                // Load auto-deduction settings
+                autoDeductionsToggle.checked = formData.autoDeductions || false;
+                if (autoDeductionsToggle.checked) {
+                    autoDeductionsSection.style.display = 'block';
+                    manualDeductionsSection.style.display = 'none';
+                    addDeductionBtn.style.display = 'none';
+                    
+                    includeEI.checked = formData.includeEI !== undefined ? formData.includeEI : true;
+                    includeCPP.checked = formData.includeCPP !== undefined ? formData.includeCPP : true;
+                    includeFedTax.checked = formData.includeFedTax !== undefined ? formData.includeFedTax : true;
+                    includeLTD.checked = formData.includeLTD || false;
+                    includeDental.checked = formData.includeDental || false;
+                    includeHealth.checked = formData.includeHealth || false;
+                    ltdType.value = formData.ltdType || 'fixed';
+                    ltdAmount.value = formData.ltdAmount || '';
+                    dentalType.value = formData.dentalType || 'fixed';
+                    dentalAmount.value = formData.dentalAmount || '';
+                    healthType.value = formData.healthType || 'fixed';
+                    healthAmount.value = formData.healthAmount || '';
+                    ytdearnings.value = formData.ytdearnings || '';
+                    ytdei.value = formData.ytdei || '';
+                    ytdcpp.value = formData.ytdcpp || '';
+                }
+                
+                if (formData.logo) {
+                    logoDataUrl = formData.logo;
+                    logoPreview.src = logoDataUrl;
+                    logoPreview.style.display = 'block';
+                    paystubLogo.src = logoDataUrl;
+                    paystubLogo.style.display = 'block';
+                    logoLabel.textContent = '✓ Logo loaded';
+                }
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded');
+            console.log('Employer name element:', employerName);
+            console.log('Preview employer element:', previewEmployer);
+            init();
+        });
+    </script>
+</body>
+</html>

@@ -1,11 +1,11 @@
 // Global Typography System for the entire site
 // Modern, responsive typography for UI, forms, and login pages
-// Font pair: Plus Jakarta Sans (headings) + Inter (body)
-// Optimized for readability, accessibility, and modern aesthetics
+// Font pair: Inter (geometric sans-serif for all text)
+// Optimized for readability, accessibility, and modern minimalist aesthetics
 
 export const GLOBAL_TYPOGRAPHY = {
-  // Font families
-  heading: "Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  // Font families - Geometric, modern, minimalist
+  heading: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   body: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   mono: "JetBrains Mono, 'Fira Code', 'Courier New', monospace",
 

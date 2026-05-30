@@ -47,6 +47,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${plusJakartaSans.variable} ${inter.variable} ${merriweather.variable}`}>
+      <head>
+      </head>
       <body className="font-sans antialiased">
         <ErrorBoundary>{children}</ErrorBoundary>
       </body>

@@ -146,16 +146,98 @@ body {
 /* Print-specific styles to ensure PDF matches preview */
 @media print {
   @page {
-    margin: 0;
     size: A4 portrait;
+    margin: 0.75in;
+    margin-bottom: 1.2in;
   }
-  
-  body {
-    background: white;
+
+  /* Page setup */
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: auto;
+    width: 100%;
+    background: white !important;
   }
-  
+
+  /* Hide everything by default */
+  body > * {
+    display: none !important;
+  }
+
+  /* Show the contract preview section */
+  [role="document"],
+  .print-contract-container {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: white !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Show all content inside contract */
+  [role="document"] *,
+  .print-contract-container * {
+    display: inherit;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Override any transform scaling */
+  [style*="transform: scale"] {
+    transform: none !important;
+  }
+
+  /* Ensure proper text rendering */
+  [role="document"],
+  .print-contract-container {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color: #000 !important;
+  }
+
+  /* Force black text for readability */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    color: #000 !important;
+    background-color: transparent !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Page break handling */
+  .break-inside-avoid {
+    break-inside: avoid;
+  }
+
+  .break-before-page {
+    break-before: page;
+  }
+
+  .break-after-avoid {
+    break-after: avoid;
+  }
+
+  /* Footer styling */
+  .print-footer {
+    position: static;
+    page-break-inside: avoid;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #000;
+  }
+
+  /* Hide print UI elements */
+  .print:hidden,
+  .no-print,
+  button,
+  .zoom-controls,
+  .shadow-lg,
+  .border-gray-300 {
+    display: none !important;
   }
 }

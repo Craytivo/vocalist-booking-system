@@ -21,8 +21,8 @@ export function ContractSection({
 }: ContractSectionProps) {
   return (
     <section
-      className={`border-b border-neutral-300 pb-4 sm:pb-6 md:pb-8 lg:pb-12 ${
-        breakAfter ? "break-after-avoid" : ""
+      className={`border-b border-neutral-300 pb-4 sm:pb-6 md:pb-8 lg:pb-12 break-inside-avoid print:break-inside-avoid ${
+        breakAfter ? "break-after-avoid print:break-after-avoid" : ""
       } print:pb-8 ${className}`}
       aria-labelledby={`section-${number}`}
     >
@@ -244,6 +244,10 @@ export function FinancialLegalTermsSection({ form, number }: { form: ContractFor
       )}
       <ContractParagraph label="Governing Law" value={form.governingLaw || DEFAULT_LEGAL_TEXT.governingLaw} />
       <ContractParagraph label="Dispute Resolution" value={form.disputeResolution || DEFAULT_LEGAL_TEXT.disputeResolution} />
+      <ContractParagraph label="Indemnification" value={form.indemnificationClause || DEFAULT_LEGAL_TEXT.indemnificationClause} />
+      <ContractParagraph label="Confidentiality" value={form.confidentialityClause || DEFAULT_LEGAL_TEXT.confidentialityClause} />
+      <ContractParagraph label="Equipment Liability" value={form.equipmentLiabilityClause || DEFAULT_LEGAL_TEXT.equipmentLiabilityClause} />
+      <ContractParagraph label="Attorney's Fees" value={form.attorneyFeesClause || DEFAULT_LEGAL_TEXT.attorneyFeesClause} />
     </ContractSection>
   );
 }

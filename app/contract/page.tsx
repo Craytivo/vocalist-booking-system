@@ -19,12 +19,15 @@ import RecentContracts from "./components/RecentContracts";
 import StorageWarningBanner from "./components/StorageWarningBanner";
 import Header from "./components/Header";
 import FormPanel from "./components/FormPanel";
+import CheckboxField from "./components/CheckboxField";
+import CollapsibleSection from "./components/CollapsibleSection";
 import ContractPreview from "./components/ContractPreview";
 import ContractWizard from "./components/ContractWizard";
 import ContractActions from "./components/ContractActions";
 import ContractModals from "./components/ContractModals";
+import { GroupedSection, FieldRow, ToggleSwitch } from "./components/iOSComponents";
 import { getErrorMessage } from "./utils/errorHandling";
-import { downloadPdf } from "./utils/pdf";
+import { addPdfPageNumbers, downloadPdf } from "./utils/pdf";
 import { generateCalendarEvent } from "./utils/calendar";
 import { copyToClipboard } from "./utils/clipboard";
 import { useContractAuth } from "./hooks/useContractAuth";
@@ -96,7 +99,7 @@ class ErrorBoundary extends React.Component<
                 <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-neutral-900 mb-2">Something went wrong</h2>
+            <h2 className="text-lg font-medium text-neutral-900 mb-2">Something went wrong</h2>
             <p className="text-sm text-neutral-600 mb-4">
               We encountered an unexpected error. Please refresh the page to try again.
             </p>
@@ -184,6 +187,10 @@ type ContractRow = {
   parking_details: string | null;
   governing_law: string | null;
   dispute_resolution: string | null;
+  indemnification_clause: string | null;
+  confidentiality_clause: string | null;
+  equipment_liability_clause: string | null;
+  attorney_fees_clause: string | null;
   // Phase 2 additions
   technical_rider_required: boolean | null;
   technical_rider_details: string | null;
@@ -203,6 +210,16 @@ type ArtistWorkspace = {
   artist_logo: string | null;
   share_slug: string;
   created_at: string | null;
+};
+
+type ContractTextField = {
+  [Key in keyof ContractForm]-?: NonNullable<ContractForm[Key]> extends string ? Key : never;
+}[keyof ContractForm];
+
+type ResettableTextareaConfig = {
+  field: ContractTextField;
+  label: string;
+  defaultValue: string;
 };
 
 const serviceOptions = [
@@ -329,6 +346,14 @@ const defaultGoverningLaw =
   "This agreement follows the laws of the jurisdiction where the performance takes place.";
 const defaultDisputeResolution =
   "We'll resolve any disputes through good faith negotiation first. If that doesn't work, we'll use binding arbitration.";
+const defaultIndemnification =
+  "Each party agrees to indemnify and hold harmless the other party from and against any and all claims, demands, losses, damages, liabilities, costs, and expenses (including reasonable attorneys' fees) arising out of or related to any breach of this agreement, negligence, or willful misconduct by the indemnifying party.";
+const defaultConfidentiality =
+  "Both parties agree to keep confidential all non-public information disclosed during the course of this engagement, including but not limited to financial terms, contact information, business strategies, and technical specifications. This obligation shall survive the termination of this agreement.";
+const defaultEquipmentLiability =
+  "The Client shall be responsible for any damage to the Artist's equipment caused by the Client, its employees, agents, or attendees. The Client shall provide adequate security and protection for all equipment. The Artist is not liable for damage to the Client's equipment or venue except in cases of willful misconduct or gross negligence.";
+const defaultAttorneyFees =
+  "In any legal proceeding arising out of or relating to this agreement, the prevailing party shall be entitled to recover reasonable attorneys' fees and costs from the non-prevailing party.";
 const defaultTechnicalRider =
   "You'll provide: high-quality PA system with monitors, 2 microphones (1 handheld, 1 stand), mic stands, direct input box for acoustic instruments, and adequate power. All equipment must work properly and be set up before I arrive.";
 const defaultAccommodationDetails =
@@ -337,6 +362,27 @@ const defaultPerDiemDetails =
   "I'll receive $75 per day for meals and incidental expenses for engagements requiring travel. Transportation to and from the venue will be provided or reimbursed.";
 const defaultPublicityTerms =
   "You'll credit me in all promotional materials and announcements for the event. Credit should include my name and/or stage name as specified. You'll get my approval for any promotional materials featuring my image or likeness.";
+
+const financialLegalTextareaFields: ResettableTextareaConfig[] = [
+  { field: "latePaymentPenalty", label: "Late Payment Penalty", defaultValue: defaultLatePaymentPenalty },
+  { field: "cancellationFee", label: "Cancellation Fee Structure", defaultValue: defaultCancellationFee },
+  { field: "governingLaw", label: "Governing Law", defaultValue: defaultGoverningLaw },
+  { field: "disputeResolution", label: "Dispute Resolution", defaultValue: defaultDisputeResolution },
+  { field: "indemnificationClause", label: "Indemnification", defaultValue: defaultIndemnification },
+  { field: "confidentialityClause", label: "Confidentiality", defaultValue: defaultConfidentiality },
+  { field: "equipmentLiabilityClause", label: "Equipment Liability", defaultValue: defaultEquipmentLiability },
+  { field: "attorneyFeesClause", label: "Attorney's Fees", defaultValue: defaultAttorneyFees },
+];
+
+const contractLanguageTextareaFields: ResettableTextareaConfig[] = [
+  { field: "depositTerms", label: "Deposit Terms", defaultValue: defaultDepositTerms },
+  { field: "travelTerms", label: "Travel Terms", defaultValue: defaultTravelTerms },
+  { field: "cancellationTerms", label: "Cancellation Terms", defaultValue: defaultCancellationTerms },
+  { field: "technicalRequirements", label: "Technical Requirements", defaultValue: defaultTechnicalRequirements },
+  { field: "mediaRightsTerms", label: "Media Rights Terms", defaultValue: defaultMediaRightsTerms },
+  { field: "forceMajeureTerms", label: "Force Majeure Terms", defaultValue: defaultForceMajeureTerms },
+  { field: "independentContractorClause", label: "Independent Contractor Clause", defaultValue: defaultIndependentContractorClause },
+];
 
 const initialForm: ContractForm = {
   artistName: "",
@@ -403,6 +449,10 @@ const initialForm: ContractForm = {
   parkingDetails: defaultParkingDetails,
   governingLaw: defaultGoverningLaw,
   disputeResolution: defaultDisputeResolution,
+  indemnificationClause: defaultIndemnification,
+  confidentialityClause: defaultConfidentiality,
+  equipmentLiabilityClause: defaultEquipmentLiability,
+  attorneyFeesClause: defaultAttorneyFees,
   // Phase 2 additions
   technicalRiderRequired: false,
   technicalRiderDetails: defaultTechnicalRider,
@@ -479,6 +529,10 @@ const contractRowToForm = (row: ContractRow): ContractForm => ({
   parkingDetails: row.parking_details ?? defaultParkingDetails,
   governingLaw: row.governing_law ?? defaultGoverningLaw,
   disputeResolution: row.dispute_resolution ?? defaultDisputeResolution,
+  indemnificationClause: row.indemnification_clause ?? defaultIndemnification,
+  confidentialityClause: row.confidentiality_clause ?? defaultConfidentiality,
+  equipmentLiabilityClause: row.equipment_liability_clause ?? defaultEquipmentLiability,
+  attorneyFeesClause: row.attorney_fees_clause ?? defaultAttorneyFees,
   // Phase 2 additions
   technicalRiderRequired: row.technical_rider_required ?? false,
   technicalRiderDetails: row.technical_rider_details ?? defaultTechnicalRider,
@@ -518,21 +572,21 @@ function InvoicePreview({
       <header className="border-b-2 border-neutral-900 pb-8 sm:pb-10">
         <div className="flex items-start justify-between gap-8">
           <div>
-            <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-900">
+            <h2 className="text-3xl sm:text-4xl font-medium tracking-tight text-neutral-900">
               INVOICE
             </h2>
-            <p className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
+            <p className="mt-2 text-xs font-medium uppercase tracking-[0.2em] text-neutral-500">
               Invoice No. {form.invoiceNumber || "INV-" + (form.eventName || "DRAFT").slice(0, 6).toUpperCase()}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500 mb-1">
+            <p className="text-xs font-medium uppercase tracking-[0.14em] text-neutral-500 mb-1">
               Date
             </p>
             <p className="text-base font-medium text-neutral-900 sm:text-lg">
               {form.invoiceDate || new Date().toISOString().split('T')[0]}
             </p>
-            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500 mb-1">
+            <p className="mt-4 text-xs font-medium uppercase tracking-[0.14em] text-neutral-500 mb-1">
               Due Date
             </p>
             <p className="text-base font-medium text-neutral-900 sm:text-lg">
@@ -544,7 +598,7 @@ function InvoicePreview({
 
       <div className="mt-10 sm:mt-12 space-y-8 sm:space-y-10 text-sm sm:text-base leading-relaxed">
         <section>
-          <h3 className="font-semibold text-base sm:text-lg text-neutral-900 pl-0  mb-4">Bill To</h3>
+          <h3 className="font-medium text-base sm:text-lg text-neutral-900 pl-0  mb-4">Bill To</h3>
           <p className="font-medium text-neutral-900">{displayValue(form.clientName)}</p>
           <p className="mt-2">{displayValue(form.representativeName)}</p>
           <p className="mt-2">{displayValue(form.email)}</p>
@@ -552,13 +606,13 @@ function InvoicePreview({
         </section>
 
         <section>
-          <h3 className="font-semibold text-base sm:text-lg text-neutral-900 pl-0  mb-4">Services</h3>
+          <h3 className="font-medium text-base sm:text-lg text-neutral-900 pl-0  mb-4">Services</h3>
           <div className="mt-4 border border-neutral-100 rounded-lg overflow-hidden">
             <table className="w-full">
               <thead className="bg-neutral-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-600">Description</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-neutral-600">Amount</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-600">Description</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-neutral-600">Amount</th>
                 </tr>
               </thead>
               <tbody>
@@ -581,7 +635,7 @@ function InvoicePreview({
         </section>
 
         <section>
-          <h3 className="font-semibold text-base sm:text-lg text-neutral-900 pl-0  mb-4">Payment Details</h3>
+          <h3 className="font-medium text-base sm:text-lg text-neutral-900 pl-0  mb-4">Payment Details</h3>
           <div className="mt-4 space-y-2">
             <div className="flex justify-between">
               <span className="text-neutral-600">Subtotal</span>
@@ -594,15 +648,15 @@ function InvoicePreview({
               </div>
             )}
             <div className="flex justify-between border-t border-neutral-300 pt-2 mt-2">
-              <span className="font-semibold text-base sm:text-lg">Balance Due</span>
-              <span className="font-semibold text-base sm:text-lg">{form.totalFee ? money(balanceAmount) : "____________________"}</span>
+              <span className="font-medium text-base sm:text-lg">Balance Due</span>
+              <span className="font-medium text-base sm:text-lg">{form.totalFee ? money(balanceAmount) : "____________________"}</span>
             </div>
           </div>
         </section>
 
         {form.invoiceNotes && (
           <section>
-            <h3 className="font-semibold text-base sm:text-lg text-neutral-900 pl-0  mb-4">Notes</h3>
+            <h3 className="font-medium text-base sm:text-lg text-neutral-900 pl-0  mb-4">Notes</h3>
             <p className="mt-4 text-neutral-600">{form.invoiceNotes}</p>
           </section>
         )}
@@ -610,19 +664,19 @@ function InvoicePreview({
         <section className="border-t border-neutral-300 pt-8">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500 mb-1">
+              <p className="text-xs font-medium uppercase tracking-[0.14em] text-neutral-500 mb-1">
                 Status
               </p>
-              <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${
+              <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wider ${
                 form.invoiceStatus === "Paid" ? "bg-emerald-100 text-emerald-700" :
                 form.invoiceStatus === "Overdue" ? "bg-red-100 text-red-700" :
-                "bg-amber-100 text-amber-700"
+                "bg-gray-100 text-gray-700"
               }`}>
                 {form.invoiceStatus}
               </span>
             </div>
             <div className="text-right">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500 mb-1">
+              <p className="text-xs font-medium uppercase tracking-[0.14em] text-neutral-500 mb-1">
                 Payment Method
               </p>
               <p className="font-medium">{form.paymentMethod || "To be determined"}</p>
@@ -913,6 +967,27 @@ function ContractPage() {
       [key]: !prev[key]
     }));
   };
+
+  const isSectionVisible = (section: keyof typeof collapsibleSections, tab: string) =>
+    (!wizardMode || currentWizardSections.includes(section)) &&
+    (collapsibleSections[section] || wizardMode) &&
+    (activeTab === "all" || activeTab === tab);
+
+  const collapsibleSectionProps = (section: keyof typeof collapsibleSections, tab: string) => ({
+    isOpen: collapsibleSections[section],
+    isVisible: isSectionVisible(section, tab),
+    onToggle: () => toggleSection(section),
+  });
+
+  const renderResettableTextarea = ({ field, label, defaultValue }: ResettableTextareaConfig) => (
+    <TextareaField
+      key={field}
+      label={label}
+      value={form[field] ?? ""}
+      onChange={handleTextareaChange(field)}
+      onReset={() => resetClause(field, defaultValue)}
+    />
+  );
 
   const createWorkspaceSlug = (name: string) =>
     `${name || "artist"}-${Math.random().toString(36).slice(2, 8)}`
@@ -1209,6 +1284,10 @@ useEffect(() => {
         parking_details: form.parkingDetails,
         governing_law: form.governingLaw,
         dispute_resolution: form.disputeResolution,
+        indemnification_clause: form.indemnificationClause,
+        confidentiality_clause: form.confidentialityClause,
+        equipment_liability_clause: form.equipmentLiabilityClause,
+        attorney_fees_clause: form.attorneyFeesClause,
       };
 
       if (draftId) {
@@ -1757,18 +1836,18 @@ ${form.artistName || "the artist"}`;
   ].filter(Boolean) as string[];
 
   const readinessChecks = [
-    { label: "Artist name", complete: Boolean(form.artistName), field: "artistName" },
-    { label: "Artist email", complete: Boolean(form.artistEmail), field: "artistEmail" },
-    { label: "Client name", complete: Boolean(form.clientName), field: "clientName" },
-    { label: "Client email", complete: Boolean(form.email), field: "email" },
-    { label: "Event name", complete: Boolean(form.eventName), field: "eventName" },
-    { label: "Event dates", complete: Boolean(form.eventDates), field: "eventDates" },
-    { label: "Venue location", complete: Boolean(form.venueLocation), field: "venueLocation" },
-    { label: "Services", complete: form.services.length > 0, field: "services" },
-    { label: "Total fee", complete: Boolean(form.totalFee), field: "totalFee" },
-    { label: "Deposit terms", complete: Boolean(form.depositTerms), field: "depositTerms" },
-    { label: "Cancellation terms", complete: Boolean(form.cancellationTerms), field: "cancellationTerms" },
-    { label: "Technical requirements", complete: Boolean(form.technicalRequirements), field: "technicalRequirements" },
+    { label: "Artist name", complete: Boolean(form.artistName), field: "artistName", sectionId: "section-artist" },
+    { label: "Artist email", complete: Boolean(form.artistEmail), field: "artistEmail", sectionId: "section-artist" },
+    { label: "Client name", complete: Boolean(form.clientName), field: "clientName", sectionId: "section-artist" },
+    { label: "Client email", complete: Boolean(form.email), field: "email", sectionId: "section-artist" },
+    { label: "Event name", complete: Boolean(form.eventName), field: "eventName", sectionId: "section-event" },
+    { label: "Event dates", complete: Boolean(form.eventDates), field: "eventDates", sectionId: "section-event" },
+    { label: "Venue location", complete: Boolean(form.venueLocation), field: "venueLocation", sectionId: "section-event" },
+    { label: "Services", complete: form.services.length > 0, field: "services", sectionId: "section-services" },
+    { label: "Total fee", complete: Boolean(form.totalFee), field: "totalFee", sectionId: "section-payment" },
+    { label: "Deposit terms", complete: Boolean(form.depositTerms), field: "depositTerms", sectionId: "section-payment" },
+    { label: "Cancellation terms", complete: Boolean(form.cancellationTerms), field: "cancellationTerms", sectionId: "section-payment" },
+    { label: "Technical requirements", complete: Boolean(form.technicalRequirements), field: "technicalRequirements", sectionId: "section-technical" },
   ];
   const readinessScore = Math.round(
     (readinessChecks.filter((item) => item.complete).length / readinessChecks.length) * 100,
@@ -1844,20 +1923,20 @@ ${artistName}`;
   return (
     <>
       <style>{customScrollbarStyles}</style>
-      <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.12),transparent_34%),radial-gradient(circle_at_78%_12%,rgba(251,191,36,0.08),transparent_28%),linear-gradient(135deg,#fffaf0_0%,#f8f4ec_48%,#fff7ed_100%)] text-stone-950 dark:bg-[radial-gradient(circle_at_top_left,rgba(180,83,9,0.18),transparent_34%),radial-gradient(circle_at_78%_12%,rgba(120,53,15,0.2),transparent_28%),linear-gradient(135deg,#0c0a09_0%,#1c1917_52%,#111827_100%)] dark:text-stone-100">
+      <main className="min-h-screen bg-gray-100 dark:bg-gray-900 text-stone-950 dark:text-stone-100">
       {/* Global Header */}
-      <header className="sticky top-0 z-50 h-16 bg-stone-950/90 backdrop-blur-xl border-b border-amber-400/20 px-4 text-amber-50 shadow-lg shadow-amber-950/10 lg:px-8">
+      <header className="sticky top-0 z-50 h-16 bg-stone-950/90 backdrop-blur-xl border-b border-gray-400/20 px-4 text-gray-50 shadow-lg shadow-gray-900/10 lg:px-8">
         <div className="flex h-full items-center justify-between max-w-[1600px] mx-auto">
           {/* Left side - Branding */}
           <div className="flex items-center gap-4">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-amber-300/25 bg-stone-900 shadow-md shadow-black/20">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="text-amber-300">
+            <div className="flex h-9 w-9 items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="text-gray-300">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
               </svg>
             </div>
             <div className="flex flex-col">
-              <h1 className="text-lg font-bold text-amber-50 tracking-normal font-display">Setlist</h1>
-              <span className="text-caption font-medium text-amber-200/70 tracking-wide uppercase">{readinessScore}% ready</span>
+              <h1 className="text-lg font-medium text-gray-50 tracking-normal font-heading">Setlist</h1>
+              <span className="text-caption font-medium text-gray-400/70 tracking-wide uppercase">{readinessScore}% ready</span>
             </div>
           </div>
 
@@ -1870,7 +1949,7 @@ ${artistName}`;
                 aria-expanded={showQuickActions}
                 aria-haspopup="menu"
                 aria-controls="quick-actions-menu"
-                className="flex items-center gap-2 rounded-lg border border-amber-400/25 bg-amber-400/10 px-4 py-2 text-body font-bold text-amber-100 tracking-normal transition-colors hover:bg-amber-400/20"
+                className="flex items-center gap-2 rounded-lg border border-gray-400/25 bg-gray-400/10 px-4 py-2 text-body font-medium text-gray-100 tracking-normal transition-colors hover:bg-gray-400/20"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="1"></circle>
@@ -1883,7 +1962,7 @@ ${artistName}`;
                 </svg>
               </button>
               {showQuickActions && (
-                <div id="quick-actions-menu" role="menu" className="absolute top-full mt-2 left-0 w-48 rounded-lg border border-amber-200 bg-white shadow-xl shadow-amber-950/10 py-1 z-50 dark:border-amber-500/20 dark:bg-stone-950 dark:shadow-black/30">
+                <div id="quick-actions-menu" role="menu" className="absolute top-full mt-2 left-0 w-48 rounded-lg border border-gray-200 bg-white shadow-xl shadow-gray-950/10 py-1 z-50 dark:border-gray-500/20 dark:bg-stone-950 dark:shadow-black/30">
                   <button
                     type="button"
                     onClick={() => { startNewContract(); setShowQuickActions(false); }}
@@ -1912,7 +1991,7 @@ ${artistName}`;
                     type="button"
                     onClick={() => { handleGenerateCalendarEvent(); setShowQuickActions(false); }}
                     role="menuitem"
-                    className="w-full px-4 py-2.5 text-left text-body font-medium text-neutral-700 tracking-normal hover:bg-neutral-50 hover:text-amber-700 transition-colors flex items-center gap-3 dark:text-stone-200 dark:hover:bg-stone-900 dark:hover:text-amber-300"
+                    className="w-full px-4 py-2.5 text-left text-body font-medium text-neutral-700 tracking-normal hover:bg-neutral-50 hover:text-neutral-900 transition-colors flex items-center gap-3 dark:text-stone-200 dark:hover:bg-stone-900 dark:hover:text-stone-100"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -1926,7 +2005,7 @@ ${artistName}`;
                     type="button"
                     onClick={() => { setShowTemplateLibrary(true); setShowQuickActions(false); }}
                     role="menuitem"
-                    className="w-full px-4 py-2.5 text-left text-body font-medium text-neutral-700 tracking-normal hover:bg-neutral-50 hover:text-amber-700 transition-colors flex items-center gap-3 dark:text-stone-200 dark:hover:bg-stone-900 dark:hover:text-amber-300"
+                    className="w-full px-4 py-2.5 text-left text-body font-medium text-neutral-700 tracking-normal hover:bg-neutral-50 hover:text-neutral-900 transition-colors flex items-center gap-3 dark:text-stone-200 dark:hover:bg-stone-900 dark:hover:text-stone-100"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -1982,17 +2061,17 @@ ${artistName}`;
           {/* Right side - User */}
           <div className="flex items-center">
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-300 text-stone-950 shadow-sm shadow-amber-500/30">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-300 text-stone-950 shadow-sm shadow-gray-500/30">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                   <circle cx="12" cy="7" r="4"/>
                 </svg>
               </div>
-              <p className="text-body font-medium text-amber-100/90 tracking-normal hidden sm:block">{userEmail || "User"}</p>
+              <p className="text-body font-medium text-gray-100/90 tracking-normal hidden sm:block">{userEmail || "User"}</p>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="p-2 rounded-lg text-amber-100 hover:bg-amber-400/10 transition-all focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-950"
+                className="p-2 rounded-lg text-gray-100 hover:bg-gray-400/10 transition-all focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-950"
                 title="Sign out"
                 aria-label="Sign out"
               >
@@ -2024,12 +2103,12 @@ ${artistName}`;
             Exit Focus Mode
           </button>
         )}
-        <div className={`grid grid-cols-2 rounded-xl border border-amber-200/70 bg-white/70 p-1 text-sm font-medium shadow-sm shadow-amber-950/5 backdrop-blur dark:border-amber-500/20 dark:bg-stone-900/70 lg:hidden gap-1 ${focusMode ? 'hidden' : ''}`}>
+        <div className={`grid grid-cols-2 rounded-xl border border-gray-200/70 bg-white/70 p-1 text-sm font-medium shadow-sm shadow-gray-950/5 backdrop-blur dark:border-gray-500/20 dark:bg-stone-900/70 lg:hidden gap-1 ${focusMode ? 'hidden' : ''}`}>
             <button
               type="button"
               onClick={() => setActivePanel("form")}
               className={`rounded-md px-3 py-3 text-base transition-all duration-200 ease-out min-h-[48px] ${
-              activePanel === "form" ? "bg-stone-950 text-amber-100 shadow-sm dark:bg-amber-200 dark:text-stone-950" : "text-stone-600 hover:bg-amber-50 dark:text-stone-300 dark:hover:bg-stone-800"
+              activePanel === "form" ? "bg-stone-950 text-gray-100 shadow-sm dark:bg-gray-200 dark:text-stone-950" : "text-stone-600 hover:bg-gray-50 dark:text-stone-300 dark:hover:bg-stone-800"
             }`}
           >
             Form
@@ -2038,7 +2117,7 @@ ${artistName}`;
               type="button"
               onClick={() => setActivePanel("preview")}
               className={`rounded-md px-3 py-3 text-base transition-all duration-200 ease-out min-h-[48px] ${
-                activePanel === "preview" ? "bg-stone-950 text-amber-100 shadow-sm dark:bg-amber-200 dark:text-stone-950" : "text-stone-600 hover:bg-amber-50 dark:text-stone-300 dark:hover:bg-stone-800"
+                activePanel === "preview" ? "bg-stone-950 text-gray-100 shadow-sm dark:bg-gray-200 dark:text-stone-950" : "text-stone-600 hover:bg-gray-50 dark:text-stone-300 dark:hover:bg-stone-800"
               }`}
             >
               Preview
@@ -2046,11 +2125,14 @@ ${artistName}`;
         </div>
 
         <section
-          className={`rounded-2xl border border-amber-200/80 bg-white/85 p-4 shadow-xl shadow-amber-950/10 backdrop-blur dark:border-amber-500/20 dark:bg-stone-950/80 dark:shadow-black/20 sm:p-6 lg:w-[380px] lg:overflow-y-auto lg:p-6 lg:sticky lg:top-[64px] lg:h-[calc(100vh-64px)] lg:self-start relative ${
+          className={`rounded-2xl border border-gray-300/60 bg-white/60 backdrop-blur-2xl p-4 shadow-2xl shadow-gray-900/10 dark:border-gray-600/40 dark:bg-stone-900/60 dark:shadow-black/50 sm:p-6 lg:w-[380px] lg:overflow-y-auto lg:p-6 lg:sticky lg:top-[64px] lg:h-[calc(100vh-64px)] lg:self-start relative ${
             activePanel === "preview" ? "hidden lg:block" : ""
           } ${focusMode ? "hidden" : ""}`}
           ref={formRef}
         >
+          {/* Enhanced glassmorphism shine effect */}
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/70 via-transparent to-white/30 dark:from-white/20 dark:via-transparent dark:to-white/10 pointer-events-none" />
+          <div className="relative z-10">
           <ContractActions
             draftId={draftId}
             supabase={supabase}
@@ -2066,19 +2148,38 @@ ${artistName}`;
             saveStatus={saveStatus}
             isOnline={isOnline}
           />
-          <div className="mb-4 rounded-lg border border-amber-200/70 bg-white/60 px-3 py-2 shadow-sm shadow-amber-950/5 dark:border-amber-500/20 dark:bg-stone-900/60">
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-xs font-semibold uppercase tracking-[0.12em] text-stone-600 dark:text-stone-300">Progress</span>
-              <span className="text-xs font-semibold text-amber-800 dark:text-amber-300">{readinessScore}% ready</span>
+          </div>
+          <div className="mb-4 rounded-lg border border-gray-300/60 bg-white/60 px-4 py-3 shadow-sm shadow-gray-900/10 dark:border-gray-600/40 dark:bg-stone-900/60">
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <span className="text-xs font-medium uppercase tracking-[0.12em] text-stone-600 dark:text-stone-300">Progress</span>
+              <span className="text-xs font-medium text-gray-800 dark:text-gray-300">{readinessScore}% ready</span>
+            </div>
+            {/* Premium progress bar */}
+            <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden mb-3 dark:bg-gray-700">
+              <div
+                className="h-full bg-gradient-to-r from-gray-600 to-gray-900 rounded-full transition-all duration-500 ease-out dark:from-gray-500 dark:to-gray-300"
+                style={{ width: `${readinessScore}%` }}
+              />
             </div>
             {readinessScore < 100 && (
-              <div className="mt-2 space-y-1 border-t border-amber-100 pt-2 dark:border-amber-500/20">
-                {readinessChecks.filter((item) => !item.complete).slice(0, 2).map((item) => (
-                  <div key={item.field} className="flex items-center justify-between gap-2 text-xs text-neutral-600 dark:text-stone-400">
-                    <span className="truncate">{item.label}</span>
+              <div className="space-y-2">
+                {readinessChecks.filter((item) => !item.complete).slice(0, 3).map((item) => (
+                  <div key={item.field} className="flex items-center justify-between gap-2 text-xs text-neutral-600 dark:text-stone-400 group">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <div className="w-1.5 h-1.5 rounded-full bg-gray-400 group-hover:bg-gray-600 transition-colors dark:bg-gray-600 dark:group-hover:bg-gray-400" />
+                      <span className="truncate">{item.label}</span>
+                    </div>
                     <button
                       type="button"
                       onClick={() => {
+                        // Scroll to section
+                        if (item.sectionId) {
+                          const element = document.getElementById(item.sectionId);
+                          if (element) {
+                            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }
+                        }
+                        // Auto-fill for specific fields
                         if (item.field === "services") {
                           setForm((prev) => ({ ...prev, services: ["Solo Vocal Performance"] }));
                         } else if (item.field === "depositTerms") {
@@ -2088,30 +2189,42 @@ ${artistName}`;
                         } else if (item.field === "technicalRequirements") {
                           updateField("technicalRequirements", "PA system with at least 2 microphones and monitor speakers required.");
                         }
-                        showToast(`Added ${item.label}`, "success");
+                        showToast(`Navigated to ${item.label}`, "success");
                       }}
-                      className="text-amber-700 font-semibold hover:text-amber-900 transition-colors focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 rounded px-1"
+                      className="px-2.5 py-1 rounded-md bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 hover:text-gray-900 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-1 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100"
                     >
                       Add
                     </button>
                   </div>
                 ))}
-                {readinessChecks.filter((item) => !item.complete).length > 2 && (
-                  <p className="text-[11px] text-stone-500 dark:text-stone-500">
-                    +{readinessChecks.filter((item) => !item.complete).length - 2} more
-                  </p>
+                {readinessChecks.filter((item) => !item.complete).length > 3 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const firstIncomplete = readinessChecks.find((item) => !item.complete);
+                      if (firstIncomplete?.sectionId) {
+                        const element = document.getElementById(firstIncomplete.sectionId);
+                        if (element) {
+                          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }
+                    }}
+                    className="text-[11px] text-stone-500 hover:text-stone-700 transition-colors dark:text-stone-500 dark:hover:text-stone-300"
+                  >
+                    +{readinessChecks.filter((item) => !item.complete).length - 3} more remaining
+                  </button>
                 )}
               </div>
             )}
           </div>
-          <div className="mb-4 rounded-xl border border-amber-200 bg-white/80 p-3 shadow-md shadow-amber-950/5">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700 mb-2">Search</p>
+          <div className="mb-4 rounded-xl border border-gray-200 bg-white/80 p-3 shadow-md shadow-gray-950/5">
+            <p className="text-xs font-medium uppercase tracking-[0.14em] text-gray-700 mb-2">Search</p>
             <input
               type="text"
               placeholder="Search contracts..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm text-stone-800 outline-none transition-all hover:border-amber-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
+              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-stone-800 outline-none transition-all hover:border-gray-400 focus:border-gray-500 focus:ring-2 focus:ring-amber-200"
             />
           </div>
           <RecentContracts
@@ -2126,21 +2239,21 @@ ${artistName}`;
           {showTemplateLibrary && (
             <div className="mt-4 rounded-xl border border-neutral-300 bg-white p-5 shadow-md">
               <div className="flex items-center justify-between gap-3 mb-4">
-                <h2 className="text-base font-semibold text-neutral-900 lg:text-lg">
+                <h2 className="text-base font-medium text-neutral-900 lg:text-lg">
                   Template Library
                 </h2>
                 <button
                   type="button"
                   onClick={saveTemplate}
-                  className="rounded-full bg-stone-950 px-4 py-2 text-xs font-semibold text-amber-100 dark:bg-amber-200 dark:text-stone-950 transition hover:bg-stone-900 dark:hover:bg-amber-100 hover:shadow-lg hover:shadow-stone-950/10 hover:scale-105 focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 border border-amber-400"
+                  className="rounded-full bg-stone-950 px-4 py-2 text-xs font-medium text-gray-100 dark:bg-gray-200 dark:text-stone-950 transition hover:bg-stone-900 dark:hover:bg-gray-100 hover:shadow-lg hover:shadow-stone-950/10 hover:scale-105 focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 border border-gray-400"
                 >
                   Save as Template
                 </button>
               </div>
               {templates.length === 0 ? (
                 <div className="text-center py-12">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-50 mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-50 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                       <polyline points="14 2 14 8 20 8"/>
                       <line x1="16" y1="13" x2="8" y2="13"/>
@@ -2148,7 +2261,7 @@ ${artistName}`;
                       <polyline points="10 9 9 9 8 9"/>
                     </svg>
                   </div>
-                  <p className="text-base font-semibold text-neutral-900 mb-2">No templates saved yet</p>
+                  <p className="text-base font-medium text-neutral-900 mb-2">No templates saved yet</p>
                   <p className="text-sm text-neutral-500 mb-4">Save your current contract as a template to reuse it later</p>
                 </div>
               ) : (
@@ -2156,10 +2269,10 @@ ${artistName}`;
                   {templates.map((template, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between rounded-lg border border-neutral-300 bg-white px-4 py-3 hover:border-amber-400 hover:bg-amber-50 hover:shadow-md transition-all"
+                      className="flex items-center justify-between rounded-lg border border-neutral-300 bg-white px-4 py-3 hover:border-gray-400 hover:bg-gray-50 hover:shadow-md transition-all"
                     >
                       <div className="flex-1">
-                        <p className="text-sm font-semibold text-neutral-900">
+                        <p className="text-sm font-medium text-neutral-900">
                           {(template as any).templateName || `Template ${index + 1}`}
                         </p>
                         <p className="text-xs text-neutral-500">
@@ -2170,14 +2283,14 @@ ${artistName}`;
                         <button
                           type="button"
                           onClick={() => loadTemplate(template)}
-                          className="rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-800 hover:border-amber-400 hover:bg-amber-50 hover:text-amber-700 transition-all focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
+                          className="rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-xs font-medium text-neutral-800 hover:border-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-all focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
                         >
                           Load
                         </button>
                         <button
                           type="button"
                           onClick={() => deleteTemplate(index)}
-                          className="rounded-full border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-700 hover:border-red-500 hover:bg-red-50 transition-all focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+                          className="rounded-full border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-700 hover:border-red-500 hover:bg-red-50 transition-all focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
                         >
                           Delete
                         </button>
@@ -2191,25 +2304,25 @@ ${artistName}`;
           {showAnalytics && (
             <div className="mt-4 rounded-xl border border-neutral-300 bg-white p-5 shadow-md">
               <div className="flex items-center justify-between gap-3 mb-4">
-                <h2 className="text-base font-semibold text-neutral-900 lg:text-lg">
+                <h2 className="text-base font-medium text-neutral-900 lg:text-lg">
                   Contract Analytics
                 </h2>
               </div>
               {recentContracts.length === 0 ? (
                 <div className="text-center py-12">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-50 mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-50 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
                       <line x1="18" y1="20" x2="18" y2="10"/>
                       <line x1="12" y1="20" x2="12" y2="4"/>
                       <line x1="6" y1="20" x2="6" y2="14"/>
                     </svg>
                   </div>
-                  <p className="text-base font-semibold text-neutral-900 mb-2">No contracts to analyze</p>
+                  <p className="text-base font-medium text-neutral-900 mb-2">No contracts to analyze</p>
                   <p className="text-sm text-neutral-500 mb-4">Create contracts to see analytics and insights</p>
                   <button
                     type="button"
                     onClick={startNewContract}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-stone-950 text-amber-100 dark:bg-amber-200 dark:text-stone-950 text-body font-medium tracking-normal hover:bg-stone-900 dark:hover:bg-amber-100 transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-stone-950 text-gray-100 dark:bg-gray-200 dark:text-stone-950 text-body font-medium tracking-normal hover:bg-stone-900 dark:hover:bg-gray-100 transition-colors"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12 5v14M5 12h14"/>
@@ -2221,24 +2334,24 @@ ${artistName}`;
                 <>
                   <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-4 mb-4">
                     <div className="rounded-lg border border-neutral-300 bg-white p-4 hover:shadow-md transition-all">
-                      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-400 mb-1">Total Contracts</p>
-                      <p className="text-2xl font-bold text-neutral-900">{recentContracts.length}</p>
+                      <p className="text-xs font-medium uppercase tracking-[0.12em] text-neutral-400 mb-1">Total Contracts</p>
+                      <p className="text-2xl font-medium text-neutral-900">{recentContracts.length}</p>
                     </div>
                     <div className="rounded-lg border border-neutral-300 bg-white p-4 hover:shadow-md transition-all">
-                      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-400 mb-1">Total Revenue</p>
-                      <p className="text-2xl font-bold text-neutral-900">
+                      <p className="text-xs font-medium uppercase tracking-[0.12em] text-neutral-400 mb-1">Total Revenue</p>
+                      <p className="text-2xl font-medium text-neutral-900">
                         ${recentContracts.reduce((sum, c) => sum + (c.total_fee || 0), 0).toLocaleString("en-CA")}
                       </p>
                     </div>
                     <div className="rounded-lg border border-neutral-300 bg-white p-4 hover:shadow-md transition-all">
-                      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-400 mb-1">Signed</p>
-                      <p className="text-2xl font-bold text-emerald-600">
+                      <p className="text-xs font-medium uppercase tracking-[0.12em] text-neutral-400 mb-1">Signed</p>
+                      <p className="text-2xl font-medium text-emerald-600">
                         {recentContracts.filter(c => c.contract_status === "Signed" || c.status === "Signed").length}
                       </p>
                     </div>
                     <div className="rounded-lg border border-neutral-300 bg-white p-4 hover:shadow-md transition-all">
-                      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-400 mb-1">Avg Fee</p>
-                      <p className="text-2xl font-bold text-neutral-900">
+                      <p className="text-xs font-medium uppercase tracking-[0.12em] text-neutral-400 mb-1">Avg Fee</p>
+                      <p className="text-2xl font-medium text-neutral-900">
                         ${recentContracts.length > 0 
                           ? Math.round(recentContracts.reduce((sum, c) => sum + (c.total_fee || 0), 0) / recentContracts.length).toLocaleString("en-CA")
                           : "0"}
@@ -2246,14 +2359,14 @@ ${artistName}`;
                     </div>
                   </div>
                   <div className="rounded-lg border border-neutral-300 bg-white p-4 hover:shadow-md transition-all">
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-400 mb-3">Contracts by Status</p>
+                    <p className="text-xs font-medium uppercase tracking-[0.12em] text-neutral-400 mb-3">Contracts by Status</p>
                     <div className="space-y-2">
                       {["Draft", "Ready", "Sent", "Signed"].map((status) => {
                         const count = recentContracts.filter(c => c.contract_status === status || c.status === status).length;
                         const percentage = recentContracts.length > 0 ? Math.round((count / recentContracts.length) * 100) : 0;
                         return (
                           <div key={status} className="flex items-center gap-3">
-                            <span className="text-sm font-semibold text-neutral-800 w-16">{status}</span>
+                            <span className="text-sm font-medium text-neutral-800 w-16">{status}</span>
                             <div className="flex-1 h-2 rounded-full bg-neutral-200 overflow-hidden">
                               <div
                                 className={`h-2 rounded-full ${
@@ -2265,7 +2378,7 @@ ${artistName}`;
                                 style={{ width: `${percentage}%` }}
                               />
                             </div>
-                            <span className="text-sm font-semibold text-neutral-900 w-12 text-right">{count}</span>
+                            <span className="text-sm font-medium text-neutral-900 w-12 text-right">{count}</span>
                           </div>
                         );
                       })}
@@ -2276,7 +2389,7 @@ ${artistName}`;
             </div>
           )}
           <div className="mb-4 rounded-xl border border-neutral-300 bg-white p-3 shadow-md">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500 mb-2">Quick Navigation</p>
+            <p className="text-xs font-medium uppercase tracking-[0.14em] text-neutral-500 mb-2">Quick Navigation</p>
             <div className="flex flex-wrap gap-2">
               {["Event Info", "Services", "Payment", "Options", "Performance", "Technical", "Financial"].map((section) => (
                 <button
@@ -2315,7 +2428,7 @@ ${artistName}`;
                       }, 100);
                     }
                   }}
-                  className="rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-800 hover:border-amber-400 hover:bg-amber-50 hover:text-amber-700 hover:shadow-md transition-all focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
+                  className="rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-xs font-medium text-neutral-800 hover:border-gray-400 hover:bg-gray-50 hover:text-gray-700 hover:shadow-md transition-all focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
                 >
                   {section}
                 </button>
@@ -2343,8 +2456,8 @@ ${artistName}`;
                       }}
                       className={`px-4 py-2 rounded-lg text-body font-medium tracking-normal whitespace-nowrap transition-all ${
                         activeTab === tab.id
-                          ? 'bg-stone-950 text-amber-100 dark:bg-amber-200 dark:text-stone-950'
-                          : 'bg-white/80 text-stone-700 hover:bg-amber-50 border border-amber-200'
+                          ? 'bg-stone-950 text-gray-100 dark:bg-gray-200 dark:text-stone-950'
+                          : 'bg-white/80 text-stone-700 hover:bg-gray-50 border border-gray-200'
                       }`}
                     >
                       {tab.name}
@@ -2359,7 +2472,7 @@ ${artistName}`;
               setWizardStep={setWizardStep}
               wizardSteps={wizardSteps}
             />
-            <fieldset id="section-event-info" className="space-y-6">
+            <fieldset id="section-artist" className="space-y-6">
               <legend className="text-section-header font-medium text-neutral-900 tracking-normal font-display">
                 1. Artist Information
               </legend>
@@ -2377,7 +2490,7 @@ ${artistName}`;
                 onChange={handleTextChange("artistEmail")}
               />
               <div>
-                <span className="mb-2.5 block text-sm font-semibold text-neutral-900 lg:text-base">
+                <span className="mb-2.5 block text-sm font-medium text-neutral-900 lg:text-base">
                   Artist Logo (Optional)
                 </span>
                 <div className="flex items-center gap-4">
@@ -2399,13 +2512,13 @@ ${artistName}`;
                         reader.readAsDataURL(file);
                       }
                     }}
-                    className="block w-full text-sm text-neutral-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-800 hover:file:bg-amber-100"
+                    className="block w-full text-sm text-neutral-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-gray-50 file:text-gray-800 hover:file:bg-gray-100"
                   />
                 </div>
               </div>
             </fieldset>
 
-            <fieldset className="space-y-6">
+            <fieldset id="section-event" className="space-y-6">
               <legend className="text-section-header font-medium text-neutral-900 tracking-normal font-display">
                 2. Event Details
               </legend>
@@ -2465,7 +2578,7 @@ ${artistName}`;
             <button
               type="button"
               onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-              className="w-full flex items-center justify-center gap-2 rounded-xl border border-amber-200 bg-white/70 px-4 py-3 text-body font-medium text-stone-700 tracking-normal hover:border-amber-400 hover:bg-amber-50 transition-all shadow-sm shadow-amber-950/5"
+              className="w-full flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white/70 px-4 py-3 text-body font-medium text-stone-700 tracking-normal hover:border-gray-400 hover:bg-gray-50 transition-all shadow-sm shadow-gray-950/5"
             >
               <span className="text-neutral-400 transition-transform">
                 {showAdvancedOptions ? (
@@ -2484,22 +2597,11 @@ ${artistName}`;
             {showAdvancedOptions && (
               <div className="space-y-8 sm:space-y-10 lg:space-y-8 xl:space-y-10">
 
-            <fieldset id="section-event-info" className="space-y-6 rounded-xl border border-amber-200/80 bg-white/80 p-6 shadow-sm shadow-amber-950/5">
-              <legend className="flex items-center justify-between text-section-header font-medium text-neutral-900 tracking-normal font-display cursor-pointer" onClick={() => toggleSection("eventInfo")}>
-                <span>4. Event Information</span>
-                <span className="text-neutral-400 transition-transform ml-2">
-                  {collapsibleSections.eventInfo ? (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  ) : (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  )}
-                </span>
-              </legend>
-              {(!wizardMode || currentWizardSections.includes("eventInfo")) && (collapsibleSections.eventInfo || wizardMode) && (activeTab === "all" || activeTab === "event") && (
+            <CollapsibleSection
+              id="section-event-info"
+              title="4. Event Information"
+              {...collapsibleSectionProps("eventInfo", "event")}
+            >
                 <>
                   <InputField
                     label="Event / Project Name"
@@ -2526,60 +2628,36 @@ ${artistName}`;
                     onChange={handleTextChange("performanceDuration")}
                   />
                 </>
-              )}
-            </fieldset>
+            </CollapsibleSection>
 
-            <fieldset id="section-services" className="space-y-6 rounded-xl border border-amber-200/80 bg-white/80 p-6 shadow-sm shadow-amber-950/5">
-              <legend className="flex items-center justify-between text-section-header font-medium text-neutral-900 tracking-normal font-display cursor-pointer" onClick={() => toggleSection("services")}>
-                <span>5. Services</span>
-                <span className="text-neutral-400 transition-transform ml-2">
-                  {collapsibleSections.services ? (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  ) : (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  )}
-                </span>
-              </legend>
-              {(!wizardMode || currentWizardSections.includes("services")) && (collapsibleSections.services || wizardMode) && (activeTab === "all" || activeTab === "services") && (
+            <CollapsibleSection
+              id="section-services"
+              title="5. Services"
+              {...collapsibleSectionProps("services", "services")}
+            >
                 <div className="grid gap-3 sm:grid-cols-2">
                   {serviceOptions.map((service) => (
                     <label
                       key={service}
-                      className="flex items-center gap-3 rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3.5 text-body font-medium text-stone-700 min-h-[48px] cursor-pointer hover:border-amber-300 hover:bg-amber-50 transition-all tracking-normal"
+                      className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50/40 px-4 py-3.5 text-body font-medium text-stone-700 min-h-[48px] cursor-pointer hover:border-gray-300 hover:bg-gray-50 transition-all tracking-normal"
                     >
                       <input
                         type="checkbox"
                         checked={form.services.includes(service)}
                         onChange={() => toggleService(service)}
-                        className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                        className="h-5 w-5 rounded border-gray-300 text-gray-600 focus:ring-amber-500"
                       />
                       {service}
                     </label>
                   ))}
                 </div>
-              )}
-            </fieldset>
+            </CollapsibleSection>
 
-            <fieldset id="section-payment" className="space-y-6 rounded-xl border border-amber-200/80 bg-white/80 p-6 shadow-sm shadow-amber-950/5">
-              <legend className="flex items-center justify-between text-section-header font-medium text-neutral-900 tracking-normal font-display cursor-pointer" onClick={() => toggleSection("payment")}>
-                <span>6. Payment</span>
-                <span className="text-neutral-400 transition-transform ml-2">
-                  {collapsibleSections.payment ? (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  ) : (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  )}
-                </span>
-              </legend>
-              {(!wizardMode || currentWizardSections.includes("payment")) && (collapsibleSections.payment || wizardMode) && (activeTab === "all" || activeTab === "payment") && (
+            <CollapsibleSection
+              id="section-payment"
+              title="6. Payment"
+              {...collapsibleSectionProps("payment", "payment")}
+            >
                 <>
                   <InputField
                     label="Total Fee (CAD)"
@@ -2609,548 +2687,346 @@ ${artistName}`;
                     onChange={handleTextChange("dateOfAgreement")}
                   />
                 </>
-              )}
-            </fieldset>
+            </CollapsibleSection>
 
-            <fieldset id="section-options" className="space-y-6 rounded-xl border border-amber-200/80 bg-white/80 p-6 shadow-sm shadow-amber-950/5">
-              <legend className="flex items-center justify-between text-section-header font-medium text-neutral-900 tracking-normal font-display cursor-pointer" onClick={() => toggleSection("options")}>
-                <span>7. Options</span>
-                <span className="text-neutral-400 transition-transform ml-2">
-                  {collapsibleSections.options ? (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  ) : (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  )}
-                </span>
-              </legend>
-              {(!wizardMode || currentWizardSections.includes("options")) && (collapsibleSections.options || wizardMode) && (activeTab === "all" || activeTab === "options") && (
+            <CollapsibleSection
+              id="section-options"
+              title="7. Options"
+              {...collapsibleSectionProps("options", "options")}
+            >
                 <>
-                  <label className="flex items-center justify-between gap-3 rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3.5 text-body font-medium text-stone-700 min-h-[48px] cursor-pointer hover:border-amber-300 hover:bg-amber-50 transition-all tracking-normal">
-                    <span>Travel Required</span>
-                    <input
-                      type="checkbox"
-                      checked={form.travelRequired}
-                      onChange={(e) => updateField("travelRequired", e.target.checked)}
-                      className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                    />
-                  </label>
-                  <label className="flex items-center justify-between gap-3 rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3.5 text-body font-medium text-stone-700 min-h-[48px] cursor-pointer hover:border-amber-300 hover:bg-amber-50 transition-all tracking-normal">
-                    <span>Media Rights Allowed (Client may record)</span>
-                    <input
-                      type="checkbox"
-                      checked={form.mediaRightsAllowed}
-                      onChange={(e) => updateField("mediaRightsAllowed", e.target.checked)}
-                      className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                    />
-                  </label>
-                  <label className="flex items-center justify-between gap-3 rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3.5 text-body font-medium text-stone-700 min-h-[48px] cursor-pointer hover:border-amber-300 hover:bg-amber-50 transition-all tracking-normal">
-                    <span>Include Force Majeure Clause</span>
-                    <input
-                      type="checkbox"
-                      checked={form.forceMajeureIncluded}
-                      onChange={(e) => updateField("forceMajeureIncluded", e.target.checked)}
-                      className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                    />
-                  </label>
+                  <GroupedSection title="Travel & Media" subtitle="Configure travel and recording options">
+                    <FieldRow label="Travel Required">
+                      <ToggleSwitch
+                        checked={form.travelRequired}
+                        onChange={(checked) => updateField("travelRequired", checked)}
+                      />
+                    </FieldRow>
+                    <FieldRow label="Media Rights Allowed" divider={false}>
+                      <ToggleSwitch
+                        checked={form.mediaRightsAllowed}
+                        onChange={(checked) => updateField("mediaRightsAllowed", checked)}
+                      />
+                    </FieldRow>
+                  </GroupedSection>
+                  <GroupedSection title="Legal Protections" subtitle="Additional contract clauses">
+                    <FieldRow label="Force Majeure Clause" divider={false}>
+                      <ToggleSwitch
+                        checked={form.forceMajeureIncluded}
+                        onChange={(checked) => updateField("forceMajeureIncluded", checked)}
+                      />
+                    </FieldRow>
+                  </GroupedSection>
                 </>
-              )}
-            </fieldset>
+            </CollapsibleSection>
 
-            <fieldset id="section-performance" className="space-y-6 rounded-xl border border-amber-200/80 bg-white/80 p-6 shadow-sm shadow-amber-950/5">
-              <legend className="flex items-center justify-between text-section-header font-medium text-neutral-900 tracking-normal font-display cursor-pointer" onClick={() => toggleSection("performanceRequirements")}>
-                <span>8. Performance Requirements</span>
-                <span className="text-neutral-400 transition-transform ml-2">
-                  {collapsibleSections.performanceRequirements ? (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  ) : (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  )}
-                </span>
-              </legend>
-              {(!wizardMode || currentWizardSections.includes("performanceRequirements")) && (collapsibleSections.performanceRequirements || wizardMode) && (activeTab === "all" || activeTab === "requirements") && (
+            <CollapsibleSection
+              id="section-performance"
+              title="8. Performance Requirements"
+              {...collapsibleSectionProps("performanceRequirements", "requirements")}
+            >
                 <>
-                  <label className="flex items-center justify-between gap-3 rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3.5 text-body font-medium text-stone-700 min-h-[48px] cursor-pointer hover:border-amber-300 hover:bg-amber-50 transition-all tracking-normal">
-                    <span>Rehearsal Required</span>
-                    <input
-                      type="checkbox"
-                      checked={form.rehearsalRequired}
-                      onChange={(e) => updateField("rehearsalRequired", e.target.checked)}
-                      className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                    />
-                  </label>
+                  <GroupedSection title="Pre-Performance" subtitle="Rehearsal and sound check requirements">
+                    <FieldRow label="Rehearsal Required">
+                      <ToggleSwitch
+                        checked={form.rehearsalRequired}
+                        onChange={(checked) => updateField("rehearsalRequired", checked)}
+                      />
+                    </FieldRow>
+                    <FieldRow label="Sound Check Required" divider={false}>
+                      <ToggleSwitch
+                        checked={form.soundCheckRequired}
+                        onChange={(checked) => updateField("soundCheckRequired", checked)}
+                      />
+                    </FieldRow>
+                  </GroupedSection>
                   {form.rehearsalRequired && (
-                    <TextareaField
-                      label="Rehearsal Details"
-                      value={form.rehearsalDetails}
-                      onChange={handleTextareaChange("rehearsalDetails")}
-                      onReset={() => resetClause("rehearsalDetails", defaultRehearsalDetails)}
-                    />
+                    <div className="mb-4">
+                      <TextareaField
+                        label="Rehearsal Details"
+                        value={form.rehearsalDetails}
+                        onChange={handleTextareaChange("rehearsalDetails")}
+                        onReset={() => resetClause("rehearsalDetails", defaultRehearsalDetails)}
+                      />
+                    </div>
                   )}
-                  <label className="flex items-center justify-between gap-3 rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3.5 text-body font-medium text-stone-700 min-h-[48px] cursor-pointer hover:border-amber-300 hover:bg-amber-50 transition-all tracking-normal">
-                    <span>Sound Check Required</span>
-                    <input
-                      type="checkbox"
-                      checked={form.soundCheckRequired}
-                      onChange={(e) => updateField("soundCheckRequired", e.target.checked)}
-                      className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                    />
-                  </label>
                   {form.soundCheckRequired && (
-                    <TextareaField
-                      label="Sound Check Details"
-                      value={form.soundCheckDetails}
-                      onChange={handleTextareaChange("soundCheckDetails")}
-                      onReset={() => resetClause("soundCheckDetails", defaultSoundCheckDetails)}
-                    />
+                    <div className="mb-4">
+                      <TextareaField
+                        label="Sound Check Details"
+                        value={form.soundCheckDetails}
+                        onChange={handleTextareaChange("soundCheckDetails")}
+                        onReset={() => resetClause("soundCheckDetails", defaultSoundCheckDetails)}
+                      />
+                    </div>
                   )}
-                  <label className="flex items-center justify-between gap-3 rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3.5 text-body font-medium text-stone-700 min-h-[48px] cursor-pointer hover:border-amber-300 hover:bg-amber-50 transition-all tracking-normal">
-                    <span>Hospitality Required</span>
-                    <input
-                      type="checkbox"
-                      checked={form.hospitalityRequired}
-                      onChange={(e) => updateField("hospitalityRequired", e.target.checked)}
-                      className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                    />
-                  </label>
+                  <GroupedSection title="Hospitality" subtitle="Food and accommodation needs">
+                    <FieldRow label="Hospitality Required" divider={false}>
+                      <ToggleSwitch
+                        checked={form.hospitalityRequired}
+                        onChange={(checked) => updateField("hospitalityRequired", checked)}
+                      />
+                    </FieldRow>
+                  </GroupedSection>
                   {form.hospitalityRequired && (
-                    <TextareaField
-                      label="Hospitality Details"
-                      value={form.hospitalityDetails}
-                      onChange={handleTextareaChange("hospitalityDetails")}
-                      onReset={() => resetClause("hospitalityDetails", defaultHospitalityDetails)}
-                    />
+                    <div className="mb-4">
+                      <TextareaField
+                        label="Hospitality Details"
+                        value={form.hospitalityDetails}
+                        onChange={handleTextareaChange("hospitalityDetails")}
+                        onReset={() => resetClause("hospitalityDetails", defaultHospitalityDetails)}
+                      />
+                    </div>
                   )}
                 </>
-              )}
-            </fieldset>
+            </CollapsibleSection>
 
-            <fieldset id="section-financial" className="space-y-6 rounded-xl border border-amber-200/80 bg-white/80 p-6 shadow-sm shadow-amber-950/5">
-              <legend className="flex items-center justify-between text-section-header font-medium text-neutral-900 tracking-normal font-display cursor-pointer" onClick={() => toggleSection("financialLegal")}>
-                <span>9. Financial & Legal</span>
-                <span className="text-neutral-400 transition-transform ml-2">
-                  {collapsibleSections.financialLegal ? (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  ) : (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  )}
-                </span>
-              </legend>
-              {(!wizardMode || currentWizardSections.includes("financialLegal")) && (collapsibleSections.financialLegal || wizardMode) && (activeTab === "all" || activeTab === "legal") && (
+            <CollapsibleSection
+              id="section-financial"
+              title="9. Financial & Legal"
+              {...collapsibleSectionProps("financialLegal", "legal")}
+            >
                 <>
-                  <TextareaField
-                    label="Late Payment Penalty"
-                    value={form.latePaymentPenalty}
-                    onChange={handleTextareaChange("latePaymentPenalty")}
-                    onReset={() => resetClause("latePaymentPenalty", defaultLatePaymentPenalty)}
-                  />
-                  <TextareaField
-                    label="Cancellation Fee Structure"
-                    value={form.cancellationFee}
-                    onChange={handleTextareaChange("cancellationFee")}
-                    onReset={() => resetClause("cancellationFee", defaultCancellationFee)}
-                  />
-                  <label className="flex items-center justify-between gap-3 rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3.5 text-body font-medium text-stone-700 min-h-[48px] cursor-pointer hover:border-amber-300 hover:bg-amber-50 transition-all tracking-normal">
-                    <span>Insurance Required</span>
-                    <input
-                      type="checkbox"
-                      checked={form.insuranceRequired}
-                      onChange={(e) => updateField("insuranceRequired", e.target.checked)}
-                      className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                    />
-                  </label>
+                  {financialLegalTextareaFields.slice(0, 2).map(renderResettableTextarea)}
+                  <GroupedSection title="Insurance" subtitle="Insurance requirements and coverage details">
+                    <FieldRow label="Insurance Required" divider={false}>
+                      <ToggleSwitch
+                        checked={form.insuranceRequired}
+                        onChange={(checked) => updateField("insuranceRequired", checked)}
+                      />
+                    </FieldRow>
+                  </GroupedSection>
                   {form.insuranceRequired && (
-                    <TextareaField
-                      label="Insurance Details"
-                      value={form.insuranceDetails}
-                      onChange={handleTextareaChange("insuranceDetails")}
-                      onReset={() => resetClause("insuranceDetails", defaultInsuranceDetails)}
-                    />
+                    <div className="mb-4">
+                      <TextareaField
+                        label="Insurance Details"
+                        value={form.insuranceDetails}
+                        onChange={handleTextareaChange("insuranceDetails")}
+                        onReset={() => resetClause("insuranceDetails", defaultInsuranceDetails)}
+                      />
+                    </div>
                   )}
-                  <TextareaField
-                    label="Governing Law"
-                    value={form.governingLaw}
-                    onChange={handleTextareaChange("governingLaw")}
-                    onReset={() => resetClause("governingLaw", defaultGoverningLaw)}
-                  />
-                  <TextareaField
-                    label="Dispute Resolution"
-                    value={form.disputeResolution}
-                    onChange={handleTextareaChange("disputeResolution")}
-                    onReset={() => resetClause("disputeResolution", defaultDisputeResolution)}
-                  />
+                  {financialLegalTextareaFields.slice(2).map(renderResettableTextarea)}
                 </>
-              )}
-            </fieldset>
+            </CollapsibleSection>
 
-            <fieldset id="section-technical" className="space-y-6 rounded-xl border border-amber-200/80 bg-white/80 p-6 shadow-sm shadow-amber-950/5">
-              <legend className="flex items-center justify-between text-section-header font-medium text-neutral-900 tracking-normal font-display cursor-pointer" onClick={() => toggleSection("technicalRider")}>
-                <span>10. Technical Rider</span>
-                <span className="text-neutral-400 transition-transform ml-2">
-                  {collapsibleSections.technicalRider ? (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  ) : (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  )}
-                </span>
-              </legend>
-              {(!wizardMode || currentWizardSections.includes("technicalRider")) && (collapsibleSections.technicalRider || wizardMode) && (activeTab === "all" || activeTab === "requirements") && (
+            <CollapsibleSection
+              id="section-technical"
+              title="10. Technical Rider"
+              {...collapsibleSectionProps("technicalRider", "requirements")}
+            >
                 <>
-                  <label className="flex items-center justify-between gap-3 rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3.5 text-body font-medium text-stone-700 min-h-[48px] cursor-pointer hover:border-amber-300 hover:bg-amber-50 transition-all tracking-normal">
-                    <span>Technical Rider Required</span>
-                    <input
-                      type="checkbox"
-                      checked={form.technicalRiderRequired}
-                      onChange={(e) => updateField("technicalRiderRequired", e.target.checked)}
-                      className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                    />
-                  </label>
+                  <GroupedSection title="Technical Requirements" subtitle="Equipment and technical specifications">
+                    <FieldRow label="Technical Rider Required" divider={false}>
+                      <ToggleSwitch
+                        checked={form.technicalRiderRequired}
+                        onChange={(checked) => updateField("technicalRiderRequired", checked)}
+                      />
+                    </FieldRow>
+                  </GroupedSection>
                   {form.technicalRiderRequired && (
-                    <TextareaField
-                      label="Technical Rider Details"
-                      value={form.technicalRiderDetails}
-                      onChange={handleTextareaChange("technicalRiderDetails")}
-                      onReset={() => resetClause("technicalRiderDetails", defaultTechnicalRider)}
-                    />
+                    <div className="mb-4">
+                      <TextareaField
+                        label="Technical Rider Details"
+                        value={form.technicalRiderDetails}
+                        onChange={handleTextareaChange("technicalRiderDetails")}
+                        onReset={() => resetClause("technicalRiderDetails", defaultTechnicalRider)}
+                      />
+                    </div>
                   )}
                 </>
-              )}
-            </fieldset>
+            </CollapsibleSection>
 
-            <fieldset className="space-y-6 rounded-xl border border-amber-200/80 bg-white/80 p-6 shadow-sm shadow-amber-950/5">
-              <legend className="flex items-center justify-between text-section-header font-medium text-neutral-900 tracking-normal font-display cursor-pointer" onClick={() => toggleSection("accommodation")}>
-                <span>11. Accommodation</span>
-                <span className="text-neutral-400 transition-transform ml-2">
-                  {collapsibleSections.accommodation ? (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  ) : (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  )}
-                </span>
-              </legend>
-              {(!wizardMode || currentWizardSections.includes("accommodation")) && (collapsibleSections.accommodation || wizardMode) && (activeTab === "all" || activeTab === "logistics") && (
+            <CollapsibleSection
+              title="11. Accommodation"
+              {...collapsibleSectionProps("accommodation", "logistics")}
+            >
                 <>
-                  <label className="flex items-center justify-between gap-3 rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3.5 text-body font-medium text-stone-700 min-h-[48px] cursor-pointer hover:border-amber-300 hover:bg-amber-50 transition-all tracking-normal">
-                    <span>Accommodation Required</span>
-                    <input
-                      type="checkbox"
-                      checked={form.accommodationRequired}
-                      onChange={(e) => updateField("accommodationRequired", e.target.checked)}
-                      className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                    />
-                  </label>
+                  <GroupedSection title="Lodging" subtitle="Accommodation requirements for overnight stays">
+                    <FieldRow label="Accommodation Required" divider={false}>
+                      <ToggleSwitch
+                        checked={form.accommodationRequired}
+                        onChange={(checked) => updateField("accommodationRequired", checked)}
+                      />
+                    </FieldRow>
+                  </GroupedSection>
                   {form.accommodationRequired && (
-                    <TextareaField
-                      label="Accommodation Details"
-                      value={form.accommodationDetails}
-                      onChange={handleTextareaChange("accommodationDetails")}
-                      onReset={() => resetClause("accommodationDetails", defaultAccommodationDetails)}
-                    />
+                    <div className="mb-4">
+                      <TextareaField
+                        label="Accommodation Details"
+                        value={form.accommodationDetails}
+                        onChange={handleTextareaChange("accommodationDetails")}
+                        onReset={() => resetClause("accommodationDetails", defaultAccommodationDetails)}
+                      />
+                    </div>
                   )}
                 </>
-              )}
-            </fieldset>
+            </CollapsibleSection>
 
-            <fieldset className="space-y-6 rounded-xl border border-amber-200/80 bg-white/80 p-6 shadow-sm shadow-amber-950/5">
-              <legend className="flex items-center justify-between text-section-header font-medium text-neutral-900 tracking-normal font-display cursor-pointer" onClick={() => toggleSection("perDiem")}>
-                <span>12. Per Diem & Expenses</span>
-                <span className="text-neutral-400 transition-transform ml-2">
-                  {collapsibleSections.perDiem ? (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  ) : (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  )}
-                </span>
-              </legend>
-              {(!wizardMode || currentWizardSections.includes("perDiem")) && (collapsibleSections.perDiem || wizardMode) && (activeTab === "all" || activeTab === "logistics") && (
+            <CollapsibleSection
+              title="12. Per Diem & Expenses"
+              {...collapsibleSectionProps("perDiem", "logistics")}
+            >
                 <>
-                  <label className="flex items-center justify-between gap-3 rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3.5 text-body font-medium text-stone-700 min-h-[48px] cursor-pointer hover:border-amber-300 hover:bg-amber-50 transition-all tracking-normal">
-                    <span>Per Diem Required</span>
-                    <input
-                      type="checkbox"
-                      checked={form.perDiemRequired}
-                      onChange={(e) => updateField("perDiemRequired", e.target.checked)}
-                      className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                    />
-                  </label>
+                  <GroupedSection title="Daily Expenses" subtitle="Meal and incidental expense allowances">
+                    <FieldRow label="Per Diem Required" divider={false}>
+                      <ToggleSwitch
+                        checked={form.perDiemRequired}
+                        onChange={(checked) => updateField("perDiemRequired", checked)}
+                      />
+                    </FieldRow>
+                  </GroupedSection>
                   {form.perDiemRequired && (
-                    <TextareaField
-                      label="Per Diem Details"
-                      value={form.perDiemDetails}
-                      onChange={handleTextareaChange("perDiemDetails")}
-                      onReset={() => resetClause("perDiemDetails", defaultPerDiemDetails)}
-                    />
+                    <div className="mb-4">
+                      <TextareaField
+                        label="Per Diem Details"
+                        value={form.perDiemDetails}
+                        onChange={handleTextareaChange("perDiemDetails")}
+                        onReset={() => resetClause("perDiemDetails", defaultPerDiemDetails)}
+                      />
+                    </div>
                   )}
                 </>
-              )}
-            </fieldset>
+            </CollapsibleSection>
 
-            <fieldset className="space-y-6 rounded-xl border border-amber-200/80 bg-white/80 p-6 shadow-sm shadow-amber-950/5">
-              <legend className="flex items-center justify-between text-section-header font-medium text-neutral-900 tracking-normal font-display cursor-pointer" onClick={() => toggleSection("publicity")}>
-                <span>13. Credit & Publicity</span>
-                <span className="text-neutral-400 transition-transform ml-2">
-                  {collapsibleSections.publicity ? (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  ) : (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  )}
-                </span>
-              </legend>
-              {(!wizardMode || currentWizardSections.includes("publicity")) && (collapsibleSections.publicity || wizardMode) && (activeTab === "all" || activeTab === "logistics") && (
+            <CollapsibleSection
+              title="13. Credit & Publicity"
+              {...collapsibleSectionProps("publicity", "logistics")}
+            >
                 <>
-                  <label className="flex items-center justify-between gap-3 rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3.5 text-body font-medium text-stone-700 min-h-[48px] cursor-pointer hover:border-amber-300 hover:bg-amber-50 transition-all tracking-normal">
-                    <span>Publicity Terms Required</span>
-                    <input
-                      type="checkbox"
-                      checked={form.publicityTermsRequired}
-                      onChange={(e) => updateField("publicityTermsRequired", e.target.checked)}
-                      className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                    />
-                  </label>
+                  <GroupedSection title="Promotional Credit" subtitle="Credit and publicity requirements">
+                    <FieldRow label="Publicity Terms Required" divider={false}>
+                      <ToggleSwitch
+                        checked={form.publicityTermsRequired}
+                        onChange={(checked) => updateField("publicityTermsRequired", checked)}
+                      />
+                    </FieldRow>
+                  </GroupedSection>
                   {form.publicityTermsRequired && (
-                    <TextareaField
-                      label="Publicity Terms"
-                      value={form.publicityTerms}
-                      onChange={handleTextareaChange("publicityTerms")}
-                      onReset={() => resetClause("publicityTerms", defaultPublicityTerms)}
-                    />
+                    <div className="mb-4">
+                      <TextareaField
+                        label="Publicity Terms"
+                        value={form.publicityTerms}
+                        onChange={handleTextareaChange("publicityTerms")}
+                        onReset={() => resetClause("publicityTerms", defaultPublicityTerms)}
+                      />
+                    </div>
                   )}
                 </>
-              )}
-            </fieldset>
+            </CollapsibleSection>
 
-            <fieldset className="space-y-6 rounded-xl border border-amber-200/80 bg-white/80 p-6 shadow-sm shadow-amber-950/5">
-              <legend className="flex items-center justify-between text-section-header font-medium text-neutral-900 tracking-normal font-display cursor-pointer" onClick={() => toggleSection("rightsUsage")}>
-                <span>14. Rights & Usage</span>
-                <span className="text-neutral-400 transition-transform ml-2">
-                  {collapsibleSections.rightsUsage ? (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  ) : (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  )}
-                </span>
-              </legend>
-              {(!wizardMode || currentWizardSections.includes("rightsUsage")) && (collapsibleSections.rightsUsage || wizardMode) && (activeTab === "all" || activeTab === "options") && (
+            <CollapsibleSection
+              title="14. Rights & Usage"
+              {...collapsibleSectionProps("rightsUsage", "options")}
+            >
                 <>
-                  <label className="flex items-center justify-between gap-3 rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3.5 text-body font-medium text-stone-700 min-h-[48px] cursor-pointer hover:border-amber-300 hover:bg-amber-50 transition-all tracking-normal">
-                    <span>Image Usage Allowed</span>
-                    <input
-                      type="checkbox"
-                      checked={form.imageUsageAllowed}
-                      onChange={(e) => updateField("imageUsageAllowed", e.target.checked)}
-                      className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                    />
-                  </label>
+                  <GroupedSection title="Image & Merchandise" subtitle="Usage rights for promotional materials">
+                    <FieldRow label="Image Usage Allowed">
+                      <ToggleSwitch
+                        checked={form.imageUsageAllowed}
+                        onChange={(checked) => updateField("imageUsageAllowed", checked)}
+                      />
+                    </FieldRow>
+                    <FieldRow label="Merchandise Sales Allowed" divider={false}>
+                      <ToggleSwitch
+                        checked={form.merchandiseSalesAllowed}
+                        onChange={(checked) => updateField("merchandiseSalesAllowed", checked)}
+                      />
+                    </FieldRow>
+                  </GroupedSection>
                   {form.imageUsageAllowed && (
-                    <TextareaField
-                      label="Image Usage Terms"
-                      value={form.imageUsageTerms}
-                      onChange={handleTextareaChange("imageUsageTerms")}
-                      onReset={() => resetClause("imageUsageTerms", defaultImageUsageTerms)}
-                    />
+                    <div className="mb-4">
+                      <TextareaField
+                        label="Image Usage Terms"
+                        value={form.imageUsageTerms}
+                        onChange={handleTextareaChange("imageUsageTerms")}
+                        onReset={() => resetClause("imageUsageTerms", defaultImageUsageTerms)}
+                      />
+                    </div>
                   )}
-                  <label className="flex items-center justify-between gap-3 rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3.5 text-body font-medium text-stone-700 min-h-[48px] cursor-pointer hover:border-amber-300 hover:bg-amber-50 transition-all tracking-normal">
-                    <span>Merchandise Sales Allowed</span>
-                    <input
-                      type="checkbox"
-                      checked={form.merchandiseSalesAllowed}
-                      onChange={(e) => updateField("merchandiseSalesAllowed", e.target.checked)}
-                      className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                    />
-                  </label>
                   {form.merchandiseSalesAllowed && (
-                    <TextareaField
-                      label="Merchandise Terms"
-                      value={form.merchandiseTerms}
-                      onChange={handleTextareaChange("merchandiseTerms")}
-                      onReset={() => resetClause("merchandiseTerms", defaultMerchandiseTerms)}
-                    />
+                    <div className="mb-4">
+                      <TextareaField
+                        label="Merchandise Terms"
+                        value={form.merchandiseTerms}
+                        onChange={handleTextareaChange("merchandiseTerms")}
+                        onReset={() => resetClause("merchandiseTerms", defaultMerchandiseTerms)}
+                      />
+                    </div>
                   )}
                 </>
-              )}
-            </fieldset>
+            </CollapsibleSection>
 
-            <fieldset className="space-y-6 rounded-xl border border-amber-200/80 bg-white/80 p-6 shadow-sm shadow-amber-950/5">
-              <legend className="flex items-center justify-between text-section-header font-medium text-neutral-900 tracking-normal font-display cursor-pointer" onClick={() => toggleSection("operational")}>
-                <span>15. Operational Details</span>
-                <span className="text-neutral-400 transition-transform ml-2">
-                  {collapsibleSections.operational ? (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  ) : (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  )}
-                </span>
-              </legend>
-              {(!wizardMode || currentWizardSections.includes("operational")) && (collapsibleSections.operational || wizardMode) && (activeTab === "all" || activeTab === "options") && (
+            <CollapsibleSection
+              title="15. Operational Details"
+              {...collapsibleSectionProps("operational", "options")}
+            >
                 <>
-                  <InputField
-                    label="Guest List Count"
-                    type="number"
-                    placeholder="2"
-                    value={form.guestListCount}
-                    onChange={handleTextChange("guestListCount")}
-                  />
-                  <label className="flex items-center justify-between gap-3 rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3.5 text-body font-medium text-stone-700 min-h-[48px] cursor-pointer hover:border-amber-300 hover:bg-amber-50 transition-all tracking-normal">
-                    <span>Security Required</span>
-                    <input
-                      type="checkbox"
-                      checked={form.securityRequired}
-                      onChange={(e) => updateField("securityRequired", e.target.checked)}
-                      className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                    />
-                  </label>
+                  <GroupedSection title="Guest List" subtitle="Complimentary tickets allocation">
+                    <FieldRow label="Guest List Count" divider={false}>
+                      <input
+                        type="number"
+                        placeholder="2"
+                        value={form.guestListCount}
+                        onChange={(e) => handleTextChange("guestListCount")(e)}
+                        className="w-20 px-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+                      />
+                    </FieldRow>
+                  </GroupedSection>
+                  <GroupedSection title="Venue Services" subtitle="Security and parking arrangements">
+                    <FieldRow label="Security Required">
+                      <ToggleSwitch
+                        checked={form.securityRequired}
+                        onChange={(checked) => updateField("securityRequired", checked)}
+                      />
+                    </FieldRow>
+                    <FieldRow label="Parking Provided" divider={false}>
+                      <ToggleSwitch
+                        checked={form.parkingProvided}
+                        onChange={(checked) => updateField("parkingProvided", checked)}
+                      />
+                    </FieldRow>
+                  </GroupedSection>
                   {form.securityRequired && (
-                    <TextareaField
-                      label="Security Details"
-                      value={form.securityDetails}
-                      onChange={handleTextareaChange("securityDetails")}
-                      onReset={() => resetClause("securityDetails", defaultSecurityDetails)}
-                    />
+                    <div className="mb-4">
+                      <TextareaField
+                        label="Security Details"
+                        value={form.securityDetails}
+                        onChange={handleTextareaChange("securityDetails")}
+                        onReset={() => resetClause("securityDetails", defaultSecurityDetails)}
+                      />
+                    </div>
                   )}
-                  <label className="flex items-center justify-between gap-3 rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3.5 text-body font-medium text-stone-700 min-h-[48px] cursor-pointer hover:border-amber-300 hover:bg-amber-50 transition-all tracking-normal">
-                    <span>Parking Provided</span>
-                    <input
-                      type="checkbox"
-                      checked={form.parkingProvided}
-                      onChange={(e) => updateField("parkingProvided", e.target.checked)}
-                      className="h-5 w-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                    />
-                  </label>
                   {form.parkingProvided && (
-                    <TextareaField
-                      label="Parking Details"
-                      value={form.parkingDetails}
-                      onChange={handleTextareaChange("parkingDetails")}
-                      onReset={() => resetClause("parkingDetails", defaultParkingDetails)}
-                    />
+                    <div className="mb-4">
+                      <TextareaField
+                        label="Parking Details"
+                        value={form.parkingDetails}
+                        onChange={handleTextareaChange("parkingDetails")}
+                        onReset={() => resetClause("parkingDetails", defaultParkingDetails)}
+                      />
+                    </div>
                   )}
                 </>
-              )}
-            </fieldset>
+            </CollapsibleSection>
 
-            <fieldset className="rounded-2xl border border-amber-200/80 bg-white/80 p-5 shadow-sm shadow-amber-950/5">
-              <button
-                type="button"
-                onClick={() => toggleSection("contractLanguage")}
-                className="flex w-full items-center justify-between gap-4 text-left transition-all hover:bg-amber-50/70 rounded-lg p-2 -m-2"
-              >
-                <span>
-                  <span className="block text-section-header font-medium text-neutral-900 tracking-normal font-display">
-                    16. Contract Language
-                  </span>
-                  <span className="mt-1 text-sm text-neutral-500">
-                    Customize legal terms and clauses
-                  </span>
-                </span>
-                <span className="text-neutral-400 transition-transform ml-2">
-                  {collapsibleSections.contractLanguage ? (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  ) : (
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  )}
-                </span>
-              </button>
-              {(!wizardMode || currentWizardSections.includes("contractLanguage")) && (collapsibleSections.contractLanguage || wizardMode) && (activeTab === "all" || activeTab === "legal") && (
-                <div className="mt-5 space-y-4">
-                  <TextareaField
-                    label="Deposit Terms"
-                    value={form.depositTerms}
-                    onChange={handleTextareaChange("depositTerms")}
-                    onReset={() => resetClause("depositTerms", defaultDepositTerms)}
-                  />
-                  <TextareaField
-                    label="Travel Terms"
-                    value={form.travelTerms}
-                    onChange={handleTextareaChange("travelTerms")}
-                    onReset={() => resetClause("travelTerms", defaultTravelTerms)}
-                  />
-                  <TextareaField
-                    label="Cancellation Terms"
-                    value={form.cancellationTerms}
-                    onChange={handleTextareaChange("cancellationTerms")}
-                    onReset={() =>
-                      resetClause("cancellationTerms", defaultCancellationTerms)
-                    }
-                  />
-                  <TextareaField
-                    label="Technical Requirements"
-                    value={form.technicalRequirements}
-                    onChange={handleTextareaChange("technicalRequirements")}
-                    onReset={() =>
-                      resetClause(
-                        "technicalRequirements",
-                        defaultTechnicalRequirements,
-                      )
-                    }
-                  />
-                  <TextareaField
-                    label="Media Rights Terms"
-                    value={form.mediaRightsTerms}
-                    onChange={handleTextareaChange("mediaRightsTerms")}
-                    onReset={() => resetClause("mediaRightsTerms", defaultMediaRightsTerms)}
-                  />
-                  <TextareaField
-                    label="Force Majeure Terms"
-                    value={form.forceMajeureTerms}
-                    onChange={handleTextareaChange("forceMajeureTerms")}
-                    onReset={() => resetClause("forceMajeureTerms", defaultForceMajeureTerms)}
-                  />
-                  <TextareaField
-                    label="Independent Contractor Clause"
-                    value={form.independentContractorClause}
-                    onChange={handleTextareaChange("independentContractorClause")}
-                    onReset={() => resetClause("independentContractorClause", defaultIndependentContractorClause)}
-                  />
-                </div>
-              )}
-            </fieldset>
-            <fieldset className="space-y-6 rounded-2xl border border-amber-200/80 bg-white/80 p-5 shadow-sm shadow-amber-950/5">
+            <CollapsibleSection
+              title="16. Contract Language"
+              subtitle="Customize legal terms and clauses"
+              variant="compact"
+              contentClassName="mt-5 space-y-4"
+              {...collapsibleSectionProps("contractLanguage", "legal")}
+            >
+                  {contractLanguageTextareaFields.map(renderResettableTextarea)}
+            </CollapsibleSection>
+            <fieldset className="space-y-6 rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm shadow-gray-950/5">
               <legend className="px-2 text-section-header font-medium text-neutral-900 tracking-normal font-display">
                 Delivery
               </legend>
               <button
                 type="button"
                 onClick={sendEmail}
-                className="rounded-full bg-stone-950 px-5 py-3.5 text-sm font-bold text-amber-100 dark:bg-amber-200 dark:text-stone-950 transition-all duration-200 ease-out hover:bg-stone-900 dark:hover:bg-amber-100 hover:shadow-md hover:shadow-stone-950/10 hover:scale-105 active:scale-95 min-h-[44px]"
+                className="rounded-full bg-stone-950 px-5 py-3.5 text-sm font-medium text-gray-100 dark:bg-gray-200 dark:text-stone-950 transition-all duration-200 ease-out hover:bg-stone-900 dark:hover:bg-gray-100 hover:shadow-md hover:shadow-stone-950/10 hover:scale-105 active:scale-95 min-h-[44px]"
               >
                 Send Email
               </button>
@@ -3166,7 +3042,7 @@ ${artistName}`;
                 onChange={handleTextareaChange("deliveryMessage")}
               />
             </fieldset>
-            <fieldset className="space-y-6 rounded-2xl border border-amber-200/80 bg-white/80 p-5 shadow-sm shadow-amber-950/5">
+            <fieldset className="space-y-6 rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm shadow-gray-950/5">
               <legend className="px-2 text-section-header font-medium text-neutral-900 tracking-normal font-display">
                 Invoice
               </legend>
@@ -3178,7 +3054,7 @@ ${artistName}`;
                   updateField("invoiceDate", new Date().toISOString().split('T')[0]);
                   showToast("Invoice generated successfully", "success");
                 }}
-                className="rounded-full bg-neutral-950 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-neutral-800 hover:scale-105 min-h-[44px]"
+                className="rounded-full bg-neutral-950 px-5 py-3.5 text-sm font-medium text-white transition hover:bg-neutral-800 hover:scale-105 min-h-[44px]"
               >
                 Generate Invoice
               </button>
@@ -3214,28 +3090,38 @@ ${artistName}`;
               />
               <button
                 type="button"
-                onClick={() => {
+                onClick={async () => {
                   if (!invoiceRef.current) return;
-                  const html2pdf = require("html2pdf.js");
-                  html2pdf()
-                    .set({
-                      margin: [15, 15, 15, 15],
-                      filename: `${form.invoiceNumber || "invoice"}.pdf`,
-                      image: { type: "jpeg", quality: 0.98 },
-                      html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-                      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-                      pagebreak: { mode: ["avoid-all", "css", "legacy"] },
-                    })
-                    .from(invoiceRef.current)
-                    .save();
-                  showToast("Invoice PDF downloaded", "success");
+                  try {
+                    const html2pdf = require("html2pdf.js");
+                    const pdfWorker = html2pdf()
+                      .set({
+                        margin: [15, 15, 15, 15],
+                        filename: `${form.invoiceNumber || "invoice"}.pdf`,
+                        image: { type: "jpeg", quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+                        pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+                      })
+                      .from(invoiceRef.current)
+                      .toPdf();
+
+                    await pdfWorker.get("pdf").then((pdf: any) => {
+                      addPdfPageNumbers(pdf);
+                    });
+
+                    await pdfWorker.save();
+                    showToast("Invoice PDF downloaded", "success");
+                  } catch (error: any) {
+                    showToast(`Invoice PDF generation failed: ${error?.message || "Unknown error"}`, "error");
+                  }
                 }}
-                className="rounded-full border border-neutral-300 px-5 py-3.5 text-sm font-semibold text-neutral-950 transition hover:border-neutral-950 hover:bg-neutral-50 hover:scale-105 min-h-[44px]"
+                className="rounded-full border border-neutral-300 px-5 py-3.5 text-sm font-medium text-neutral-950 transition hover:border-neutral-950 hover:bg-neutral-50 hover:scale-105 min-h-[44px]"
               >
                 Download Invoice PDF
               </button>
             </fieldset>
-            <fieldset className="space-y-6 rounded-2xl border border-amber-200/80 bg-white/80 p-5 shadow-sm shadow-amber-950/5">
+            <fieldset className="space-y-6 rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm shadow-gray-950/5">
               <legend className="px-2 text-section-header font-medium text-neutral-900 tracking-normal font-display">
                 17. Signatures
               </legend>
@@ -3303,7 +3189,7 @@ ${artistName}`;
                   type="button"
                   onClick={() => setWizardStep(Math.min(wizardSteps.length, wizardStep + 1))}
                   disabled={wizardStep === wizardSteps.length}
-                  className="px-6 py-3 rounded-lg bg-stone-950 text-body font-medium text-amber-100 tracking-normal dark:bg-amber-200 dark:text-stone-950 hover:bg-stone-900 dark:hover:bg-amber-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-6 py-3 rounded-lg bg-stone-950 text-body font-medium text-gray-100 tracking-normal dark:bg-gray-200 dark:text-stone-950 hover:bg-stone-900 dark:hover:bg-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {wizardStep === wizardSteps.length ? "Complete" : "Next"}
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -3316,14 +3202,17 @@ ${artistName}`;
         </section>
 
         <section
-          className={`rounded-2xl border border-amber-200/70 bg-stone-950/5 p-6 shadow-inner shadow-amber-950/5 dark:border-amber-500/20 dark:bg-stone-950/40 dark:shadow-black/20 sm:p-8 lg:flex-1 lg:overflow-y-auto lg:p-8 xl:p-10 transition-all duration-300 relative ${
+          className={`print-contract-container rounded-2xl border border-gray-300/60 bg-white/60 backdrop-blur-2xl p-6 shadow-2xl shadow-gray-900/10 dark:border-gray-600/40 dark:bg-stone-900/60 dark:shadow-black/50 sm:p-8 lg:flex-1 lg:overflow-y-auto lg:p-8 xl:p-10 transition-all duration-300 relative ${
             activePanel === "form" ? "hidden lg:block" : ""
           }`}
           ref={previewRef}
         >
+          {/* Enhanced glassmorphism shine effect */}
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/70 via-transparent to-white/30 dark:from-white/20 dark:via-transparent dark:to-white/10 pointer-events-none" />
+          <div className="relative z-10">
           <div className="mx-auto max-w-[950px] px-1 sm:px-0">
-            <div className="mb-4">
-              <p className="text-xs font-semibold uppercase tracking-widest text-amber-800 sm:text-sm mb-3">
+            <div className="print:hidden mb-4">
+              <p className="text-xs font-medium uppercase tracking-widest text-gray-800 sm:text-sm mb-3">
                 Live Contract Preview
               </p>
               <div className="flex items-center gap-2 flex-wrap">
@@ -3354,7 +3243,7 @@ ${artistName}`;
                 <button
                   type="button"
                   onClick={handleDownloadPdf}
-                  className="rounded-lg bg-stone-950 px-4 py-1.5 text-xs font-semibold text-amber-100 dark:bg-amber-200 dark:text-stone-950 transition-all hover:bg-stone-900 dark:hover:bg-amber-100 flex items-center gap-2"
+                  className="rounded-lg bg-stone-950 px-4 py-1.5 text-xs font-medium text-gray-100 dark:bg-gray-200 dark:text-stone-950 transition-all hover:bg-stone-900 dark:hover:bg-gray-100 flex items-center gap-2"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -3372,8 +3261,8 @@ ${artistName}`;
             </div>
           </div>
           {form.invoiceNumber && (
-            <div className="mx-auto max-w-[950px] px-1 sm:px-0 mt-8">
-              <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-neutral-500 sm:text-sm">
+            <div className="print:hidden mx-auto max-w-[950px] px-1 sm:px-0 mt-8">
+              <p className="mb-4 text-xs font-medium uppercase tracking-widest text-neutral-500 sm:text-sm">
                 Delivery Package
               </p>
               <div className="bg-white shadow-lg" style={{ fontFamily: 'Georgia, serif' }}>
@@ -3381,6 +3270,7 @@ ${artistName}`;
               </div>
             </div>
           )}
+        </div>
         </section>
       </div>
       <ContractModals
@@ -3442,14 +3332,14 @@ ${artistName}`;
               ? "bg-emerald-50 border-emerald-200 text-emerald-900" 
               : toast.type === "error"
               ? "bg-red-50 border-red-200 text-red-900"
-              : "bg-amber-50 border-amber-200 text-amber-900"
+              : "bg-gray-50 border-gray-200 text-gray-900"
           }`}>
             <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${
               toast.type === "success"
                 ? "bg-emerald-500"
                 : toast.type === "error"
                 ? "bg-red-500"
-                : "bg-amber-500"
+                : "bg-gray-500"
             }`}>
               {toast.type === "success" ? (
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">

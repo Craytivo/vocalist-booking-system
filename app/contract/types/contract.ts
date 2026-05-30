@@ -65,6 +65,10 @@ export interface ContractForm {
   forceMajeureTerms: string;
   governingLaw: string;
   disputeResolution: string;
+  indemnificationClause: string;
+  confidentialityClause: string;
+  equipmentLiabilityClause: string;
+  attorneyFeesClause: string;
 
   // Operational
   securityRequired: boolean;
@@ -149,6 +153,10 @@ export const DEFAULT_LEGAL_TEXT = {
   forceMajeureTerms: "Neither party shall be liable for failure to perform due to circumstances beyond their reasonable control, including acts of God, war, labor disputes, or government restrictions.",
   governingLaw: "This agreement shall be governed by and construed in accordance with the laws of the jurisdiction where the event takes place.",
   disputeResolution: "Any disputes arising from this agreement shall be resolved through good faith negotiation, followed by mediation if necessary.",
+  indemnificationClause: "Each party agrees to indemnify and hold harmless the other party from and against any and all claims, demands, losses, damages, liabilities, costs, and expenses (including reasonable attorneys' fees) arising out of or related to any breach of this agreement, negligence, or willful misconduct by the indemnifying party.",
+  confidentialityClause: "Both parties agree to keep confidential all non-public information disclosed during the course of this engagement, including but not limited to financial terms, contact information, business strategies, and technical specifications. This obligation shall survive the termination of this agreement.",
+  equipmentLiabilityClause: "The Client shall be responsible for any damage to the Artist's equipment caused by the Client, its employees, agents, or attendees. The Client shall provide adequate security and protection for all equipment. The Artist is not liable for damage to the Client's equipment or venue except in cases of willful misconduct or gross negligence.",
+  attorneyFeesClause: "In any legal proceeding arising out of or relating to this agreement, the prevailing party shall be entitled to recover reasonable attorneys' fees and costs from the non-prevailing party.",
   securityDetails: "The Client will provide adequate security personnel to ensure the safety of the Artist, their equipment, and attendees.",
   parkingDetails: "The Client will provide designated parking for the Artist and their entourage near the performance venue.",
   severabilityClause: "If any provision of this agreement is found to be invalid or unenforceable, the remaining provisions shall continue in full force and effect.",

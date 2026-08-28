@@ -148,7 +148,7 @@ function ContractActions({
       </div>
 
       {/* Save Status */}
-      <div className="mb-4 rounded-xl border border-amber-200 bg-gradient-to-r from-white/90 to-amber-50/80 px-4 py-3 flex items-center gap-3 shadow-sm shadow-amber-950/5">
+      <div className="mb-4 rounded-xl border border-amber-200 bg-stone-50 px-4 py-3 flex items-center gap-3 shadow-sm shadow-amber-950/5">
         <span
           className={`h-2 w-2 rounded-full ${
             saveStatus.includes("failed")

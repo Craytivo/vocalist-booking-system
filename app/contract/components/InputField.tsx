@@ -66,7 +66,7 @@ export default function InputField({
   return (
     <label className="block">
       <span className="mb-2.5 flex items-center justify-between gap-3">
-        <span className={`${FONT_SIZE_CLASSES.uiMd} ${FONT_WEIGHT_CLASSES.semibold} text-neutral-800 dark:text-stone-200 lg:text-base ${FONT_FAMILY_CLASSES.heading}`}>{label}{required && <span className="text-red-500 ml-1">*</span>}</span>
+        <span className={`${FONT_SIZE_CLASSES.uiMd} ${FONT_WEIGHT_CLASSES.semibold} text-black lg:text-base ${FONT_FAMILY_CLASSES.heading}`}>{label}{required && <span className="text-red-500 ml-1">*</span>}</span>
         {showValidation && (
           <span className={`${FONT_SIZE_CLASSES.uiXs} ${FONT_WEIGHT_CLASSES.medium} ${currentError ? 'text-red-600' : 'text-emerald-600'}`}>
             {currentError ? currentError : '✓ Valid'}
@@ -79,8 +79,8 @@ export default function InputField({
         onChange={handleChange}
         onBlur={handleBlur}
         placeholder={placeholder}
-        className={`w-full rounded-xl border bg-white px-4 py-3.5 ${FONT_SIZE_CLASSES.uiLg} text-neutral-950 outline-none transition-all hover:border-amber-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 min-h-[48px] dark:bg-stone-900/70 dark:text-stone-100 dark:hover:bg-stone-900 lg:text-base lg:py-4 ${FONT_FAMILY_CLASSES.body} ${
-          currentError ? 'border-red-500 focus:border-red-600 focus:ring-red-100' : showValidation && isValid ? 'border-emerald-500 focus:border-emerald-600 focus:ring-emerald-100' : 'border-neutral-300'
+        className={`w-full rounded-xl border bg-white px-4 py-3.5 ${FONT_SIZE_CLASSES.uiLg} text-black outline-none transition-all hover:border-stone-400 focus:border-stone-500 focus:ring-2 focus:ring-stone-200 min-h-[48px] lg:text-base lg:py-4 ${FONT_FAMILY_CLASSES.body} ${
+          currentError ? 'border-red-500 focus:border-red-600 focus:ring-red-100' : showValidation && isValid ? 'border-emerald-500 focus:border-emerald-600 focus:ring-emerald-100' : 'border-stone-300'
         }`}
       />
       {currentError && (

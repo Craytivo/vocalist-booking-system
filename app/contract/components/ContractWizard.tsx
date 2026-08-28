@@ -69,7 +69,7 @@ export default function ContractWizard({
             <div
               className={`flex-1 h-2 rounded-full transition-all duration-300 ${
                 step.id <= wizardStep
-                  ? "bg-gradient-to-r from-amber-400 to-orange-500"
+                  ? "bg-stone-700"
                   : "bg-amber-100"
               }`}
             />

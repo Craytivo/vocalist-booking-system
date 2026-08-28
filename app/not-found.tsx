@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.12),transparent_34%),radial-gradient(circle_at_78%_12%,rgba(251,191,36,0.08),transparent_28%),linear-gradient(135deg,#fffaf0_0%,#f8f4ec_48%,#fff7ed_100%)] px-4 py-10 text-stone-950 dark:bg-[radial-gradient(circle_at_top_left,rgba(180,83,9,0.18),transparent_34%),radial-gradient(circle_at_78%_12%,rgba(120,53,15,0.2),transparent_28%),linear-gradient(135deg,#0c0a09_0%,#1c1917_52%,#111827_100%)] dark:text-stone-100">
+    <main className="min-h-screen flex items-center justify-center bg-stone-100 px-4 py-10 text-stone-950 dark:bg-stone-900 dark:text-stone-100">
       <div className="w-full max-w-md rounded-2xl border border-amber-200/80 bg-white/85 p-8 text-center shadow-xl shadow-amber-950/10 backdrop-blur dark:border-amber-500/20 dark:bg-stone-950/80 dark:shadow-black/20">
         <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl border border-amber-300/25 bg-stone-900 text-amber-300 shadow-md shadow-black/20">
           404

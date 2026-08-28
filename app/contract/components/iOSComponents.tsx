@@ -9,9 +9,9 @@ interface SectionHeaderProps {
 export function SectionHeader({ title, subtitle }: SectionHeaderProps) {
   return (
     <div className="px-4 py-3 sm:px-5 sm:py-4">
-      <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+      <h3 className="text-sm font-semibold text-white">{title}</h3>
       {subtitle && (
-        <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{subtitle}</p>
+        <p className="mt-0.5 text-xs text-stone-300">{subtitle}</p>
       )}
     </div>
   );
@@ -28,12 +28,12 @@ interface FieldRowProps {
 export function FieldRow({ label, children, divider = true, onClick }: FieldRowProps) {
   return (
     <div
-      className={`flex items-center justify-between px-4 py-3 sm:px-5 sm:py-3.5 bg-white dark:bg-gray-800 ${
-        divider ? "border-b border-gray-100 dark:border-gray-700" : ""
-      } ${onClick ? "cursor-pointer active:bg-gray-50 dark:active:bg-gray-700" : ""}`}
+      className={`flex items-center justify-between px-4 py-3 sm:px-5 sm:py-3.5 bg-stone-700 ${
+        divider ? "border-b border-stone-600" : ""
+      } ${onClick ? "cursor-pointer active:bg-stone-600" : ""}`}
       onClick={onClick}
     >
-      <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
+      <span className="text-sm text-white">{label}</span>
       <div className="flex items-center">{children}</div>
     </div>
   );
@@ -77,9 +77,9 @@ interface GroupedSectionProps {
 
 export function GroupedSection({ title, subtitle, children, className = "" }: GroupedSectionProps) {
   return (
-    <section className={`rounded-2xl bg-white/90 dark:bg-gray-800/90 border border-black/5 dark:border-white/10 overflow-hidden mb-4 ${className}`}>
+    <section className={`rounded-2xl bg-stone-800 border border-stone-600 overflow-hidden mb-4 ${className}`}>
       {title && <SectionHeader title={title} subtitle={subtitle} />}
-      <div className="divide-y divide-gray-100 dark:divide-gray-700">
+      <div className="divide-y divide-stone-700">
         {children}
       </div>
     </section>

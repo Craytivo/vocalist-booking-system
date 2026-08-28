@@ -13,10 +13,10 @@ type CollapsibleSectionProps = {
 };
 
 const defaultFieldsetClassName =
-  "space-y-6 rounded-xl border border-gray-200/80 bg-white/80 p-6 shadow-sm shadow-gray-950/5";
+  "space-y-6 rounded-xl border border-stone-600 bg-stone-800 p-6 pt-8 shadow-md";
 
 const compactFieldsetClassName =
-  "rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm shadow-gray-950/5";
+  "rounded-2xl border border-stone-600 bg-stone-800 p-5 pt-7 shadow-md";
 
 function Chevron({ isOpen }: { isOpen: boolean }) {
   return (
@@ -48,14 +48,14 @@ export default function CollapsibleSection({
       className={variant === "compact" ? compactFieldsetClassName : defaultFieldsetClassName}
     >
       <legend
-        className="flex items-center justify-between text-section-header font-medium text-neutral-900 tracking-normal font-display cursor-pointer"
+        className="flex items-center justify-between text-lg font-semibold text-white tracking-normal cursor-pointer select-none hover:text-stone-200 transition-colors"
         onClick={onToggle}
       >
         <span>
           <span className="block">{title}</span>
-          {subtitle && <span className="mt-1 block text-sm text-neutral-500">{subtitle}</span>}
+          {subtitle && <span className="mt-1 block text-sm font-medium text-stone-300">{subtitle}</span>}
         </span>
-        <span className="text-neutral-400 transition-transform ml-2">
+        <span className="text-stone-300 transition-transform duration-200 ml-2">
           <Chevron isOpen={isOpen} />
         </span>
       </legend>

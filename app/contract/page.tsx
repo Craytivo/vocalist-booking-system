@@ -753,19 +753,19 @@ function ContractPage() {
   const currentWizardSections = wizardMode ? wizardSteps.find(s => s.id === wizardStep)?.sections || [] : [];
   const [sessionTimeout, setSessionTimeout] = useState<NodeJS.Timeout | null>(null);
   const [collapsibleSections, setCollapsibleSections] = useState({
-    eventInfo: false,
-    services: false,
-    payment: false,
-    options: false,
-    contractLanguage: false,
-    performanceRequirements: false,
-    financialLegal: false,
-    technicalRider: false,
-    accommodation: false,
-    perDiem: false,
-    publicity: false,
-    rightsUsage: false,
-    operational: false,
+    eventInfo: true,
+    services: true,
+    payment: true,
+    options: true,
+    contractLanguage: true,
+    performanceRequirements: true,
+    financialLegal: true,
+    technicalRider: true,
+    accommodation: true,
+    perDiem: true,
+    publicity: true,
+    rightsUsage: true,
+    operational: true,
   });
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [showQuickStart, setShowQuickStart] = useState(false);
@@ -2132,7 +2132,7 @@ ${artistName}`;
           ref={formRef}
         >
           {/* Enhanced glassmorphism shine effect */}
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/70 via-transparent to-white/30 dark:from-white/20 dark:via-transparent dark:to-white/10 pointer-events-none" />
+          <div className="absolute inset-0 rounded-2xl bg-white/50 dark:bg-white/10 pointer-events-none" />
           <div className="relative z-10">
           <ContractActions
             draftId={draftId}
@@ -2158,7 +2158,7 @@ ${artistName}`;
             {/* Premium progress bar */}
             <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden mb-3 dark:bg-gray-700">
               <div
-                className="h-full bg-gradient-to-r from-gray-600 to-gray-900 rounded-full transition-all duration-500 ease-out dark:from-gray-500 dark:to-gray-300"
+                className="h-full bg-stone-700 rounded-full transition-all duration-500 ease-out dark:bg-stone-500"
                 style={{ width: `${readinessScore}%` }}
               />
             </div>
@@ -3209,7 +3209,7 @@ ${artistName}`;
           ref={previewRef}
         >
           {/* Enhanced glassmorphism shine effect */}
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/70 via-transparent to-white/30 dark:from-white/20 dark:via-transparent dark:to-white/10 pointer-events-none" />
+          <div className="absolute inset-0 rounded-2xl bg-white/50 dark:bg-white/10 pointer-events-none" />
           <div className="relative z-10">
           <div className="mx-auto max-w-[950px] px-1 sm:px-0">
             <div className="print:hidden mb-4">

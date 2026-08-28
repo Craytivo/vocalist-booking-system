@@ -1,5 +1,5 @@
 // Global Typography System for the entire site
-// Modern, responsive typography for UI, forms, and login pages
+// Modern, responsive typography for UI, forms, and contract surfaces
 // Font pair: Inter (geometric sans-serif for all text)
 // Optimized for readability, accessibility, and modern minimalist aesthetics
 

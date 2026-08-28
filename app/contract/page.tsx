@@ -689,7 +689,7 @@ function ContractPage() {
   const [form, setForm] = useState<ContractForm>(initialForm);
   const [draftId, setDraftId] = useState<string | null>(null);
   const [authUser, setAuthUser] = useState<any | null>(null);
-  const [authStatus, setAuthStatus] = useState("Checking sign-in...");
+  const [authStatus, setAuthStatus] = useState("Preparing local workspace...");
   const [workspace, setWorkspace] = useState<any | null>(null);
   const [workspaceStatus, setWorkspaceStatus] = useState("Loading workspace...");
   const [saveStatus, setSaveStatus] = useState("Local draft");
@@ -833,28 +833,18 @@ function ContractPage() {
     });
   };
 
-  // Local-only authentication: no external auth provider required
+  // Local-only session: no external auth provider required
   useEffect(() => {
-    // Provide a local session object so other logic can rely on authUser where needed
     const localUser = { id: "local", email: "local@local" } as any;
     setAuthUser(localUser);
     setUserEmail(localUser.email || "");
-    setAuthStatus("Local mode: authentication disabled");
-    // Ensure the app continues without redirecting to a login page
+    setAuthStatus("Local mode ready");
     setHasLoadedDraft(true);
 
-    // No subscription to external auth in local-only mode
     return () => {};
   }, []);
 
-  // Check email verification status
-  useEffect(() => {
-    if (authUser && !authUser.email_confirmed_at) {
-      showToast("Please verify your email address", "info");
-    }
-  }, [authUser]);
-
-  // Session timeout - auto-logout after 30 minutes of inactivity
+  // Session timeout - clear the local session after 30 minutes of inactivity
   useEffect(() => {
     const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
@@ -862,7 +852,7 @@ function ContractPage() {
       if (sessionTimeoutRef.current) clearTimeout(sessionTimeoutRef.current);
       sessionTimeoutRef.current = setTimeout(() => {
         handleLogout();
-        showToast("Session expired. Please sign in again.", "info");
+        showToast("Session expired. Your local draft is still available.", "info");
       }, SESSION_TIMEOUT);
     };
 
@@ -883,15 +873,14 @@ function ContractPage() {
   }, []);
 
   const handleLogout = async () => {
-    // Sign-out is a no-op in local-only mode; just clear local session and show message
     try {
       setAuthUser(null);
       setUserEmail("");
       setSaveStatus("Local draft");
-      showToast("Signed out (local mode)", "info");
+      showToast("Local session cleared.", "info");
     } catch (error) {
       console.error("Logout error:", error);
-      showToast(getErrorMessage(error, "auth"), "error");
+      showToast(getErrorMessage(error, "local"), "error");
     }
   };
 
@@ -1003,16 +992,14 @@ function ContractPage() {
   };
 
   const signOut = async () => {
-    // Local-only signOut: clear local session
     setAuthUser(null);
     setUserEmail("");
     setSaveStatus("Local draft");
-    showToast("Signed out (local mode)", "success");
+    showToast("Local session cleared.", "success");
   };
 
   const signInWithGoogle = async () => {
-    // OAuth sign-in removed in local-only mode
-    showToast("Sign-in disabled in local-only mode", "info");
+    showToast("No account required while working locally.", "info");
   };
 
 useEffect(() => {

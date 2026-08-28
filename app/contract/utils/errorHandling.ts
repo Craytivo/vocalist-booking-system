@@ -6,18 +6,18 @@ export function getErrorMessage(error: any, context: string): string {
     return "Please check your internet connection and try again.";
   }
   
-  // Authentication errors
+  // Local session / auth-related errors
   if (context.includes('auth') || context.includes('sign')) {
     if (errorLower.includes('invalid') || errorLower.includes('credentials')) {
-      return "Please check your email and password and try again.";
+      return "The local session data looks invalid. Please refresh and try again.";
     }
     if (errorLower.includes('email')) {
-      return "Please enter a valid email address.";
+      return "Please provide a valid artist or client email address.";
     }
     if (errorLower.includes('already')) {
-      return "An account with this email already exists.";
+      return "This local session entry already exists.";
     }
-    return "Unable to sign in. Please try again.";
+    return "This action is unavailable in local-only mode. Please continue without an external account.";
   }
   
   // Database/local-save errors

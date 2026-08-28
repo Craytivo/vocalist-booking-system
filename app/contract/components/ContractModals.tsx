@@ -34,7 +34,6 @@ interface ContractModalsProps {
   contractVersions: ContractVersion[];
   activeVersionNumber: number | null;
   draftId: string | null;
-  supabase: any;
   bookingPresets: any[];
   setShowDeleteModal: (show: boolean) => void;
   setShowWorkspaceModal: (show: boolean) => void;
@@ -85,7 +84,6 @@ function ContractModals({
   contractVersions,
   activeVersionNumber,
   draftId,
-  supabase,
   bookingPresets,
   setShowDeleteModal,
   setShowWorkspaceModal,
@@ -578,12 +576,23 @@ function ContractModals({
                         variant="danger"
                         size="sm"
                         onClick={async () => {
-                          if (supabase && confirm("Are you sure you want to delete this version?")) {
-                            await supabase.from("contract_versions").delete().eq("id", version.id);
+                          if (!confirm("Are you sure you want to delete this version?")) return;
+
+                          try {
+                            const key = draftId ? `contractVersions:${draftId}` : null;
+                            if (!key) return;
+
+                            const existing = JSON.parse(localStorage.getItem(key) || "[]") as any[];
+                            const nextVersions = existing.filter((entry) => entry.id !== version.id);
+                            localStorage.setItem(key, JSON.stringify(nextVersions));
+
                             if (draftId) {
                               await loadContractVersions(draftId);
                             }
                             showToast("Version deleted", "success");
+                          } catch (error) {
+                            console.error("Delete version error:", error);
+                            showToast("Unable to delete version locally", "error");
                           }
                         }}
                         title="Delete version"

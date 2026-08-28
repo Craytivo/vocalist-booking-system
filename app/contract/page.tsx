@@ -1875,7 +1875,6 @@ ${artistName}`;
           <div className="relative z-10">
           <ContractActions
           draftId={draftId}
-          supabase={null}
           setShowQuickStart={setShowQuickStart}
           setShowSaveVersionModal={setShowSaveVersionModal}
           startNewContract={startNewContract}
@@ -2848,7 +2847,6 @@ ${artistName}`;
         </section>
       </div>
       <ContractModals
-        supabase={null}
         showDeleteModal={showDeleteModal}
         showWorkspaceModal={showWorkspaceModal}
         showMailClientModal={showMailClientModal}

@@ -7,7 +7,6 @@ interface FormPanelProps {
   setShowQuickStart: (show: boolean) => void;
   startNewContract: () => void;
   draftId: string | null;
-  supabase: any;
   setShowSaveVersionModal: (show: boolean) => void;
   loadContractVersions: (id: string) => void;
   generateCalendarEvent: () => void;
@@ -38,7 +37,6 @@ export default function FormPanel({
   setShowQuickStart,
   startNewContract,
   draftId,
-  supabase,
   setShowSaveVersionModal,
   loadContractVersions,
   generateCalendarEvent,
@@ -95,7 +93,7 @@ export default function FormPanel({
         </div>
 
         {/* Contract Actions */}
-        {draftId && supabase && (
+        {draftId && (
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-700 mb-3">Contract Actions</p>
             <div className="flex flex-wrap items-center gap-2">

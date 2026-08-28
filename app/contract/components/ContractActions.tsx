@@ -4,7 +4,6 @@ import Button from "../../components/Button";
 
 interface ContractActionsProps {
   draftId: string | null;
-  supabase: any;
   setShowQuickStart: (show: boolean) => void;
   setShowSaveVersionModal: (show: boolean) => void;
   startNewContract: () => void;
@@ -15,7 +14,6 @@ interface ContractActionsProps {
 
 function ContractActions({
   draftId,
-  supabase,
   setShowQuickStart,
   setShowSaveVersionModal,
   startNewContract,
@@ -71,7 +69,7 @@ function ContractActions({
       </div>
 
       {/* Contract Actions */}
-      {draftId && supabase && (
+      {draftId && (
         <div>
           <p className={`${FONT_SIZE_CLASSES.uiXs} ${FONT_WEIGHT_CLASSES.semibold} uppercase tracking-[0.12em] text-amber-700 mb-3 ${FONT_FAMILY_CLASSES.heading}`}>
             Contract Actions

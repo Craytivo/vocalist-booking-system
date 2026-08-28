@@ -7,7 +7,6 @@ interface RecentContractsProps {
   onDeleteContract: (id: string) => void;
   onStatusFilterChange: (status: string) => void;
   statusFilter: string;
-  supabaseEnabled: boolean;
 }
 
 export default function RecentContracts() {

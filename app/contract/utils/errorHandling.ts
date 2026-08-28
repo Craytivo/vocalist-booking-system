@@ -20,8 +20,8 @@ export function getErrorMessage(error: any, context: string): string {
     return "Unable to sign in. Please try again.";
   }
   
-  // Supabase/Database errors
-  if (context.includes('supabase') || context.includes('save') || context.includes('load')) {
+  // Database/local-save errors
+  if (context.includes('save') || context.includes('load') || context.includes('local')) {
     if (errorLower.includes('permission') || errorLower.includes('unauthorized')) {
       return "You don't have permission to perform this action.";
     }

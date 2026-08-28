@@ -14,9 +14,7 @@ import Toast from "./components/Toast";
 import InputField from "./components/InputField";
 import SelectField from "./components/SelectField";
 import TextareaField from "./components/TextareaField";
-import RecentContracts from "./components/RecentContracts";
 import StorageWarningBanner from "./components/StorageWarningBanner";
-import Header from "./components/Header";
 import FormPanel from "./components/FormPanel";
 import CheckboxField from "./components/CheckboxField";
 import CollapsibleSection from "./components/CollapsibleSection";
@@ -691,7 +689,6 @@ function ContractPage() {
   const router = useRouter();
   const [form, setForm] = useState<ContractForm>(initialForm);
   const [draftId, setDraftId] = useState<string | null>(null);
-  const [recentContracts, setRecentContracts] = useState<ContractRow[]>([]);
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [authStatus, setAuthStatus] = useState("Checking sign-in...");
   const [workspace, setWorkspace] = useState<ArtistWorkspace | null>(null);
@@ -704,10 +701,8 @@ function ContractPage() {
   const [hasLoadedDraft, setHasLoadedDraft] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
   const [zoomLevel, setZoomLevel] = useState(100);
-  const [showTemplateLibrary, setShowTemplateLibrary] = useState(false);
   const [templates, setTemplates] = useState<ContractForm[]>([]);
   const [isOnline, setIsOnline] = useState(true);
-  const [showAnalytics, setShowAnalytics] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [userEmail, setUserEmail] = useState("");
@@ -836,7 +831,6 @@ function ContractPage() {
       setAuthStatus(session?.user ? `Signed in as ${session.user.email}` : "Sign in required");
       if (!session?.user) {
         setWorkspace(null);
-        setRecentContracts([]);
         setDraftId(null);
         setHasLoadedDraft(true);
         setSaveStatus("Sign in to save contracts");
@@ -1140,26 +1134,6 @@ useEffect(() => {
     loadWorkspace();
   }, [authUser]);
 
-  const refreshRecentContracts = useCallback(async () => {
-    if (!supabase || !workspace) {
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from("contracts")
-      .select("*")
-      .eq("workspace_id", workspace.id)
-      .order("created_at", { ascending: false })
-      .limit(8);
-
-    console.log("RefreshRecentContracts loaded:", data?.length || 0, "contracts", error || "Success");
-    console.log("Contract IDs:", data?.map((c: any) => c.id));
-
-    if (!error && data) {
-      setRecentContracts(data as ContractRow[]);
-    }
-  }, [workspace]);
-
   useEffect(() => {
     const loadLatestDraft = async () => {
       if (!supabase) {
@@ -1196,11 +1170,10 @@ useEffect(() => {
       }
 
       setHasLoadedDraft(true);
-      refreshRecentContracts();
     };
 
     loadLatestDraft();
-  }, [refreshRecentContracts, workspace]);
+  }, [workspace]);
 
   useEffect(() => {
     if (!supabase || !hasLoadedDraft || !workspace) {
@@ -1303,7 +1276,7 @@ useEffect(() => {
         if (!error) {
           saveContractVersion(draftId, form);
           if (!skipRefreshRef.current) {
-            refreshRecentContracts();
+            // No-op: recent contracts removed in local-only mode
           }
         }
         return;
@@ -1324,12 +1297,12 @@ useEffect(() => {
       setDraftId(data.id);
       setSaveStatus("Draft saved");
       if (!skipRefreshRef.current) {
-        refreshRecentContracts();
+        // No-op: recent contracts removed in local-only mode
       }
     }, 700);
 
     return () => window.clearTimeout(timeoutId);
-  }, [draftId, form, hasLoadedDraft, refreshRecentContracts, workspace]);
+  }, [draftId, form, hasLoadedDraft, workspace]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -1693,9 +1666,7 @@ useEffect(() => {
       setSaveStatus("Local draft");
     }
 
-    // Remove the contract from the local state
-    setRecentContracts((prev) => prev.filter((c) => c.id !== contractToDelete));
-    
+    // Remove the contract from the local state (no-op in local-only mode)
     // Skip the next refresh to prevent the deleted contract from reappearing
     skipRefreshRef.current = true;
     setTimeout(() => {
@@ -2002,34 +1973,6 @@ ${artistName}`;
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setShowTemplateLibrary(true); setShowQuickActions(false); }}
-                    role="menuitem"
-                    className="w-full px-4 py-2.5 text-left text-body font-medium text-neutral-700 tracking-normal hover:bg-neutral-50 hover:text-neutral-900 transition-colors flex items-center gap-3 dark:text-stone-200 dark:hover:bg-stone-900 dark:hover:text-stone-100"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                      <polyline points="14 2 14 8 20 8"/>
-                      <line x1="16" y1="13" x2="8" y2="13"/>
-                      <line x1="16" y1="17" x2="8" y2="17"/>
-                      <polyline points="10 9 9 9 8 9"/>
-                    </svg>
-                    Templates
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setShowAnalytics(true); setShowQuickActions(false); }}
-                    role="menuitem"
-                    className="w-full px-4 py-2 text-left text-body font-regular text-neutral-700 tracking-normal hover:bg-neutral-50 transition-colors flex items-center gap-3 dark:text-stone-200 dark:hover:bg-stone-900"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="18" y1="20" x2="18" y2="10"/>
-                      <line x1="12" y1="20" x2="12" y2="4"/>
-                      <line x1="6" y1="20" x2="6" y2="14"/>
-                    </svg>
-                    Analytics
-                  </button>
-                  <button
-                    type="button"
                     onClick={() => { setFocusMode(!focusMode); setShowQuickActions(false); }}
                     role="menuitem"
                     className="w-full px-4 py-2 text-left text-body font-regular text-neutral-700 tracking-normal hover:bg-neutral-50 transition-colors flex items-center gap-3 dark:text-stone-200 dark:hover:bg-stone-900"
@@ -2135,15 +2078,10 @@ ${artistName}`;
           <ContractActions
             draftId={draftId}
             supabase={supabase}
-            showTemplateLibrary={showTemplateLibrary}
-            showAnalytics={showAnalytics}
             setShowQuickStart={setShowQuickStart}
             setShowSaveVersionModal={setShowSaveVersionModal}
-            setShowTemplateLibrary={setShowTemplateLibrary}
-            setShowAnalytics={setShowAnalytics}
             startNewContract={startNewContract}
             loadContractVersions={loadContractVersions}
-            handleGenerateCalendarEvent={handleGenerateCalendarEvent}
             saveStatus={saveStatus}
             isOnline={isOnline}
           />
@@ -2226,167 +2164,6 @@ ${artistName}`;
               className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-stone-800 outline-none transition-all hover:border-gray-400 focus:border-gray-500 focus:ring-2 focus:ring-amber-200"
             />
           </div>
-          <RecentContracts
-            activeDraftId={draftId}
-            contracts={filteredContracts}
-            onLoadContract={loadRecentContract}
-            onDeleteContract={deleteContract}
-            onStatusFilterChange={setRecentStatusFilter}
-            statusFilter={recentStatusFilter}
-            supabaseEnabled={Boolean(supabase)}
-          />
-          {showTemplateLibrary && (
-            <div className="mt-4 rounded-xl border border-neutral-300 bg-white p-5 shadow-md">
-              <div className="flex items-center justify-between gap-3 mb-4">
-                <h2 className="text-base font-medium text-neutral-900 lg:text-lg">
-                  Template Library
-                </h2>
-                <button
-                  type="button"
-                  onClick={saveTemplate}
-                  className="rounded-full bg-stone-950 px-4 py-2 text-xs font-medium text-gray-100 dark:bg-gray-200 dark:text-stone-950 transition hover:bg-stone-900 dark:hover:bg-gray-100 hover:shadow-lg hover:shadow-stone-950/10 hover:scale-105 focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 border border-gray-400"
-                >
-                  Save as Template
-                </button>
-              </div>
-              {templates.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-50 mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                      <polyline points="14 2 14 8 20 8"/>
-                      <line x1="16" y1="13" x2="8" y2="13"/>
-                      <line x1="16" y1="17" x2="8" y2="17"/>
-                      <polyline points="10 9 9 9 8 9"/>
-                    </svg>
-                  </div>
-                  <p className="text-base font-medium text-neutral-900 mb-2">No templates saved yet</p>
-                  <p className="text-sm text-neutral-500 mb-4">Save your current contract as a template to reuse it later</p>
-                </div>
-              ) : (
-                <div className="grid gap-2">
-                  {templates.map((template, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between rounded-lg border border-neutral-300 bg-white px-4 py-3 hover:border-gray-400 hover:bg-gray-50 hover:shadow-md transition-all"
-                    >
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-neutral-900">
-                          {(template as any).templateName || `Template ${index + 1}`}
-                        </p>
-                        <p className="text-xs text-neutral-500">
-                          {template.clientName || "No client"} · {template.totalFee ? `$${template.totalFee} CAD` : "No fee"}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => loadTemplate(template)}
-                          className="rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-xs font-medium text-neutral-800 hover:border-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-all focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
-                        >
-                          Load
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => deleteTemplate(index)}
-                          className="rounded-full border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-700 hover:border-red-500 hover:bg-red-50 transition-all focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-          {showAnalytics && (
-            <div className="mt-4 rounded-xl border border-neutral-300 bg-white p-5 shadow-md">
-              <div className="flex items-center justify-between gap-3 mb-4">
-                <h2 className="text-base font-medium text-neutral-900 lg:text-lg">
-                  Contract Analytics
-                </h2>
-              </div>
-              {recentContracts.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-50 mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
-                      <line x1="18" y1="20" x2="18" y2="10"/>
-                      <line x1="12" y1="20" x2="12" y2="4"/>
-                      <line x1="6" y1="20" x2="6" y2="14"/>
-                    </svg>
-                  </div>
-                  <p className="text-base font-medium text-neutral-900 mb-2">No contracts to analyze</p>
-                  <p className="text-sm text-neutral-500 mb-4">Create contracts to see analytics and insights</p>
-                  <button
-                    type="button"
-                    onClick={startNewContract}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-stone-950 text-gray-100 dark:bg-gray-200 dark:text-stone-950 text-body font-medium tracking-normal hover:bg-stone-900 dark:hover:bg-gray-100 transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 5v14M5 12h14"/>
-                    </svg>
-                    Create First Contract
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-4 mb-4">
-                    <div className="rounded-lg border border-neutral-300 bg-white p-4 hover:shadow-md transition-all">
-                      <p className="text-xs font-medium uppercase tracking-[0.12em] text-neutral-400 mb-1">Total Contracts</p>
-                      <p className="text-2xl font-medium text-neutral-900">{recentContracts.length}</p>
-                    </div>
-                    <div className="rounded-lg border border-neutral-300 bg-white p-4 hover:shadow-md transition-all">
-                      <p className="text-xs font-medium uppercase tracking-[0.12em] text-neutral-400 mb-1">Total Revenue</p>
-                      <p className="text-2xl font-medium text-neutral-900">
-                        ${recentContracts.reduce((sum, c) => sum + (c.total_fee || 0), 0).toLocaleString("en-CA")}
-                      </p>
-                    </div>
-                    <div className="rounded-lg border border-neutral-300 bg-white p-4 hover:shadow-md transition-all">
-                      <p className="text-xs font-medium uppercase tracking-[0.12em] text-neutral-400 mb-1">Signed</p>
-                      <p className="text-2xl font-medium text-emerald-600">
-                        {recentContracts.filter(c => c.contract_status === "Signed" || c.status === "Signed").length}
-                      </p>
-                    </div>
-                    <div className="rounded-lg border border-neutral-300 bg-white p-4 hover:shadow-md transition-all">
-                      <p className="text-xs font-medium uppercase tracking-[0.12em] text-neutral-400 mb-1">Avg Fee</p>
-                      <p className="text-2xl font-medium text-neutral-900">
-                        ${recentContracts.length > 0 
-                          ? Math.round(recentContracts.reduce((sum, c) => sum + (c.total_fee || 0), 0) / recentContracts.length).toLocaleString("en-CA")
-                          : "0"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="rounded-lg border border-neutral-300 bg-white p-4 hover:shadow-md transition-all">
-                    <p className="text-xs font-medium uppercase tracking-[0.12em] text-neutral-400 mb-3">Contracts by Status</p>
-                    <div className="space-y-2">
-                      {["Draft", "Ready", "Sent", "Signed"].map((status) => {
-                        const count = recentContracts.filter(c => c.contract_status === status || c.status === status).length;
-                        const percentage = recentContracts.length > 0 ? Math.round((count / recentContracts.length) * 100) : 0;
-                        return (
-                          <div key={status} className="flex items-center gap-3">
-                            <span className="text-sm font-medium text-neutral-800 w-16">{status}</span>
-                            <div className="flex-1 h-2 rounded-full bg-neutral-200 overflow-hidden">
-                              <div
-                                className={`h-2 rounded-full ${
-                                  status === "Draft" ? "bg-neutral-400" :
-                                  status === "Ready" ? "bg-emerald-500" :
-                                  status === "Sent" ? "bg-blue-500" :
-                                  "bg-purple-500"
-                                }`}
-                                style={{ width: `${percentage}%` }}
-                              />
-                            </div>
-                            <span className="text-sm font-medium text-neutral-900 w-12 text-right">{count}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          )}
           <div className="mb-4 rounded-xl border border-neutral-300 bg-white p-3 shadow-md">
             <p className="text-xs font-medium uppercase tracking-[0.14em] text-neutral-500 mb-2">Quick Navigation</p>
             <div className="flex flex-wrap gap-2">

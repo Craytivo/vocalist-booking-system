@@ -19,8 +19,6 @@ interface HeaderProps {
   startNewContract: () => void;
   downloadPdf: () => void;
   generateCalendarEvent: () => void;
-  setShowTemplateLibrary: (show: boolean) => void;
-  setShowAnalytics: (show: boolean) => void;
   focusMode: boolean;
   setFocusMode: (focus: boolean) => void;
   wizardMode: boolean;
@@ -37,8 +35,6 @@ export default function Header({
   startNewContract,
   downloadPdf,
   generateCalendarEvent,
-  setShowTemplateLibrary,
-  setShowAnalytics,
   focusMode,
   setFocusMode,
   wizardMode,
@@ -144,26 +140,6 @@ export default function Header({
                   >
                     <Calendar size={16} />
                     Add to Calendar
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ x: 4 }}
-                    type="button"
-                    onClick={() => { setShowTemplateLibrary(true); setShowQuickActions(false); }}
-                    role="menuitem"
-                    className="w-full px-4 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-primary transition-colors flex items-center gap-3 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-primary"
-                  >
-                    <FileText size={16} />
-                    Templates
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ x: 4 }}
-                    type="button"
-                    onClick={() => { setShowAnalytics(true); setShowQuickActions(false); }}
-                    role="menuitem"
-                    className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-3 dark:text-slate-200 dark:hover:bg-slate-800"
-                  >
-                    <BarChart3 size={16} />
-                    Analytics
                   </motion.button>
                   <motion.button
                     whileHover={{ x: 4 }}

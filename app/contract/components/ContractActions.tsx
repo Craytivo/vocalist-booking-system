@@ -5,15 +5,10 @@ import Button from "../../components/Button";
 interface ContractActionsProps {
   draftId: string | null;
   supabase: any;
-  showTemplateLibrary: boolean;
-  showAnalytics: boolean;
   setShowQuickStart: (show: boolean) => void;
   setShowSaveVersionModal: (show: boolean) => void;
-  setShowTemplateLibrary: (show: boolean) => void;
-  setShowAnalytics: (show: boolean) => void;
   startNewContract: () => void;
   loadContractVersions: (id: string) => void;
-  handleGenerateCalendarEvent: () => void;
   saveStatus: string;
   isOnline: boolean;
 }
@@ -21,15 +16,10 @@ interface ContractActionsProps {
 function ContractActions({
   draftId,
   supabase,
-  showTemplateLibrary,
-  showAnalytics,
   setShowQuickStart,
   setShowSaveVersionModal,
-  setShowTemplateLibrary,
-  setShowAnalytics,
   startNewContract,
   loadContractVersions,
-  handleGenerateCalendarEvent,
   saveStatus,
   isOnline,
 }: ContractActionsProps) {
@@ -42,13 +32,6 @@ function ContractActions({
     setShowSaveVersionModal(true);
   }, [setShowSaveVersionModal]);
 
-  const handleToggleTemplates = useCallback(() => {
-    setShowTemplateLibrary(!showTemplateLibrary);
-  }, [showTemplateLibrary, setShowTemplateLibrary]);
-
-  const handleToggleAnalytics = useCallback(() => {
-    setShowAnalytics(!showAnalytics);
-  }, [showAnalytics, setShowAnalytics]);
 
   const handleVersionHistory = useCallback(() => {
     if (draftId) {
@@ -114,38 +97,6 @@ function ContractActions({
         </div>
       )}
 
-      {/* Utilities */}
-      <div>
-        <p className={`${FONT_SIZE_CLASSES.uiXs} ${FONT_WEIGHT_CLASSES.semibold} uppercase tracking-[0.12em] text-amber-700 mb-3 ${FONT_FAMILY_CLASSES.heading}`}>
-          Utilities
-        </p>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            variant="secondary"
-            size="md"
-            onClick={handleGenerateCalendarEvent}
-            title="Generate calendar event"
-          >
-            Calendar Event
-          </Button>
-          <Button
-            variant="secondary"
-            size="md"
-            onClick={handleToggleTemplates}
-            title="Toggle template library"
-          >
-            Templates
-          </Button>
-          <Button
-            variant="secondary"
-            size="md"
-            onClick={handleToggleAnalytics}
-            title={showAnalytics ? "Close analytics" : "View analytics"}
-          >
-            {showAnalytics ? "Close" : "Analytics"}
-          </Button>
-        </div>
-      </div>
 
       {/* Save Status */}
       <div className="mb-4 rounded-xl border border-amber-200 bg-gradient-to-r from-white/90 to-amber-50/80 px-4 py-3 flex items-center gap-3 shadow-sm shadow-amber-950/5">

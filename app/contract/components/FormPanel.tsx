@@ -1,6 +1,5 @@
 import React from "react";
 import Button from "../../components/Button";
-import RecentContracts from "./RecentContracts";
 
 interface FormPanelProps {
   activePanel: string;
@@ -12,10 +11,6 @@ interface FormPanelProps {
   setShowSaveVersionModal: (show: boolean) => void;
   loadContractVersions: (id: string) => void;
   generateCalendarEvent: () => void;
-  showTemplateLibrary: boolean;
-  setShowTemplateLibrary: (show: boolean) => void;
-  showAnalytics: boolean;
-  setShowAnalytics: (show: boolean) => void;
   saveStatus: string;
   isOnline: boolean;
   readinessScore: number;
@@ -47,10 +42,6 @@ export default function FormPanel({
   setShowSaveVersionModal,
   loadContractVersions,
   generateCalendarEvent,
-  showTemplateLibrary,
-  setShowTemplateLibrary,
-  showAnalytics,
-  setShowAnalytics,
   saveStatus,
   isOnline,
   readinessScore,
@@ -137,20 +128,6 @@ export default function FormPanel({
             >
               Add to Calendar
             </Button>
-            <Button
-              variant={showTemplateLibrary ? "primary" : "secondary"}
-              size="md"
-              onClick={() => setShowTemplateLibrary(!showTemplateLibrary)}
-            >
-              {showTemplateLibrary ? "Close" : "Templates"}
-            </Button>
-            <Button
-              variant={showAnalytics ? "primary" : "secondary"}
-              size="md"
-              onClick={() => setShowAnalytics(!showAnalytics)}
-            >
-              {showAnalytics ? "Close" : "Analytics"}
-            </Button>
           </div>
         </div>
       </div>
@@ -218,124 +195,7 @@ export default function FormPanel({
         />
       </div>
 
-      {/* Recent Contracts */}
-      <RecentContracts
-        activeDraftId={draftId}
-        contracts={filteredContracts}
-        onLoadContract={loadRecentContract}
-        onDeleteContract={deleteContract}
-        onStatusFilterChange={setRecentStatusFilter}
-        statusFilter={recentStatusFilter}
-        supabaseEnabled={Boolean(supabase)}
-      />
 
-      {/* Template Library */}
-      {showTemplateLibrary && (
-        <div className="mt-4 rounded-xl border border-neutral-300 bg-white p-5 shadow-md">
-          <div className="flex items-center justify-between gap-3 mb-4">
-            <h2 className="text-base font-semibold text-neutral-900 lg:text-lg">
-              Template Library
-            </h2>
-            <button
-              type="button"
-              onClick={saveTemplate}
-              className="rounded-full bg-stone-950 px-4 py-2 text-xs font-semibold text-amber-100 dark:bg-amber-200 dark:text-stone-950 transition hover:bg-stone-900 dark:hover:bg-amber-100 hover:shadow-lg hover:shadow-stone-950/10 hover:scale-105 focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 border border-amber-400"
-            >
-              Save as Template
-            </button>
-          </div>
-          {templates.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-50 mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14 2 14 8 20 8"/>
-                  <line x1="16" y1="13" x2="8" y2="13"/>
-                  <line x1="16" y1="17" x2="8" y2="17"/>
-                  <polyline points="10 9 9 9 8 9"/>
-                </svg>
-              </div>
-              <p className="text-base font-semibold text-neutral-900 mb-2">No templates saved yet</p>
-              <p className="text-sm text-neutral-500 mb-4">Save your current contract as a template to reuse it later</p>
-            </div>
-          ) : (
-            <div className="grid gap-2">
-              {templates.map((template, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between rounded-lg border border-neutral-300 bg-white px-4 py-3 hover:border-amber-400 hover:bg-amber-50 hover:shadow-md transition-all"
-                >
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-neutral-900">
-                      {(template as any).templateName || `Template ${index + 1}`}
-                    </p>
-                    <p className="text-xs text-neutral-500">
-                      {template.clientName || "No client"} · {template.totalFee ? `$${template.totalFee} CAD` : "No fee"}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => loadTemplate(template)}
-                      className="rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-800 hover:border-amber-400 hover:bg-amber-50 hover:text-amber-700 transition-all focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
-                    >
-                      Load
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => deleteTemplate(index)}
-                      className="rounded-full border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-700 hover:border-red-500 hover:bg-red-50 transition-all focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Analytics */}
-      {showAnalytics && (
-        <div className="mt-4 rounded-xl border border-neutral-300 bg-white p-5 shadow-md">
-          <div className="flex items-center justify-between gap-3 mb-4">
-            <h2 className="text-base font-semibold text-neutral-900 lg:text-lg">
-              Contract Analytics
-            </h2>
-          </div>
-          {recentContracts.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-50 mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500">
-                  <line x1="18" y1="20" x2="18" y2="10"/>
-                  <line x1="12" y1="20" x2="12" y2="4"/>
-                  <line x1="6" y1="20" x2="6" y2="14"/>
-                </svg>
-              </div>
-              <p className="text-base font-semibold text-neutral-900 mb-2">No contracts to analyze</p>
-              <p className="text-sm text-neutral-500 mb-4">Create contracts to see analytics and insights</p>
-              <button
-                type="button"
-                onClick={startNewContract}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-stone-950 text-amber-100 dark:bg-amber-200 dark:text-stone-950 text-sm font-medium hover:bg-stone-900 dark:hover:bg-amber-100 transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 5v14M5 12h14"/>
-                </svg>
-                Create First Contract
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-4 mb-4">
-              <div className="rounded-lg border border-neutral-300 bg-white p-4 hover:shadow-md transition-all">
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-400 mb-1">Total Contracts</p>
-                <p className="text-2xl font-bold text-neutral-900">{recentContracts.length}</p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
     </section>
   );
 }

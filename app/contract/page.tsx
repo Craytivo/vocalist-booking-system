@@ -747,7 +747,7 @@ function ContractPage() {
 
   // Get sections for current wizard step
   const currentWizardSections = wizardMode ? wizardSteps.find(s => s.id === wizardStep)?.sections || [] : [];
-  const [sessionTimeout, setSessionTimeout] = useState<NodeJS.Timeout | null>(null);
+  const sessionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [collapsibleSections, setCollapsibleSections] = useState({
     eventInfo: false,
     services: false,
@@ -879,13 +879,11 @@ function ContractPage() {
     const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
     const resetTimeout = () => {
-      if (sessionTimeout) clearTimeout(sessionTimeout);
-      setSessionTimeout(
-        setTimeout(() => {
-          handleLogout();
-          showToast("Session expired. Please sign in again.", "info");
-        }, SESSION_TIMEOUT)
-      );
+      if (sessionTimeoutRef.current) clearTimeout(sessionTimeoutRef.current);
+      sessionTimeoutRef.current = setTimeout(() => {
+        handleLogout();
+        showToast("Session expired. Please sign in again.", "info");
+      }, SESSION_TIMEOUT);
     };
 
     const handleActivity = () => {
@@ -899,10 +897,10 @@ function ContractPage() {
     resetTimeout();
 
     return () => {
-      if (sessionTimeout) clearTimeout(sessionTimeout);
+      if (sessionTimeoutRef.current) clearTimeout(sessionTimeoutRef.current);
       events.forEach((event) => window.removeEventListener(event, handleActivity));
     };
-  }, [sessionTimeout]);
+  }, []);
 
   const handleLogout = async () => {
     try {

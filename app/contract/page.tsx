@@ -1875,6 +1875,7 @@ ${artistName}`;
           <div className="relative z-10">
           <ContractActions
           draftId={draftId}
+          supabase={null}
           setShowQuickStart={setShowQuickStart}
           setShowSaveVersionModal={setShowSaveVersionModal}
           startNewContract={startNewContract}

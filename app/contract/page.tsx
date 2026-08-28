@@ -713,6 +713,8 @@ function ContractPage() {
   const previewRef = useRef<HTMLDivElement>(null);
   const [wizardStep, setWizardStep] = useState(1);
   const [activeTab, setActiveTab] = useState("all");
+  // Recent contracts removed for local-only mode — provide an empty array to avoid runtime references
+  const recentContracts: any[] = [];
 
   // Define wizard steps (memoized for performance)
   const wizardSteps = useMemo(

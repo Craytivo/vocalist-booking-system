@@ -9,7 +9,6 @@ import React, {
   useCallback,
 } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../utils/supabaseClient";
 import Toast from "./components/Toast";
 import InputField from "./components/InputField";
 import SelectField from "./components/SelectField";
@@ -833,39 +832,19 @@ function ContractPage() {
     });
   };
 
-  // Check authentication on mount
+  // Local-only authentication: no external auth provider required
   useEffect(() => {
-    if (!supabase) {
-      setAuthStatus("Add Supabase keys to enable secure artist login");
-      return;
-    }
+    // Provide a local session object so other logic can rely on authUser where needed
+    const localUser = { id: "local", email: "local@local" } as any;
+    setAuthUser(localUser);
+    setUserEmail(localUser.email || "");
+    setAuthStatus("Local mode: authentication disabled");
+    // Ensure the app continues without redirecting to a login page
+    setHasLoadedDraft(true);
 
-    supabase.auth.getUser().then(({ data }) => {
-      setAuthUser(data.user);
-      setUserEmail(data.user?.email || "");
-      setAuthStatus(data.user ? `Signed in as ${data.user.email}` : "Sign in required");
-      if (!data.user) {
-        router.push("/login");
-      }
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setAuthUser(session?.user || null);
-      setUserEmail(session?.user?.email || "");
-      setAuthStatus(session?.user ? `Signed in as ${session.user.email}` : "Sign in required");
-      if (!session?.user) {
-        setWorkspace(null);
-        setDraftId(null);
-        setHasLoadedDraft(true);
-        setSaveStatus("Sign in to save contracts");
-        router.push("/login");
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [router]);
+    // No subscription to external auth in local-only mode
+    return () => {};
+  }, []);
 
   // Check email verification status
   useEffect(() => {
@@ -903,11 +882,12 @@ function ContractPage() {
   }, []);
 
   const handleLogout = async () => {
+    // Sign-out is a no-op in local-only mode; just clear local session and show message
     try {
-      if (supabase) {
-        await supabase.auth.signOut();
-      }
-      router.push("/login");
+      setAuthUser(null);
+      setUserEmail("");
+      setSaveStatus("Local draft");
+      showToast("Signed out (local mode)", "info");
     } catch (error) {
       console.error("Logout error:", error);
       showToast(getErrorMessage(error, "auth"), "error");
@@ -1022,39 +1002,17 @@ function ContractPage() {
   };
 
   const signOut = async () => {
-    if (!supabase) return;
-    await supabase.auth.signOut();
-    router.push("/login");
-    showToast("Signed out", "success");
+    // Local-only signOut: clear local session
+    setAuthUser(null);
+    setUserEmail("");
+    setSaveStatus("Local draft");
+    showToast("Signed out (local mode)", "success");
   };
 
   const signInWithGoogle = async () => {
-    if (!supabase) {
-      showToast("Supabase not initialized", "error");
-      return;
-    }
-
-    console.log("Initiating Google OAuth sign-in...");
-
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}${window.location.pathname}`,
-        queryParams: {
-          access_type: "offline",
-          prompt: "consent",
-        },
-      },
-    });
-
-    if (error) {
-      console.error("Google sign-in error:", error);
-      showToast(getErrorMessage(error, "auth"), "error");
-      return;
-    }
-
-  console.log("Google OAuth initiated successfully", data);
-};
+    // OAuth sign-in removed in local-only mode
+    showToast("Sign-in disabled in local-only mode", "info");
+  };
 
 useEffect(() => {
   const today = new Date().toISOString().split("T")[0];
@@ -1062,137 +1020,77 @@ useEffect(() => {
 }, []);
 
   const createWorkspace = async (artistName: string, artistEmail: string) => {
-    if (!supabase || !authUser) {
-      showToast("Sign in before creating a workspace", "error");
-      return;
+    // Local-only workspace: persist to localStorage and apply
+    const shareSlug = createWorkspaceSlug(artistName || artistEmail || "artist");
+    const localWorkspace: ArtistWorkspace = {
+      id: "local-workspace",
+      artist_name: artistName || artistEmail?.split("@")[0] || "Artist",
+      artist_email: artistEmail || "",
+      share_slug: shareSlug,
+    } as any;
+
+    try {
+      localStorage.setItem("localArtistWorkspace", JSON.stringify(localWorkspace));
+      setWorkspace(localWorkspace);
+      setWorkspaceStatus(`Workspace: ${localWorkspace.artist_name || localWorkspace.share_slug}`);
+      applyWorkspaceToForm(localWorkspace);
+      setWorkspaceArtistName("");
+      setWorkspaceArtistEmail("");
+      setShowWorkspaceModal(false);
+      showToast("Local artist workspace ready", "success");
+    } catch (err) {
+      console.error("Failed to save workspace locally", err);
+      showToast("Failed to save workspace locally", "error");
     }
-
-    const shareSlug = createWorkspaceSlug(artistName);
-    const { data, error } = await supabase
-      .from("artist_workspaces")
-      .insert({
-        owner_user_id: authUser.id,
-        artist_name: artistName,
-        artist_email: artistEmail,
-        share_slug: shareSlug,
-      })
-      .select("*")
-      .single<ArtistWorkspace>();
-
-    if (error) {
-      setWorkspaceStatus(getErrorMessage(error, "supabase"));
-      showToast(getErrorMessage(error, "supabase"), "error");
-      return;
-    }
-
-    setWorkspace(data);
-    setWorkspaceStatus(`Workspace: ${data.artist_name || data.share_slug}`);
-    applyWorkspaceToForm(data);
-    setWorkspaceArtistName("");
-    setWorkspaceArtistEmail("");
-    setShowWorkspaceModal(false);
-    showToast("Artist workspace ready", "success");
   };
 
   useEffect(() => {
-    const loadWorkspace = async () => {
-      if (!supabase) {
-        setWorkspaceStatus("Add Supabase keys to enable workspaces");
-        setHasLoadedDraft(true);
-        return;
+    // Local-only workspace: load from localStorage or create a default local workspace
+    const saved = localStorage.getItem("localArtistWorkspace");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as ArtistWorkspace;
+        setWorkspace(parsed);
+        setWorkspaceStatus(`Workspace: ${parsed.artist_name || parsed.share_slug}`);
+        applyWorkspaceToForm(parsed);
+      } catch (err) {
+        console.error("Failed to parse saved workspace:", err);
       }
+    } else {
+      // create a minimal local workspace from local user
+      const shareSlug = createWorkspaceSlug(userEmail || "artist");
+      const localWorkspace: ArtistWorkspace = {
+        id: "local-workspace",
+        artist_name: userEmail?.split("@")[0] || "Artist",
+        artist_email: userEmail || "",
+        share_slug: shareSlug,
+      } as any;
+      setWorkspace(localWorkspace);
+      setWorkspaceStatus(`Workspace: ${localWorkspace.artist_name || localWorkspace.share_slug}`);
+      applyWorkspaceToForm(localWorkspace);
+      localStorage.setItem("localArtistWorkspace", JSON.stringify(localWorkspace));
+    }
 
-      if (!authUser) {
-        setWorkspaceStatus("Sign in to access your workspace");
-        setSaveStatus("Sign in to save contracts");
-        setHasLoadedDraft(true);
-        return;
-      }
-
-      // Load workspace by owner_user_id
-      const { data, error } = await supabase
-        .from("artist_workspaces")
-        .select("*")
-        .eq("owner_user_id", authUser.id)
-        .maybeSingle<ArtistWorkspace>();
-
-      if (error) {
-        setWorkspaceStatus(getErrorMessage(error, "supabase"));
-        setHasLoadedDraft(true);
-        return;
-      }
-
-      if (!data) {
-        // Auto-create workspace if user doesn't have one
-        const shareSlug = createWorkspaceSlug(authUser.email || "artist");
-        const { data: newWorkspace, error: createError } = await supabase
-          .from("artist_workspaces")
-          .insert({
-            owner_user_id: authUser.id,
-            artist_name: authUser.email?.split("@")[0] || "Artist",
-            artist_email: authUser.email,
-            share_slug: shareSlug,
-          })
-          .select("*")
-          .single<ArtistWorkspace>();
-
-        if (createError) {
-          setWorkspaceStatus(getErrorMessage(createError, "supabase"));
-          setHasLoadedDraft(true);
-          return;
-        }
-
-        setWorkspace(newWorkspace);
-        setWorkspaceStatus(`Workspace: ${newWorkspace.artist_name || newWorkspace.share_slug}`);
-        applyWorkspaceToForm(newWorkspace);
-        showToast("Workspace created automatically", "success");
-      } else {
-        setWorkspace(data);
-        setWorkspaceStatus(`Workspace: ${data.artist_name || data.share_slug}`);
-        applyWorkspaceToForm(data);
-      }
-
-      setHasLoadedDraft(true);
-    };
-
-    loadWorkspace();
-  }, [authUser]);
+    setHasLoadedDraft(true);
+  }, [userEmail]);
 
   useEffect(() => {
-    const loadLatestDraft = async () => {
-      if (!supabase) {
-        setHasLoadedDraft(true);
-        setSaveStatus("Add Supabase keys to enable autosave");
-        return;
+    // Load latest draft from localStorage in local-only mode
+    const loadLatestDraft = () => {
+      const saved = localStorage.getItem("localContractDraft");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved) as ContractForm;
+          setDraftId("local-draft");
+          skipNextAutosaveRef.current = true;
+          setForm(parsed);
+          setSaveStatus("Latest local draft loaded");
+        } catch (err) {
+          console.error("Failed to parse local draft:", err);
+        }
+      } else {
+        setSaveStatus("Local draft");
       }
-
-      if (!workspace) {
-        setSaveStatus("Create or open an artist workspace to enable autosave");
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from("contracts")
-        .select("*")
-        .eq("workspace_id", workspace.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle<ContractRow>();
-
-      if (error) {
-        setSaveStatus(getErrorMessage(error, "load"));
-        console.error("Load draft error:", error);
-        setHasLoadedDraft(true);
-        return;
-      }
-
-      if (data) {
-        setDraftId(data.id);
-        skipNextAutosaveRef.current = true;
-        setForm(contractRowToForm(data));
-        setSaveStatus("Latest draft loaded");
-      }
-
       setHasLoadedDraft(true);
     };
 
@@ -1200,133 +1098,33 @@ useEffect(() => {
   }, [workspace]);
 
   useEffect(() => {
-    if (!supabase || !hasLoadedDraft || !workspace) {
-      return;
-    }
-
+    // Autosave to localStorage (debounced)
+    if (!hasLoadedDraft || !workspace) return;
     if (skipNextAutosaveRef.current) {
       skipNextAutosaveRef.current = false;
       return;
     }
 
-    setSaveStatus("Saving draft...");
-    const supabaseClient = supabase;
+    setSaveStatus("Saving draft (local)...");
+    const timeoutId = window.setTimeout(() => {
+      try {
+        const payload: ContractForm = { ...form };
+        localStorage.setItem("localContractDraft", JSON.stringify(payload));
+        setDraftId((prev) => prev || "local-draft");
+        setSaveStatus("Draft saved (local)");
 
-    const timeoutId = window.setTimeout(async () => {
-      const payload = {
-        workspace_id: workspace.id,
-        artist_name: form.artistName,
-        artist_email: form.artistEmail,
-        artist_logo: form.artistLogo || null,
-        booking_preset: form.bookingPreset,
-        contract_status: form.contractStatus,
-        client_name: form.clientName,
-        representative_name: form.representativeName,
-        email: form.email,
-        phone: form.phoneNumber,
-        event_name: form.eventName,
-        event_dates: form.eventDates,
-        venue: form.venueLocation,
-        services: form.services,
-        total_fee: Number(form.totalFee) || 0,
-        deposit_percentage: form.depositPercentage !== "" ? Number(form.depositPercentage) : 50,
-        travel_required: form.travelRequired,
-        deposit_terms: form.depositTerms,
-        travel_terms: form.travelTerms,
-        cancellation_terms: form.cancellationTerms,
-        technical_requirements: form.technicalRequirements,
-        performance_duration: form.performanceDuration || null,
-        payment_method: form.paymentMethod || null,
-        date_of_agreement: form.dateOfAgreement || null,
-        media_rights_allowed: form.mediaRightsAllowed,
-        media_rights_terms: form.mediaRightsTerms,
-        force_majeure_included: form.forceMajeureIncluded,
-        force_majeure_terms: form.forceMajeureTerms,
-        independent_contractor_clause: form.independentContractorClause,
-        artist_signer_name: form.artistSignerName,
-        client_signer_name: form.clientSignerName,
-        artist_signer_title: form.artistSignerTitle,
-        client_signer_title: form.clientSignerTitle,
-        artist_signature: form.artistSignature,
-        client_signature: form.clientSignature,
-        signed_date: form.signedDate || null,
-        delivery_subject: form.deliverySubject,
-        delivery_message: form.deliveryMessage,
-        invoice_number: form.invoiceNumber,
-        invoice_date: form.invoiceDate || null,
-        invoice_status: form.invoiceStatus,
-        invoice_due_date: form.invoiceDueDate || null,
-        invoice_notes: form.invoiceNotes,
-        status: form.contractStatus.toLowerCase(),
-        // New fields for comprehensive contract
-        rehearsal_required: form.rehearsalRequired,
-        rehearsal_details: form.rehearsalDetails,
-        sound_check_required: form.soundCheckRequired,
-        sound_check_details: form.soundCheckDetails,
-        hospitality_required: form.hospitalityRequired,
-        hospitality_details: form.hospitalityDetails,
-        late_payment_penalty: form.latePaymentPenalty,
-        cancellation_fee: form.cancellationFee,
-        insurance_required: form.insuranceRequired,
-        insurance_details: form.insuranceDetails,
-        image_usage_allowed: form.imageUsageAllowed,
-        image_usage_terms: form.imageUsageTerms,
-        merchandise_sales_allowed: form.merchandiseSalesAllowed,
-        merchandise_terms: form.merchandiseTerms,
-        guest_list_count: form.guestListCount,
-        security_required: form.securityRequired,
-        security_details: form.securityDetails,
-        parking_provided: form.parkingProvided,
-        parking_details: form.parkingDetails,
-        governing_law: form.governingLaw,
-        dispute_resolution: form.disputeResolution,
-        indemnification_clause: form.indemnificationClause,
-        confidentiality_clause: form.confidentialityClause,
-        equipment_liability_clause: form.equipmentLiabilityClause,
-        attorney_fees_clause: form.attorneyFeesClause,
-      };
-
-      if (draftId) {
-        const { error } = await supabaseClient
-          .from("contracts")
-          .update(payload)
-          .eq("id", draftId)
-          .eq("workspace_id", workspace.id);
-
-        setSaveStatus(error ? getErrorMessage(error, "save") : "Draft saved");
-        if (error) {
-          console.error("Autosave error:", error);
+        // Save a lightweight version entry
+        if (draftId || true) {
+          saveContractVersion(draftId || "local-draft", form);
         }
-        if (!error) {
-          saveContractVersion(draftId, form);
-          if (!skipRefreshRef.current) {
-            // No-op: recent contracts removed in local-only mode
-          }
-        }
-        return;
-      }
-
-      const { data, error } = await supabaseClient
-        .from("contracts")
-        .insert(payload)
-        .select("id")
-        .single();
-
-      if (error) {
-        setSaveStatus(getErrorMessage(error, "save"));
-        console.error("Autosave insert error:", error);
-        return;
-      }
-
-      setDraftId(data.id);
-      setSaveStatus("Draft saved");
-      if (!skipRefreshRef.current) {
-        // No-op: recent contracts removed in local-only mode
+      } catch (err) {
+        console.error("Local save error:", err);
+        setSaveStatus("Failed to save draft locally");
       }
     }, 700);
 
     return () => window.clearTimeout(timeoutId);
-  }, [draftId, form, hasLoadedDraft, workspace]);
+  }, [form, hasLoadedDraft, workspace]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -1365,7 +1163,7 @@ useEffect(() => {
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
-      showToast("Back online - syncing with Supabase", "success");
+      showToast("Back online - local draft available", "success");
     };
     const handleOffline = () => {
       setIsOnline(false);
@@ -1508,7 +1306,8 @@ useEffect(() => {
   };
 
   const saveContractVersion = async (contractId: string, contractData: ContractForm, manualNote?: string) => {
-    if (!supabase || !contractId) return;
+    // Local-only versioning stored in localStorage under key `contractVersions:{id}`
+    if (!contractId) return;
 
     // Check if form data has significantly changed
     const currentFormHash = JSON.stringify(contractData);
@@ -1516,60 +1315,52 @@ useEffect(() => {
       return; // Skip saving if no significant changes
     }
 
-    // Reset active version when form is modified
     if (!manualNote) {
       setActiveVersionNumber(null);
     }
 
-    // Debounce version saves (wait 5 seconds after last change before saving)
     if (!manualNote) {
       if (versionSaveTimeoutRef.current) {
         clearTimeout(versionSaveTimeoutRef.current);
       }
-      versionSaveTimeoutRef.current = setTimeout(async () => {
-        await createVersion(contractId, contractData, manualNote);
+      versionSaveTimeoutRef.current = setTimeout(() => {
+        createVersion(contractId, contractData, manualNote);
         lastSavedFormRef.current = currentFormHash;
       }, 5000);
       return;
     }
 
-    // Manual saves are immediate
     await createVersion(contractId, contractData, manualNote);
     lastSavedFormRef.current = currentFormHash;
   };
 
   const createVersion = async (contractId: string, contractData: ContractForm, manualNote?: string) => {
-    if (!supabase || !contractId) return;
+    if (!contractId) return;
 
-    // Get the current version number for this contract
-    const { data: versions } = await supabase
-      .from("contract_versions")
-      .select("version_number")
-      .eq("contract_id", contractId)
-      .order("version_number", { ascending: false })
-      .limit(1);
+    try {
+      const key = `contractVersions:${contractId}`;
+      const stored = localStorage.getItem(key);
+      const versions = stored ? JSON.parse(stored) as any[] : [];
+      const nextVersion = versions.length > 0 ? (versions[0].version_number || versions.length) + 1 : 1;
 
-    const nextVersion = versions && versions.length > 0 ? versions[0].version_number + 1 : 1;
-
-    // Save the version
-    const { error } = await supabase
-      .from("contract_versions")
-      .insert({
-        contract_id: contractId,
-        workspace_id: workspace?.id || null,
+      const entry = {
         version_number: nextVersion,
         contract_data: contractData,
         created_by: form.artistName || "Unknown",
         version_note: manualNote || "Autosave",
-      });
+        created_at: new Date().toISOString(),
+      };
 
-    if (error) {
-      console.error("Version save error:", error);
-      return;
+      versions.unshift(entry);
+      localStorage.setItem(key, JSON.stringify(versions));
+
+      // Trim to last 20
+      if (versions.length > 20) {
+        localStorage.setItem(key, JSON.stringify(versions.slice(0, 20)));
+      }
+    } catch (err) {
+      console.error("Failed to save version locally:", err);
     }
-
-    // Limit to last 20 versions
-    await limitVersions(contractId);
   };
 
   const limitVersions = async (contractId: string) => {
@@ -1655,27 +1446,18 @@ useEffect(() => {
 
     console.log("Deleting contract:", contractToDelete);
 
-    if (supabase) {
-      let deleteQuery = supabase
-        .from("contracts")
-        .delete()
-        .eq("id", contractToDelete);
-
-      if (workspace) {
-        deleteQuery = deleteQuery.eq("workspace_id", workspace.id);
+    // Local-only deletion: remove local draft and version history when applicable
+    try {
+      if (contractToDelete === "local-draft") {
+        localStorage.removeItem("localContractDraft");
+        localStorage.removeItem(`contractVersions:${contractToDelete}`);
       }
-
-      const { error } = await deleteQuery;
-      
-      console.log("Delete result:", error || "Success");
-      
-      if (error) {
-        console.error("Supabase delete error:", error);
-        showToast(getErrorMessage(error, "supabase"), "error");
-        setShowDeleteModal(false);
-        setContractToDelete(null);
-        return;
-      }
+    } catch (err) {
+      console.error("Local delete error:", err);
+      showToast(getErrorMessage(err, "delete"), "error");
+      setShowDeleteModal(false);
+      setContractToDelete(null);
+      return;
     }
 
     // If the deleted contract was the active draft, reset the form
@@ -2100,14 +1882,13 @@ ${artistName}`;
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/70 via-transparent to-white/30 dark:from-white/20 dark:via-transparent dark:to-white/10 pointer-events-none" />
           <div className="relative z-10">
           <ContractActions
-            draftId={draftId}
-            supabase={supabase}
-            setShowQuickStart={setShowQuickStart}
-            setShowSaveVersionModal={setShowSaveVersionModal}
-            startNewContract={startNewContract}
-            loadContractVersions={loadContractVersions}
-            saveStatus={saveStatus}
-            isOnline={isOnline}
+          draftId={draftId}
+          setShowQuickStart={setShowQuickStart}
+          setShowSaveVersionModal={setShowSaveVersionModal}
+          startNewContract={startNewContract}
+          loadContractVersions={loadContractVersions}
+          saveStatus={saveStatus}
+          isOnline={isOnline}
           />
           </div>
           <div className="mb-4 rounded-lg border border-gray-300/60 bg-white/60 px-4 py-3 shadow-sm shadow-gray-900/10 dark:border-gray-600/40 dark:bg-stone-900/60">
@@ -3093,7 +2874,6 @@ ${artistName}`;
         contractVersions={contractVersions}
         activeVersionNumber={activeVersionNumber}
         draftId={draftId}
-        supabase={supabase}
         bookingPresets={bookingPresets}
         setShowDeleteModal={setShowDeleteModal}
         setShowWorkspaceModal={setShowWorkspaceModal}

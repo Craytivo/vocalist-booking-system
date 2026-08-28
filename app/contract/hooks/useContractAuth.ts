@@ -18,10 +18,12 @@ export function useContractAuth({ getErrorMessage, showToast, onLogout }: UseCon
     if (onLogout) onLogout();
     showToast("Signed out (local session)", "info");
   }, [onLogout, showToast]);
-n  useEffect(() => {
+
+  useEffect(() => {
     // no external auth in local-only mode
   }, []);
-n  return {
+
+  return {
     authUser,
     setAuthUser,
     authStatus,

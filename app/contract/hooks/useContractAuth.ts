@@ -22,12 +22,13 @@ export function useContractAuth({ getErrorMessage, showToast, onLogout }: UseCon
         await supabase.auth.signOut();
       }
       if (onLogout) onLogout();
-      router.push("/login");
+      // Login page removed — do not redirect. Update auth status instead.
+      setAuthStatus("Sign in required");
     } catch (error) {
       console.error("Logout error:", error);
       showToast(getErrorMessage(error, "auth"), "error");
     }
-  }, [router, getErrorMessage, showToast, onLogout]);
+  }, [getErrorMessage, showToast, onLogout]);
 
   useEffect(() => {
     if (!supabase) {
@@ -38,9 +39,7 @@ export function useContractAuth({ getErrorMessage, showToast, onLogout }: UseCon
       setAuthUser(data.user);
       setUserEmail(data.user?.email || "");
       setAuthStatus(data.user ? `Signed in as ${data.user.email}` : "Sign in required");
-      if (!data.user) {
-        router.push("/login");
-      }
+      // Login route removed — do not redirect on missing session; allow unauthenticated access with limited features.
     });
 
     const {
@@ -49,9 +48,7 @@ export function useContractAuth({ getErrorMessage, showToast, onLogout }: UseCon
       setAuthUser(session?.user || null);
       setUserEmail(session?.user?.email || "");
       setAuthStatus(session?.user ? `Signed in as ${session.user.email}` : "Sign in required");
-      if (!session?.user) {
-        router.push("/login");
-      }
+      // Login route removed — do not redirect when auth state changes to signed-out.
     });
 
     return () => subscription.unsubscribe();

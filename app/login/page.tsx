@@ -1,43 +1,17 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { supabase } from "../utils/supabaseClient";
-import { FONT_SIZE_CLASSES, LINE_HEIGHT_CLASSES, FONT_FAMILY_CLASSES, BUTTON_SIZE_CLASSES, FONT_WEIGHT_CLASSES } from "../components/GlobalTypography";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-function LoginContent() {
+export default function LoginRedirect() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [isLogin, setIsLogin] = useState(true);
-  const [isResetPassword, setIsResetPassword] = useState(false);
-  const [isSetNewPassword, setIsSetNewPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  useEffect(() => {
+    // Login route removed — redirect visitors to the main app
+    router.replace("/contract");
+  }, [router]);
+  return null;
+}
 
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    if (!supabase) {
-      setError("Supabase is not configured. Please add your credentials to .env.local");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      if (isLogin) {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
-        router.push("/contract");
       } else {
         const { data, error } = await supabase.auth.signUp({
           email,

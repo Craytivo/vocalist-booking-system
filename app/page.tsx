@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
 export default function Home() {
-  redirect("/login");
+  // Login route removed — redirect users to the main contract app instead
+  redirect("/contract");
 }

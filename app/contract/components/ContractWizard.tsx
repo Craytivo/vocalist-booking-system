@@ -56,7 +56,7 @@ export default function ContractWizard({
           <span className="text-sm text-neutral-600">
             Step {wizardStep} of {steps.length}
           </span>
-          <span className="text-xs font-medium text-amber-700 bg-amber-50 px-2 py-1 rounded">
+          <span className="text-xs font-medium text-slate-700 bg-slate-100 px-2 py-1 rounded">
             {progressPercentage}%
           </span>
         </div>
@@ -69,8 +69,8 @@ export default function ContractWizard({
             <div
               className={`flex-1 h-2 rounded-full transition-all duration-300 ${
                 step.id <= wizardStep
-                  ? "bg-gradient-to-r from-amber-400 to-orange-500"
-                  : "bg-amber-100"
+                  ? "bg-gradient-to-r from-[#6b8f71] to-[#8aa88d]"
+                  : "bg-slate-200"
               }`}
             />
             {index < steps.length - 1 && (
@@ -89,10 +89,10 @@ export default function ContractWizard({
             onClick={() => setWizardStep(step.id)}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
               step.id === wizardStep
-                ? "bg-stone-950 text-amber-100 dark:bg-amber-200 dark:text-stone-950"
+                ? "bg-slate-900 text-white"
                 : step.id < wizardStep
-                ? "bg-amber-100 text-amber-800 hover:bg-amber-200"
-                : "bg-white/80 text-stone-600 hover:bg-amber-50 border border-amber-100"
+                ? "bg-[#e8efe8] text-slate-800 hover:bg-[#dfeae0]"
+                : "bg-white/80 text-slate-600 hover:bg-slate-50 border border-slate-200"
             }`}
             aria-current={step.id === wizardStep ? "step" : undefined}
           >

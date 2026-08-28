@@ -41,7 +41,7 @@ function ContractActions({
     <div className="flex flex-col gap-5 sm:gap-6 mb-6">
       {/* Primary Actions */}
       <div>
-        <p className={`${FONT_SIZE_CLASSES.uiXs} ${FONT_WEIGHT_CLASSES.semibold} uppercase tracking-[0.12em] text-amber-700 mb-3 ${FONT_FAMILY_CLASSES.heading}`}>
+        <p className={`${FONT_SIZE_CLASSES.uiXs} ${FONT_WEIGHT_CLASSES.semibold} uppercase tracking-[0.12em] text-slate-700 mb-3 ${FONT_FAMILY_CLASSES.heading}`}>
           Primary Actions
         </p>
         <div className="flex flex-wrap items-center gap-2">
@@ -71,7 +71,7 @@ function ContractActions({
       {/* Contract Actions */}
       {draftId && (
         <div>
-          <p className={`${FONT_SIZE_CLASSES.uiXs} ${FONT_WEIGHT_CLASSES.semibold} uppercase tracking-[0.12em] text-amber-700 mb-3 ${FONT_FAMILY_CLASSES.heading}`}>
+          <p className={`${FONT_SIZE_CLASSES.uiXs} ${FONT_WEIGHT_CLASSES.semibold} uppercase tracking-[0.12em] text-slate-700 mb-3 ${FONT_FAMILY_CLASSES.heading}`}>
             Contract Actions
           </p>
           <div className="flex flex-wrap items-center gap-2">
@@ -97,21 +97,21 @@ function ContractActions({
 
 
       {/* Save Status */}
-      <div className="mb-4 rounded-xl border border-amber-200 bg-gradient-to-r from-white/90 to-amber-50/80 px-4 py-3 flex items-center gap-3 shadow-sm shadow-amber-950/5">
+      <div className="mb-4 rounded-xl border border-slate-200 bg-gradient-to-r from-white/90 to-slate-50 px-4 py-3 flex items-center gap-3 shadow-sm shadow-slate-200/60">
         <span
           className={`h-2 w-2 rounded-full ${
             saveStatus.includes("failed")
               ? "bg-red-500"
               : saveStatus.includes("Saving")
-              ? "bg-amber-500"
+              ? "bg-[#6b8f71]"
               : "bg-emerald-500"
           }`}
         />
-        <p className="text-sm text-neutral-700">
+        <p className="text-sm text-slate-700">
           {!isOnline ? "Offline - saved locally" : saveStatus}
         </p>
         {!isOnline && (
-          <span className="ml-auto rounded-md bg-amber-50 border border-amber-200 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700">
+          <span className="ml-auto rounded-md bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-700">
             Offline
           </span>
         )}

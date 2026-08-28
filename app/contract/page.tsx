@@ -9,7 +9,6 @@ import React, {
   useCallback,
 } from "react";
 import { useRouter } from "next/navigation";
-import type { User } from "@supabase/supabase-js";
 import { supabase } from "../utils/supabaseClient";
 import Toast from "./components/Toast";
 import InputField from "./components/InputField";

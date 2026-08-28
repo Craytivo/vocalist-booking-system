@@ -1,6 +1,4 @@
 import { useEffect, useCallback, useState } from "react";
-import type { User } from "@supabase/supabase-js";
-import { supabase } from "../../utils/supabaseClient";
 
 interface ArtistWorkspace {
   id: string;
@@ -13,7 +11,8 @@ interface ArtistWorkspace {
 }
 
 interface UseContractWorkspaceProps {
-  authUser: User | null;
+  // authUser intentionally generic in local-only mode
+  authUser: any;
   showToast: (message: string, type: "success" | "error" | "info") => void;
   getErrorMessage: (error: any, context: string) => string;
   applyWorkspaceToForm: (workspace: ArtistWorkspace) => void;
@@ -28,107 +27,42 @@ export function useContractWorkspace({
   setHasLoadedDraft,
 }: UseContractWorkspaceProps) {
   const [workspace, setWorkspace] = useState<ArtistWorkspace | null>(null);
-  const [workspaceStatus, setWorkspaceStatus] = useState("Loading workspace...");
-
-  const createWorkspaceSlug = (name: string) =>
-    `${name || "artist"}-${Math.random().toString(36).slice(2, 8)}`
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "");
+  const [workspaceStatus, setWorkspaceStatus] = useState("Local workspace");
 
   const createWorkspace = async (artistName: string, artistEmail: string) => {
-    if (!supabase || !authUser) {
-      showToast("Sign in before creating a workspace", "error");
-      return;
-    }
+    const ws: ArtistWorkspace = {
+      id: "local",
+      owner_user_id: null,
+      artist_name: artistName || "Local Artist",
+      artist_email: artistEmail || null,
+      artist_logo: null,
+      share_slug: "local",
+      created_at: new Date().toISOString(),
+    };
 
-    const shareSlug = createWorkspaceSlug(artistName);
-    const { data, error } = await supabase
-      .from("artist_workspaces")
-      .insert({
-        owner_user_id: authUser.id,
-        artist_name: artistName,
-        artist_email: artistEmail,
-        share_slug: shareSlug,
-      })
-      .select("*")
-      .single<ArtistWorkspace>();
-
-    if (error) {
-      setWorkspaceStatus(getErrorMessage(error, "supabase"));
-      showToast(getErrorMessage(error, "supabase"), "error");
-      return;
-    }
-
-    setWorkspace(data);
-    setWorkspaceStatus(`Workspace: ${data.artist_name || data.share_slug}`);
-    applyWorkspaceToForm(data);
-    showToast("Artist workspace ready", "success");
-    return data;
+    setWorkspace(ws);
+    setWorkspaceStatus(`Workspace: ${ws.artist_name}`);
+    if (applyWorkspaceToForm) applyWorkspaceToForm(ws);
+    if (showToast) showToast("Local workspace ready", "success");
+    return ws;
   };
 
   useEffect(() => {
-    const loadWorkspace = async () => {
-      if (!supabase) {
-        setWorkspaceStatus("Add Supabase keys to enable workspaces");
-        setHasLoadedDraft(true);
-        return;
-      }
-
-      if (!authUser) {
-        setWorkspaceStatus("Sign in to access your workspace");
-        setHasLoadedDraft(true);
-        return;
-      }
-
-      // Load workspace by owner_user_id
-      const { data, error } = await supabase
-        .from("artist_workspaces")
-        .select("*")
-        .eq("owner_user_id", authUser.id)
-        .maybeSingle<ArtistWorkspace>();
-
-      if (error) {
-        setWorkspaceStatus(getErrorMessage(error, "supabase"));
-        setHasLoadedDraft(true);
-        return;
-      }
-
-      if (!data) {
-        // Auto-create workspace if user doesn't have one
-        const shareSlug = createWorkspaceSlug(authUser.email || "artist");
-        const { data: newWorkspace, error: createError } = await supabase
-          .from("artist_workspaces")
-          .insert({
-            owner_user_id: authUser.id,
-            artist_name: authUser.email?.split("@")[0] || "Artist",
-            artist_email: authUser.email,
-            share_slug: shareSlug,
-          })
-          .select("*")
-          .single<ArtistWorkspace>();
-
-        if (createError) {
-          setWorkspaceStatus(getErrorMessage(createError, "supabase"));
-          setHasLoadedDraft(true);
-          return;
-        }
-
-        setWorkspace(newWorkspace);
-        setWorkspaceStatus(`Workspace: ${newWorkspace.artist_name || newWorkspace.share_slug}`);
-        applyWorkspaceToForm(newWorkspace);
-        showToast("Workspace created automatically", "success");
-      } else {
-        setWorkspace(data);
-        setWorkspaceStatus(`Workspace: ${data.artist_name || data.share_slug}`);
-        applyWorkspaceToForm(data);
-      }
-
-      setHasLoadedDraft(true);
+    // Initialize a simple local workspace
+    const ws: ArtistWorkspace = {
+      id: "local",
+      owner_user_id: null,
+      artist_name: "Local Artist",
+      artist_email: null,
+      artist_logo: null,
+      share_slug: "local",
+      created_at: new Date().toISOString(),
     };
-
-    loadWorkspace();
-  }, [authUser]);
+    setWorkspace(ws);
+    setWorkspaceStatus(`Workspace: ${ws.artist_name}`);
+    if (applyWorkspaceToForm) applyWorkspaceToForm(ws);
+    if (setHasLoadedDraft) setHasLoadedDraft(true);
+  }, []);
 
   return {
     workspace,

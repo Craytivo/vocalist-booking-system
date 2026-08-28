@@ -701,6 +701,7 @@ function ContractPage() {
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
   const [zoomLevel, setZoomLevel] = useState(100);
   const [templates, setTemplates] = useState<ContractForm[]>([]);
+  const [showTemplateLibrary, setShowTemplateLibrary] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);

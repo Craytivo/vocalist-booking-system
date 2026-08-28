@@ -1,0 +1,10 @@
+﻿contract: finalize Alberta defaults & add local contract generation validation
+
+- Update deposit, cancellation and travel terms to Alberta-tailored wording (50% deposit, balance due 5 business days prior, cancellation tiers 60/30/0).
+- Ensure contract preview article is marked role="document" for reliable PDF generation.
+- Add client-side validation for required fields before PDF generation and wire to existing Download PDF action.
+- Keep local-only mode and no Supabase changes here (other commits handled earlier).
+
+This prepares the app to generate a complete Alberta-tailored performance agreement from the UI and export it locally as PDF.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>

@@ -304,11 +304,11 @@ const bookingPresets = [
 const contractStatuses = ["Draft", "Ready", "Sent", "Signed"];
 
 const defaultDepositTerms =
-  "A deposit is required to confirm your booking. The remaining balance is due 7 days before the event, or when you receive the invoice. Late payments may have a 5% monthly fee.";
+  "A non-refundable deposit equal to fifty percent (50%) of the Fee is due within seven (7) calendar days of signing to secure the date. The remaining balance is due no later than five (5) business days prior to the Performance Date.";
 const defaultTravelTerms =
-  "We'll agree on travel details at least 14 days before the event. You'll cover reasonable travel costs like transportation, lodging, and meals. I'll provide receipts for reimbursement.";
+  "The Client will provide and pay for economy round-trip transportation (or agreed ground transport), ground transportation to/from airports and the venue, and any agreed travel-related expenses. Travel and accommodation arrangements should be confirmed at least 14 days before the Performance Date.";
 const defaultCancellationTerms =
-  "Cancellations must be in writing. More than 30 days before = full refund. 14-30 days before = 50% refund. Less than 14 days before = no refund. If I cancel due to illness or emergency, I'll refund your deposit and try to find a substitute.";
+  "If Client cancels more than 60 days prior to the Performance Date, the Deposit is retained; if Client cancels 30–60 days prior, Client pays 50% of the Fee; if Client cancels within 30 days, Client pays 100% of the Fee. If Artist cancels due to illness or emergency, Artist will attempt to find a qualified replacement or refund amounts paid less documented non-recoverable expenses.";
 const defaultTechnicalRequirements =
   "You'll provide proper sound equipment including a PA system, microphones, stage monitors, and sound check access at least 60 minutes before the show. I'll let you know of any special needs at least 7 days in advance.";
 const defaultMediaRightsTerms =
@@ -340,15 +340,15 @@ const defaultSecurityDetails =
 const defaultParkingDetails =
   "You'll provide complimentary parking for me and my equipment. Parking passes or a designated parking area will be provided in advance.";
 const defaultGoverningLaw =
-  "This agreement follows the laws of the jurisdiction where the performance takes place.";
+  "This agreement shall be governed by the laws of the Province of Alberta and the federal laws of Canada applicable therein.";
 const defaultDisputeResolution =
-  "We'll resolve any disputes through good faith negotiation first. If that doesn't work, we'll use binding arbitration.";
+  "Parties shall attempt good-faith negotiation and mediation first. If unresolved within thirty (30) days, disputes shall be resolved by binding arbitration under the Arbitration Act (Alberta), with the seat of arbitration in Calgary, Alberta.";
 const defaultIndemnification =
   "Each party agrees to indemnify and hold harmless the other party from and against any and all claims, demands, losses, damages, liabilities, costs, and expenses (including reasonable attorneys' fees) arising out of or related to any breach of this agreement, negligence, or willful misconduct by the indemnifying party.";
 const defaultConfidentiality =
-  "Both parties agree to keep confidential all non-public information disclosed during the course of this engagement, including but not limited to financial terms, contact information, business strategies, and technical specifications. This obligation shall survive the termination of this agreement.";
+  "Both parties agree to keep confidential all non-public information disclosed during the course of this engagement, including but not limited to financial terms, contact information, business strategies, and technical specifications. This obligation shall survive the termination of this agreement for two (2) years.";
 const defaultEquipmentLiability =
-  "The Client shall be responsible for any damage to the Artist's equipment caused by the Client, its employees, agents, or attendees. The Client shall provide adequate security and protection for all equipment. The Artist is not liable for damage to the Client's equipment or venue except in cases of willful misconduct or gross negligence.";
+  "The Client shall be responsible for any damage to the Artist's equipment caused by the Client, its employees, agents, or attendees, except where arising from the Artist's gross negligence or willful misconduct.";
 const defaultAttorneyFees =
   "In any legal proceeding arising out of or relating to this agreement, the prevailing party shall be entitled to recover reasonable attorneys' fees and costs from the non-prevailing party.";
 const defaultTechnicalRider =
@@ -793,6 +793,30 @@ function ContractPage() {
 
   // Wrapper functions for extracted utilities
   const handleDownloadPdf = async () => {
+    // Validate required fields before generating the contract
+    const requiredFields: Array<keyof ContractForm> = [
+      "artistName",
+      "clientName",
+      "totalFee",
+      "eventDates",
+      "venueLocation",
+    ];
+
+    let allErrors: Record<string, string> = {};
+    requiredFields.forEach((field) => {
+      const errs = validateField(field as string, (form as any)[field]);
+      allErrors = { ...allErrors, ...errs };
+    });
+
+    if (Object.keys(allErrors).length > 0) {
+      setFieldErrors(allErrors);
+      showToast("Please fix the highlighted fields before generating the contract.", "error");
+      return;
+    }
+
+    // Clear previous field errors and proceed
+    setFieldErrors({});
+
     await downloadPdf(previewRef, form.eventName || "vocal-performance-agreement", showToast, getErrorMessage, setIsLoading);
   };
 

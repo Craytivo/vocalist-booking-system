@@ -74,7 +74,7 @@ export default function ContractPreview({ form, previewRef, draftId, showStandar
       
       <style>{PRINT_STYLES}</style>
       
-      <article className="print-contract bg-white max-w-[794px] shadow-lg" style={{ padding: '15mm' }}>
+      <article role="document" className="print-contract bg-white max-w-[794px] shadow-lg" style={{ padding: '15mm' }}>
         {form.artistLogo && (
           <div className="mb-6 flex justify-center">
             <img src={form.artistLogo} alt="Artist Logo" className="h-20 w-auto max-w-[200px] object-contain" />

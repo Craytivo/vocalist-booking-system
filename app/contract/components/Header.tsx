@@ -48,7 +48,7 @@ export default function Header({
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="sticky top-0 z-50 h-16 bg-slate-900/90 backdrop-blur-xl border-b border-primary/20 px-4 text-white shadow-lg shadow-slate-900/10 lg:px-8"
+      className="sticky top-0 z-50 h-16 bg-[#1f2937]/95 backdrop-blur-xl border-b border-slate-200/10 px-4 text-white shadow-lg shadow-slate-900/10 lg:px-8"
     >
       <div className="flex h-full items-center justify-between max-w-[1600px] mx-auto">
         {/* Left side - Branding */}

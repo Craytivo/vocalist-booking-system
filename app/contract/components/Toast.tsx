@@ -14,14 +14,14 @@ export default function Toast({ message, type, onDismiss }: ToastProps) {
           ? "bg-emerald-50 border-emerald-200 text-emerald-900" 
           : type === "error"
           ? "bg-red-50 border-red-200 text-red-900"
-          : "bg-amber-50 border-amber-200 text-amber-900"
+         : "bg-slate-100 border-slate-200 text-slate-800"
       }`}>
         <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${
           type === "success"
             ? "bg-emerald-500"
             : type === "error"
             ? "bg-red-500"
-            : "bg-amber-500"
+           : "bg-slate-700"
         }`}>
           {type === "success" ? (
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">

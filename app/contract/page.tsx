@@ -1678,20 +1678,20 @@ ${artistName}`;
   return (
     <>
       <style>{customScrollbarStyles}</style>
-      <main className="min-h-screen bg-gray-100 dark:bg-gray-900 text-stone-950 dark:text-stone-100">
+      <main className="min-h-screen bg-slate-100 text-slate-900">
       {/* Global Header */}
-      <header className="sticky top-0 z-50 h-16 bg-stone-950/90 backdrop-blur-xl border-b border-gray-400/20 px-4 text-gray-50 shadow-lg shadow-gray-900/10 lg:px-8">
+      <header className="sticky top-0 z-50 h-16 bg-slate-900/95 backdrop-blur-xl border-b border-slate-200/10 px-4 text-white shadow-lg shadow-slate-900/10 lg:px-8">
         <div className="flex h-full items-center justify-between max-w-[1600px] mx-auto">
           {/* Left side - Branding */}
           <div className="flex items-center gap-4">
-            <div className="flex h-9 w-9 items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="text-gray-300">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-600 bg-slate-800 text-slate-100 shadow-sm shadow-slate-900/20">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="text-slate-100">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
               </svg>
             </div>
             <div className="flex flex-col">
-              <h1 className="text-lg font-medium text-gray-50 tracking-normal font-heading">Setlist</h1>
-              <span className="text-caption font-medium text-gray-400/70 tracking-wide uppercase">{readinessScore}% ready</span>
+              <h1 className="text-lg font-medium text-white tracking-normal font-heading">Setlist</h1>
+              <span className="text-caption font-medium text-slate-300 tracking-wide uppercase">{readinessScore}% ready</span>
             </div>
           </div>
 
@@ -1704,7 +1704,7 @@ ${artistName}`;
                 aria-expanded={showQuickActions}
                 aria-haspopup="menu"
                 aria-controls="quick-actions-menu"
-                className="flex items-center gap-2 rounded-lg border border-gray-400/25 bg-gray-400/10 px-4 py-2 text-body font-medium text-gray-100 tracking-normal transition-colors hover:bg-gray-400/20"
+                className="flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-800/80 px-4 py-2 text-body font-medium text-white tracking-normal transition-colors hover:bg-slate-700"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="1"></circle>
@@ -1717,12 +1717,12 @@ ${artistName}`;
                 </svg>
               </button>
               {showQuickActions && (
-                <div id="quick-actions-menu" role="menu" className="absolute top-full mt-2 left-0 w-48 rounded-lg border border-gray-200 bg-white shadow-xl shadow-gray-950/10 py-1 z-50 dark:border-gray-500/20 dark:bg-stone-950 dark:shadow-black/30">
+                <div id="quick-actions-menu" role="menu" className="absolute top-full mt-2 left-0 w-48 rounded-lg border border-slate-200 bg-white shadow-xl shadow-slate-900/10 py-1 z-50">
                   <button
                     type="button"
                     onClick={() => { startNewContract(); setShowQuickActions(false); }}
                     role="menuitem"
-                    className="w-full px-4 py-2 text-left text-body font-regular text-neutral-700 tracking-normal hover:bg-neutral-50 transition-colors flex items-center gap-3 dark:text-stone-200 dark:hover:bg-stone-900"
+                    className="w-full px-4 py-2 text-left text-body font-regular text-slate-700 tracking-normal hover:bg-slate-50 transition-colors flex items-center gap-3"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12 5v14M5 12h14"/>
@@ -1733,7 +1733,7 @@ ${artistName}`;
                     type="button"
                     onClick={() => { handleDownloadPdf(); setShowQuickActions(false); }}
                     role="menuitem"
-                    className="w-full px-4 py-2 text-left text-body font-regular text-neutral-700 tracking-normal hover:bg-neutral-50 transition-colors flex items-center gap-3 dark:text-stone-200 dark:hover:bg-stone-900"
+                    className="w-full px-4 py-2 text-left text-body font-regular text-slate-700 tracking-normal hover:bg-slate-50 transition-colors flex items-center gap-3"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -1746,7 +1746,7 @@ ${artistName}`;
                     type="button"
                     onClick={() => { handleGenerateCalendarEvent(); setShowQuickActions(false); }}
                     role="menuitem"
-                    className="w-full px-4 py-2.5 text-left text-body font-medium text-neutral-700 tracking-normal hover:bg-neutral-50 hover:text-neutral-900 transition-colors flex items-center gap-3 dark:text-stone-200 dark:hover:bg-stone-900 dark:hover:text-stone-100"
+                    className="w-full px-4 py-2.5 text-left text-body font-medium text-slate-700 tracking-normal hover:bg-slate-50 hover:text-slate-900 transition-colors flex items-center gap-3"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -1760,7 +1760,7 @@ ${artistName}`;
                     type="button"
                     onClick={() => { setFocusMode(!focusMode); setShowQuickActions(false); }}
                     role="menuitem"
-                    className="w-full px-4 py-2 text-left text-body font-regular text-neutral-700 tracking-normal hover:bg-neutral-50 transition-colors flex items-center gap-3 dark:text-stone-200 dark:hover:bg-stone-900"
+                    className="w-full px-4 py-2 text-left text-body font-regular text-slate-700 tracking-normal hover:bg-slate-50 transition-colors flex items-center gap-3"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10"/>
@@ -1773,7 +1773,7 @@ ${artistName}`;
                     type="button"
                     onClick={() => { setWizardMode(!wizardMode); setShowQuickActions(false); if (!wizardMode) setWizardStep(1); }}
                     role="menuitem"
-                    className="w-full px-4 py-2 text-left text-body font-regular text-neutral-700 tracking-normal hover:bg-neutral-50 transition-colors flex items-center gap-3 dark:text-stone-200 dark:hover:bg-stone-900"
+                    className="w-full px-4 py-2 text-left text-body font-regular text-slate-700 tracking-normal hover:bg-slate-50 transition-colors flex items-center gap-3"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polygon points="5 3 19 12 5 21 5 3"/>
@@ -1788,17 +1788,17 @@ ${artistName}`;
           {/* Right side - User */}
           <div className="flex items-center">
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-300 text-stone-950 shadow-sm shadow-gray-500/30">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-700 text-white shadow-sm shadow-slate-900/20">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                   <circle cx="12" cy="7" r="4"/>
                 </svg>
               </div>
-              <p className="text-body font-medium text-gray-100/90 tracking-normal hidden sm:block">{userEmail || "User"}</p>
+              <p className="text-body font-medium text-slate-100/90 tracking-normal hidden sm:block">{userEmail || "User"}</p>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="p-2 rounded-lg text-gray-100 hover:bg-gray-400/10 transition-all focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-950"
+                className="p-2 rounded-lg text-slate-100 hover:bg-slate-700/80 transition-all focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
                 title="Sign out"
                 aria-label="Sign out"
               >

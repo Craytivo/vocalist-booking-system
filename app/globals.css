@@ -8,9 +8,13 @@
 
 body {
   margin: 0;
-  background: #f8fafc;
-  color: #0f172a;
+  background: linear-gradient(180deg, #f7f5f2 0%, #f4f1eb 100%);
+  color: #1f2937;
   font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+}
+
+html {
+  color-scheme: light;
 }
 
 /* Typography Scale */
@@ -42,35 +46,35 @@ body {
   --tracking-wider: 0.05em;
   --tracking-widest: 0.1em;
   
-  /* Color Palette - Refined */
-  --color-primary: #4f46e5; /* Indigo */
-  --color-primary-light: #6366f1;
-  --color-primary-dark: #4338ca;
+  /* Clean, professional palette */
+  --color-primary: #1f2937; /* charcoal */
+  --color-primary-light: #374151;
+  --color-primary-dark: #111827;
   
-  --color-secondary: #f59e0b; /* Amber */
-  --color-secondary-light: #fbbf24;
-  --color-secondary-dark: #d97706;
+  --color-secondary: #d6d3d1; /* warm stone */
+  --color-secondary-light: #e7e5e4;
+  --color-secondary-dark: #a8a29e;
   
-  --color-accent: #14b8a6; /* Teal */
-  --color-accent-light: #2dd4bf;
-  --color-accent-dark: #0d9488;
+  --color-accent: #6b8f71; /* muted sage */
+  --color-accent-light: #8aa88d;
+  --color-accent-dark: #56725d;
   
-  /* Neutral scale - Slate */
-  --color-slate-50: #f8fafc;
-  --color-slate-100: #f1f5f9;
-  --color-slate-200: #e2e8f0;
-  --color-slate-300: #cbd5e1;
-  --color-slate-400: #94a3b8;
-  --color-slate-500: #64748b;
-  --color-slate-600: #475569;
-  --color-slate-700: #334155;
-  --color-slate-800: #1e293b;
-  --color-slate-900: #0f172a;
+  /* Neutral scale - soft warm neutrals */
+  --color-slate-50: #f8f7f4;
+  --color-slate-100: #f3f1ee;
+  --color-slate-200: #e7e2db;
+  --color-slate-300: #d6d0c7;
+  --color-slate-400: #a9a29a;
+  --color-slate-500: #7c7067;
+  --color-slate-600: #5f524d;
+  --color-slate-700: #433c38;
+  --color-slate-800: #2d2a28;
+  --color-slate-900: #1b1a18;
   
   /* Semantic colors */
-  --color-success: #10b981; /* Emerald */
-  --color-warning: #f59e0b; /* Amber */
-  --color-error: #f43f5e; /* Rose */
+  --color-success: #3f7d5b; /* green */
+  --color-warning: #b7791f; /* muted amber */
+  --color-error: #b4535a; /* softened red */
   
   /* Spacing scale - 8px base */
   --space-1: 0.25rem; /* 4px */

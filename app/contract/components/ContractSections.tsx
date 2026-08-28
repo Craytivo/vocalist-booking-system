@@ -82,21 +82,38 @@ export function EngagementDetailsSection({ form, number }: { form: ContractForm;
   const displayValue = (value: string) => value || "________";
   const artistName = displayValue(form.artistName);
 
+  const hasMultipleStops = (form.eventDates || "").trim().includes("\n");
+  const parsedStops = (form.eventDates || "").split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+
   return (
     <ContractSection number={number} title="Engagement Details">
-      <p>
-        This Vocal Performance Agreement is entered into between {artistName}{" "}
-        and {displayValue(form.clientName)}, represented by{" "}
-        {displayValue(form.representativeName)}. The engagement is for{" "}
-        {displayValue(form.eventName)} taking place on{" "}
-        {displayValue(form.eventDates)} at {displayValue(form.venueLocation)}.
-      </p>
+      {!hasMultipleStops ? (
+        <p>
+          This Vocal Performance Agreement is entered into between {artistName}{" "}
+          and {displayValue(form.clientName)}, represented by{" "}
+          {displayValue(form.representativeName)}. The engagement is for{" "}
+          {displayValue(form.eventName)} taking place on{" "}
+          {displayValue(form.eventDates)} at {displayValue(form.venueLocation)}.
+        </p>
+      ) : (
+        <div>
+          <p>
+            This Vocal Performance Agreement is entered into between {artistName} and {displayValue(form.clientName)}, represented by {displayValue(form.representativeName)}. The engagement is for {displayValue(form.eventName)} and includes the following engagement stops:
+          </p>
+          <ul className="mt-3 list-disc pl-6 space-y-1">
+            {parsedStops.map((line, idx) => (
+              <li key={idx} className="break-words">{line}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {form.performanceDuration && (
         <ContractParagraph label="Performance Duration" value={form.performanceDuration} />
       )}
+
       <p className={`mt-3 sm:mt-4 text-neutral-700 ${FONT_SIZE_CLASSES.bodyCompact} md:${FONT_SIZE_CLASSES.bodyText} lg:${FONT_SIZE_CLASSES.bodyText} ${LINE_HEIGHT_CLASSES.body}`}>
-        Client contact details: {displayValue(form.email)} /{" "}
-        {displayValue(form.phoneNumber)}.
+        Client contact details: {displayValue(form.email)} / {displayValue(form.phoneNumber)}.
       </p>
     </ContractSection>
   );

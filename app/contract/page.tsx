@@ -825,7 +825,8 @@ function ContractPage() {
       setUserEmail(data.user?.email || "");
       setAuthStatus(data.user ? `Signed in as ${data.user.email}` : "Sign in required");
       if (!data.user) {
-        router.push("/login");
+        // Login route removed — do not redirect. Keep the app accessible in a signed-out state.
+        setAuthStatus("Sign in required");
       }
     });
 
@@ -841,7 +842,7 @@ function ContractPage() {
         setDraftId(null);
         setHasLoadedDraft(true);
         setSaveStatus("Sign in to save contracts");
-        router.push("/login");
+        // Login route removed — do not redirect users. Keep workspace state cleared for signed-out users.
       }
     });
 

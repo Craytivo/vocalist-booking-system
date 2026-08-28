@@ -123,14 +123,22 @@ export default function ContractPreview({ form, previewRef, draftId, showStandar
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-400 mb-1">Total Fee</p>
               <p className="text-base font-bold text-neutral-900 break-words">{totalFee}</p>
             </div>
-            <div className="flex flex-col">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-400 mb-1">Event Date</p>
-              <p className="text-sm font-semibold text-neutral-900 break-words">{displayValue(form.eventDates)}</p>
-            </div>
-            <div className="flex flex-col">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-400 mb-1">Venue</p>
-              <p className="text-sm font-semibold text-neutral-900 break-words">{displayValue(form.venueLocation)}</p>
-            </div>
+            {(() => {
+              const hasMultiple = (form.eventDates || "").includes("\n");
+              const firstLine = (form.eventDates || "").split(/\r?\n/).map(s => s.trim()).filter(Boolean)[0] || form.eventDates || "";
+              return (
+                <>
+                  <div className="flex flex-col">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-400 mb-1">Event Date</p>
+                    <p className="text-sm font-semibold text-neutral-900 break-words">{displayValue(hasMultiple ? firstLine : form.eventDates)}</p>
+                  </div>
+                  <div className="flex flex-col">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-400 mb-1">Venue</p>
+                    <p className="text-sm font-semibold text-neutral-900 break-words">{displayValue(hasMultiple ? 'Multiple locations' : form.venueLocation)}</p>
+                  </div>
+                </>
+              );
+            })()}
             <div className="flex flex-col">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-400 mb-1">Services</p>
               <p className="text-sm font-semibold text-neutral-900 break-words">{form.services.length > 0 ? `${form.services.length} selected` : "To be determined"}</p>

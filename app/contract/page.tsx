@@ -1145,7 +1145,7 @@ useEffect(() => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [draftId, supabase]);
+  }, []);
 
   // Load templates from localStorage
   useEffect(() => {
@@ -1190,18 +1190,18 @@ useEffect(() => {
 
   // Load offline draft when coming back online
   useEffect(() => {
-    if (isOnline && supabase) {
+    if (isOnline) {
       const offlineDraft = localStorage.getItem("offlineDraft");
       const offlineTimestamp = localStorage.getItem("offlineDraftTimestamp");
       if (offlineDraft && offlineTimestamp) {
         const timeDiff = Date.now() - parseInt(offlineTimestamp);
         // If offline draft is less than 24 hours old, offer to restore
         if (timeDiff < 86400000) {
-          showToast("Offline draft available - use Recent Contracts to restore", "info");
+          showToast("Offline draft available - restore from local drafts", "info");
         }
       }
     }
-  }, [isOnline, supabase]);
+  }, [isOnline]);
 
   const updateField = (field: keyof ContractForm, value: string | boolean) => {
     setForm((currentForm) => ({
@@ -1364,54 +1364,45 @@ useEffect(() => {
   };
 
   const limitVersions = async (contractId: string) => {
-    if (!supabase || !contractId) return;
-
-    // Get all versions for this contract
-    const { data: versions } = await supabase
-      .from("contract_versions")
-      .select("id, version_number")
-      .eq("contract_id", contractId)
-      .order("version_number", { ascending: false });
-
-    if (!versions || versions.length <= 20) return;
-
-    // Delete versions older than the last 20
-    const versionsToDelete = versions.slice(20);
-    for (const version of versionsToDelete) {
-      await supabase
-        .from("contract_versions")
-        .delete()
-        .eq("id", version.id);
+    // Local-only: ensure we keep only the most recent 20 versions in localStorage
+    if (!contractId) return;
+    try {
+      const key = `contractVersions:${contractId}`;
+      const raw = localStorage.getItem(key);
+      if (!raw) return;
+      const versions = JSON.parse(raw) as any[];
+      if (!Array.isArray(versions) || versions.length <= 20) return;
+      const trimmed = versions.slice(0, 20);
+      localStorage.setItem(key, JSON.stringify(trimmed));
+    } catch (err) {
+      console.error("limitVersions (local) error:", err);
     }
   };
 
   const loadContractVersions = async (contractId: string) => {
     try {
-      if (!supabase || !contractId) return;
+      if (!contractId) return;
 
-      let query = supabase
-        .from("contract_versions")
-        .select("*")
-        .eq("contract_id", contractId)
-        .order("version_number", { ascending: false });
-
-      if (workspace) {
-        query = query.eq("workspace_id", workspace.id);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error("Version load error:", error);
-        showToast(getErrorMessage(error, "load"), "error");
+      const key = `contractVersions:${contractId}`;
+      const raw = localStorage.getItem(key);
+      if (!raw) {
+        setContractVersions([]);
+        setShowVersionHistory(true);
         return;
       }
 
-      setContractVersions(data || []);
+      let versions = JSON.parse(raw) as any[];
+      if (!Array.isArray(versions)) versions = [];
+
+      if (workspace && workspace.id) {
+        versions = versions.filter((v) => v.workspace_id === workspace.id);
+      }
+
+      setContractVersions(versions);
       setShowVersionHistory(true);
-    } catch (error) {
-      console.error("Version load error:", error);
-      showToast(getErrorMessage(error, "load"), "error");
+    } catch (err) {
+      console.error("Version load error (local):", err);
+      showToast(getErrorMessage(err, "local"), "error");
     }
   };
 
@@ -1435,7 +1426,7 @@ useEffect(() => {
       setVersionToRestore(null);
     } catch (error) {
       console.error("Restore version error:", error);
-      showToast(getErrorMessage(error, "supabase"), "error");
+      showToast(getErrorMessage(error, "local"), "error");
     } finally {
       setIsLoading(false);
     }

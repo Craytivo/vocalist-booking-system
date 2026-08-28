@@ -688,9 +688,9 @@ function ContractPage() {
   const router = useRouter();
   const [form, setForm] = useState<ContractForm>(initialForm);
   const [draftId, setDraftId] = useState<string | null>(null);
-  const [authUser, setAuthUser] = useState<User | null>(null);
+  const [authUser, setAuthUser] = useState<any | null>(null);
   const [authStatus, setAuthStatus] = useState("Checking sign-in...");
-  const [workspace, setWorkspace] = useState<ArtistWorkspace | null>(null);
+  const [workspace, setWorkspace] = useState<any | null>(null);
   const [workspaceStatus, setWorkspaceStatus] = useState("Loading workspace...");
   const [saveStatus, setSaveStatus] = useState("Local draft");
   const [emailStatus, setEmailStatus] = useState("");

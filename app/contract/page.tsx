@@ -2848,6 +2848,7 @@ ${artistName}`;
         </section>
       </div>
       <ContractModals
+        supabase={null}
         showDeleteModal={showDeleteModal}
         showWorkspaceModal={showWorkspaceModal}
         showMailClientModal={showMailClientModal}

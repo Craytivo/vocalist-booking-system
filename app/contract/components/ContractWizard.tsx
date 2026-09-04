@@ -125,27 +125,30 @@ export default function ContractWizard({
   const [services, setServices] = useState<string[]>([]);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const servicesTouchedRef = useRef(false);
+  const formTouchedRef = useRef(false);
 
   const syncFromLegacyForm = useCallback(() => {
-    setValues((current) => ({
-      ...current,
-      artist: readField("Artist Name"),
-      artistEmail: readField("Artist Email"),
-      client: readField("Client / Organization Name"),
-      representative: readField("Representative Name"),
-      email: readField("Email"),
-      phone: readField("Phone Number"),
-      event: readField("Event / Project Name"),
-      date: readField("Event Date(s)"),
-      venue: readField("Venue / Location"),
-      duration: readField("Performance Duration"),
-      fee: readField("Total Fee"),
-      deposit: readField("Deposit Percentage (%)") || "50",
-      paymentMethod: readField("Payment Method"),
-      travel: readField("Travel Terms"),
-      cancellation: readField("Cancellation Terms"),
-      preset: readField("Booking Preset"),
-    }));
+    if (!formTouchedRef.current) {
+      setValues((current) => ({
+        ...current,
+        artist: readField("Artist Name"),
+        artistEmail: readField("Artist Email"),
+        client: readField("Client / Organization Name"),
+        representative: readField("Representative Name"),
+        email: readField("Email"),
+        phone: readField("Phone Number"),
+        event: readField("Event / Project Name"),
+        date: readField("Event Date(s)"),
+        venue: readField("Venue / Location"),
+        duration: readField("Performance Duration"),
+        fee: readField("Total Fee"),
+        deposit: readField("Deposit Percentage (%)") || "50",
+        paymentMethod: readField("Payment Method"),
+        travel: readField("Travel Terms"),
+        cancellation: readField("Cancellation Terms"),
+        preset: readField("Booking Preset"),
+      }));
+    }
 
     // The legacy form may hydrate asynchronously when editing an existing contract.
     // Once the user touches services in this wizard, the wizard becomes the source of truth
@@ -167,6 +170,7 @@ export default function ContractWizard({
   }, [externalWizardStep]);
 
   const update = useCallback((key: keyof typeof values, label: string, value: string) => {
+    formTouchedRef.current = true;
     setValues((current) => ({ ...current, [key]: value }));
     setField(label, value);
   }, []);
@@ -184,6 +188,7 @@ export default function ContractWizard({
     const preset = PRESETS.find((item) => item.label === label);
     if (!preset) return;
 
+    formTouchedRef.current = true;
     servicesTouchedRef.current = true;
     setField("Booking Preset", label);
     setField("Total Fee", preset.fee);
@@ -201,6 +206,7 @@ export default function ContractWizard({
   };
 
   const toggleService = (service: string) => {
+    formTouchedRef.current = true;
     servicesTouchedRef.current = true;
     setServices((current) => {
       const next = current.includes(service)

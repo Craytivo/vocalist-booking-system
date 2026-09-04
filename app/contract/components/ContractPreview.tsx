@@ -1,81 +1,86 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { ContractForm, ContractPreviewProps } from "../types/contract";
 import { getSectionNumber } from "../utils/sectionNumbering";
 import { PRINT_STYLES } from "./ContractPrintStyles";
 import { FONT_SIZE_CLASSES, FONT_FAMILY_CLASSES } from "./ContractTypography";
 import {
-  EngagementDetailsSection,
-  ScopeOfServicesSection,
-  CompensationSection,
-  TravelExpensesSection,
-  CancellationTermsSection,
-  TechnicalRequirementsSection,
-  TechnicalRiderSection,
-  MediaRightsSection,
-  ForceMajeureSection,
-  IndependentContractorSection,
-  PerformanceRequirementsSection,
-  FinancialLegalTermsSection,
-  RightsUsageSection,
-  AccommodationSection,
-  PerDiemSection,
-  CreditPublicitySection,
-  OperationalDetailsSection,
+  EngagementDetailsSection, ScopeOfServicesSection, CompensationSection, TravelExpensesSection,
+  CancellationTermsSection, TechnicalRequirementsSection, TechnicalRiderSection, MediaRightsSection,
+  ForceMajeureSection, IndependentContractorSection, PerformanceRequirementsSection, FinancialLegalTermsSection,
+  RightsUsageSection, AccommodationSection, PerDiemSection, CreditPublicitySection, OperationalDetailsSection,
   StandardLegalProtectionsSection,
 } from "./ContractSections";
 import { ContractSignatures } from "./ContractSignatures";
 
-export default function ContractPreview({ form, previewRef, draftId, showStandardClauses = true }: ContractPreviewProps) {
+const WIZARD_FIELD_MAP: Record<string, keyof ContractForm> = {
+  "artist name": "artistName", "artist email": "artistEmail", "client / organization": "clientName",
+  "client / organization name": "clientName", "primary contact": "representativeName", "representative name": "representativeName",
+  "client email": "email", "email": "email", "phone": "phoneNumber", "phone number": "phoneNumber",
+  "event / project name": "eventName", "event name": "eventName", "event date(s)": "eventDates", "event date(s) *": "eventDates",
+  "venue / location": "venueLocation", "venue / location *": "venueLocation", "performance duration": "performanceDuration",
+  "total fee": "totalFee", "deposit percentage (%)": "depositPercentage", "payment method": "paymentMethod",
+  "travel terms": "travelTerms", "cancellation terms": "cancellationTerms", "booking preset": "bookingPreset",
+};
+
+function normalizeLabel(value: string) {
+  return value.replace(/[\*•:]/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+function getWizardField(target: HTMLElement): keyof ContractForm | null {
+  const label = target.closest("label");
+  if (!label) return null;
+  const text = normalizeLabel(label.querySelector(":scope > span")?.textContent || label.textContent || "");
+  return WIZARD_FIELD_MAP[text] || null;
+}
+
+export default function ContractPreview({ form: incomingForm, previewRef, draftId, showStandardClauses = true }: ContractPreviewProps) {
+  const [liveForm, setLiveForm] = useState<ContractForm>(incomingForm);
+
+  useEffect(() => {
+    setLiveForm(incomingForm);
+  }, [incomingForm]);
+
+  useEffect(() => {
+    const handleWizardInput = (event: Event) => {
+      const target = event.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null;
+      if (!target || (target instanceof HTMLInputElement && target.type === "checkbox")) return;
+      const field = getWizardField(target);
+      if (!field) return;
+      setLiveForm((current) => ({ ...current, [field]: target.value }));
+    };
+    document.addEventListener("input", handleWizardInput, true);
+    document.addEventListener("change", handleWizardInput, true);
+    return () => {
+      document.removeEventListener("input", handleWizardInput, true);
+      document.removeEventListener("change", handleWizardInput, true);
+    };
+  }, []);
+
+  const form = liveForm;
+
   useEffect(() => {
     const handleCreateContract = (event: SubmitEvent) => {
       const submitter = event.submitter as HTMLElement | null;
       const label = submitter?.textContent?.replace(/\s+/g, " ").trim().toLowerCase();
       if (label !== "create contract") return;
-
       event.preventDefault();
       event.stopPropagation();
 
-      // Print a standalone copy of the contract. This avoids the CRM layout,
-      // hidden ancestors, transforms, and overflow containers affecting print.
       const contract = document.querySelector(".print-contract") as HTMLElement | null;
       if (!contract) return;
-
       const printWindow = window.open("", "contract-print", "width=900,height=1200");
-      if (!printWindow) {
-        window.print();
-        return;
-      }
-
-      const styles = Array.from(document.querySelectorAll("style"))
-        .map((style) => style.textContent || "")
-        .join("\n");
-      const linkedStyles = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
-        .map((link) => `<link rel="stylesheet" href="${(link as HTMLLinkElement).href}">`)
-        .join("\n");
-
+      if (!printWindow) { window.print(); return; }
+      const styles = Array.from(document.querySelectorAll("style")).map((style) => style.textContent || "").join("\n");
+      const linkedStyles = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).map((link) => `<link rel="stylesheet" href="${(link as HTMLLinkElement).href}">`).join("\n");
       printWindow.document.open();
       printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Vocal Performance Agreement</title>${linkedStyles}<style>${styles}</style><style>
-        html, body { margin: 0; padding: 0; background: #fff; }
-        body { padding: 18mm; box-sizing: border-box; }
-        .print-contract { display: block !important; visibility: visible !important; position: static !important; width: 100% !important; max-width: none !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; border: 0 !important; }
-        .print-contract, .print-contract * { visibility: visible !important; }
-        button, input, textarea, select, .no-print, .print-hidden, .zoom-controls { display: none !important; }
-        @page { size: Letter; margin: 0; }
-        @media print { body { padding: 18mm; } }
+        html,body{margin:0;padding:0;background:#fff} body{padding:18mm;box-sizing:border-box}.print-contract{display:block!important;visibility:visible!important;position:static!important;width:100%!important;max-width:none!important;padding:0!important;margin:0!important;box-shadow:none!important;border:0!important}.print-contract,.print-contract *{visibility:visible!important}button,input,textarea,select,.no-print,.print-hidden,.zoom-controls{display:none!important}@page{size:Letter;margin:0}@media print{body{padding:18mm}}
       </style></head><body>${contract.outerHTML}</body></html>`);
       printWindow.document.close();
-
-      const doPrint = () => {
-        printWindow.focus();
-        printWindow.print();
-      };
-      if (printWindow.document.readyState === "complete") {
-        window.setTimeout(doPrint, 150);
-      } else {
-        printWindow.addEventListener("load", () => window.setTimeout(doPrint, 150), { once: true });
-      }
+      const doPrint = () => { printWindow.focus(); printWindow.print(); };
+      if (printWindow.document.readyState === "complete") window.setTimeout(doPrint, 150);
+      else printWindow.addEventListener("load", () => window.setTimeout(doPrint, 150), { once: true });
     };
-
     document.addEventListener("submit", handleCreateContract, true);
     return () => document.removeEventListener("submit", handleCreateContract, true);
   }, []);
@@ -89,34 +94,11 @@ export default function ContractPreview({ form, previewRef, draftId, showStandar
   const balanceAmount = totalFeeNumber - depositAmount;
   const money = (value: number) => value.toLocaleString("en-CA", { style: "currency", currency: "CAD" });
   const totalFee = form.totalFee ? money(totalFeeNumber) : "________ CAD";
-
-  const engagementNumber = getSectionNumber("engagement", form);
-  const scopeNumber = getSectionNumber("scope", form);
-  const compensationNumber = getSectionNumber("compensation", form);
-  const travelNumber = getSectionNumber("travel", form);
-  const cancellationNumber = getSectionNumber("cancellation", form);
-  const technicalNumber = getSectionNumber("technical", form);
-  const technicalRiderNumber = getSectionNumber("technicalRider", form);
-  const mediaRightsNumber = getSectionNumber("mediaRights", form);
-  const forceMajeureNumber = getSectionNumber("forceMajeure", form);
-  const independentContractorNumber = getSectionNumber("independentContractor", form);
-  const performanceRequirementsNumber = getSectionNumber("performanceRequirements", form);
-  const financialLegalNumber = getSectionNumber("financialLegal", form);
-  const rightsUsageNumber = getSectionNumber("rightsUsage", form);
-  const accommodationNumber = getSectionNumber("accommodation", form);
-  const perDiemNumber = getSectionNumber("perDiem", form);
-  const publicityNumber = getSectionNumber("publicity", form);
-  const operationalNumber = getSectionNumber("operational", form);
-  const standardLegalNumber = getSectionNumber("standardLegalProtections", form);
-  const signaturesNumber = getSectionNumber("signatures", form);
+  const engagementNumber = getSectionNumber("engagement", form), scopeNumber = getSectionNumber("scope", form), compensationNumber = getSectionNumber("compensation", form), travelNumber = getSectionNumber("travel", form), cancellationNumber = getSectionNumber("cancellation", form), technicalNumber = getSectionNumber("technical", form), technicalRiderNumber = getSectionNumber("technicalRider", form), mediaRightsNumber = getSectionNumber("mediaRights", form), forceMajeureNumber = getSectionNumber("forceMajeure", form), independentContractorNumber = getSectionNumber("independentContractor", form), performanceRequirementsNumber = getSectionNumber("performanceRequirements", form), financialLegalNumber = getSectionNumber("financialLegal", form), rightsUsageNumber = getSectionNumber("rightsUsage", form), accommodationNumber = getSectionNumber("accommodation", form), perDiemNumber = getSectionNumber("perDiem", form), publicityNumber = getSectionNumber("publicity", form), operationalNumber = getSectionNumber("operational", form), standardLegalNumber = getSectionNumber("standardLegalProtections", form), signaturesNumber = getSectionNumber("signatures", form);
 
   return (
     <div ref={previewRef} className="bg-slate-100 p-4 sm:p-8 flex justify-center" style={{ fontFamily: "var(--font-legal)" }}>
-      {form.contractStatus === "Draft" && (
-        <div className="fixed inset-0 flex items-center justify-center pointer-events-none opacity-[0.035] print:hidden" aria-hidden="true">
-          <div className={`rotate-[-45deg] ${FONT_SIZE_CLASSES.contractTitle} font-bold text-slate-900 uppercase tracking-[0.2em] whitespace-nowrap ${FONT_FAMILY_CLASSES.heading}`}>DRAFT</div>
-        </div>
-      )}
+      {form.contractStatus === "Draft" && <div className="fixed inset-0 flex items-center justify-center pointer-events-none opacity-[0.035] print:hidden" aria-hidden="true"><div className={`rotate-[-45deg] ${FONT_SIZE_CLASSES.contractTitle} font-bold text-slate-900 uppercase tracking-[0.2em] whitespace-nowrap ${FONT_FAMILY_CLASSES.heading}`}>DRAFT</div></div>}
       <style>{PRINT_STYLES}</style>
       <article role="document" className="print-contract w-full max-w-[794px] overflow-hidden bg-white shadow-xl shadow-slate-900/10 ring-1 ring-slate-200 print:max-w-none print:shadow-none print:ring-0" style={{ padding: "15mm" }}>
         <header className="border-b border-slate-300 pb-6 mb-8"><div className="flex items-start justify-between gap-6"><div className="min-w-0"><div className="mb-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">Contract No. {draftId ? draftId.slice(0, 8).toUpperCase() : "DRAFT"}</div><h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-1">Vocal Performance Agreement</h1><p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">Professional Artist Services Agreement</p></div>{form.artistLogo && <img src={form.artistLogo} alt="Artist Logo" className="h-16 w-auto max-w-[150px] object-contain shrink-0" />}</div></header>

@@ -153,10 +153,9 @@ export function useContractAutosave({
         return;
       }
 
-      if (!data?.id) {
-        const missingDataError = new Error("The contract was saved but no contract ID was returned.");
-        setSaveStatus(getErrorMessage(missingDataError, "save"));
-        console.error("Autosave insert error: no contract ID returned", data);
+      if (!data || !data.id) {
+        setSaveStatus("Unable to save draft: no contract ID was returned.");
+        console.error("Autosave insert returned no contract data.");
         return;
       }
 

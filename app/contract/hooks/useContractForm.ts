@@ -1,4 +1,4 @@
-import { useState, ChangeEvent } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { ContractForm, DEFAULT_LEGAL_TEXT } from "../types/contract";
 
 interface UseContractFormProps { initialForm: ContractForm; }
@@ -18,11 +18,16 @@ function migrateLegalDefaults(form: ContractForm): ContractForm {
     ["waiverClause", "No waiver of any provision of this agreement shall be deemed a waiver of any other provision or of the same provision on any other occasion.", DEFAULT_LEGAL_TEXT.waiverClause],
     ["governingJurisdiction", "Any legal proceedings arising from this agreement shall be brought exclusively in the courts of the jurisdiction where the event takes place.", DEFAULT_LEGAL_TEXT.governingJurisdiction],
   ];
-  migrations.forEach(([field, legacy, replacement]) => {
-    if (next[field] === legacy) (next as any)[field] = replacement;
-  });
+  migrations.forEach(([field, legacy, replacement]) => { if (next[field] === legacy) (next as any)[field] = replacement; });
   return next;
 }
+
+const WIZARD_FIELD_MAP: Record<string, keyof ContractForm> = {
+  "Artist Name": "artistName", "Artist Email": "artistEmail", "Client / Organization Name": "clientName", "Representative Name": "representativeName",
+  "Email": "email", "Phone Number": "phoneNumber", "Event / Project Name": "eventName", "Event Date(s)": "eventDates", "Venue / Location": "venueLocation",
+  "Performance Duration": "performanceDuration", "Total Fee": "totalFee", "Deposit Percentage (%)": "depositPercentage", "Payment Method": "paymentMethod",
+  "Travel Terms": "travelTerms", "Cancellation Terms": "cancellationTerms", "Booking Preset": "bookingPreset",
+};
 
 export function useContractForm({ initialForm }: UseContractFormProps) {
   const [form, setForm] = useState<ContractForm>(() => migrateLegalDefaults(initialForm));
@@ -31,6 +36,21 @@ export function useContractForm({ initialForm }: UseContractFormProps) {
   const updateField = (field: keyof ContractForm, value: string | boolean) => setForm((currentForm) => ({ ...currentForm, [field]: value }));
   const handleTextChange = (field: keyof ContractForm) => (event: ChangeEvent<HTMLInputElement>) => updateField(field, event.target.value);
   const handleTextareaChange = (field: keyof ContractForm) => (event: ChangeEvent<HTMLTextAreaElement>) => updateField(field, event.target.value);
+
+  // Dedicated wizard -> preview bridge. It uses a custom event rather than
+  // intercepting native input/change events, so controlled wizard inputs remain
+  // fully interactive while the contract preview updates immediately.
+  useEffect(() => {
+    const handleWizardFieldChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ label?: string; value?: string }>).detail;
+      if (!detail?.label) return;
+      const field = WIZARD_FIELD_MAP[detail.label];
+      if (!field) return;
+      updateField(field, detail.value ?? "");
+    };
+    window.addEventListener("contract:wizard-field-change", handleWizardFieldChange);
+    return () => window.removeEventListener("contract:wizard-field-change", handleWizardFieldChange);
+  }, []);
 
   const validateField = (fieldName: string, value: any) => {
     const errors: Record<string, string> = {};

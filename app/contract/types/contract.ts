@@ -1,7 +1,8 @@
 // Contract Form Types for Production-Ready Contract System
 
+export type ContractStatus = "Draft" | "Negotiating" | "Confirmed" | "Completed" | "Cancelled";
+
 export interface ContractForm {
-  // Basic Information
   artistName: string;
   artistEmail: string;
   artistLogo: string;
@@ -13,9 +14,7 @@ export interface ContractForm {
   eventDates: string;
   venueLocation: string;
   dateOfAgreement: string;
-  contractStatus: "Draft" | "Ready" | "Sent" | "Signed";
-
-  // Financial Details
+  contractStatus: ContractStatus;
   totalFee: string;
   depositPercentage: string;
   paymentMethod: string;
@@ -24,20 +23,14 @@ export interface ContractForm {
   cancellationFee: string;
   insuranceRequired: boolean;
   insuranceDetails: string;
-
-  // Services
   services: string[];
   performanceDuration: string;
-
-  // Travel & Expenses
   travelRequired: boolean;
   travelTerms: string;
   accommodationRequired: boolean;
   accommodationDetails: string;
   perDiemRequired: boolean;
   perDiemDetails: string;
-
-  // Technical & Performance
   technicalRiderRequired: boolean;
   technicalRiderDetails: string;
   technicalRequirements: string;
@@ -47,8 +40,6 @@ export interface ContractForm {
   soundCheckDetails: string;
   hospitalityRequired: boolean;
   hospitalityDetails: string;
-
-  // Rights & Usage
   imageUsageAllowed: boolean;
   imageUsageTerms: string;
   merchandiseSalesAllowed: boolean;
@@ -57,8 +48,6 @@ export interface ContractForm {
   mediaRightsTerms: string;
   publicityTermsRequired: boolean;
   publicityTerms: string;
-
-  // Legal Terms
   cancellationTerms: string;
   independentContractorClause: string;
   forceMajeureIncluded: boolean;
@@ -69,15 +58,11 @@ export interface ContractForm {
   confidentialityClause: string;
   equipmentLiabilityClause: string;
   attorneyFeesClause: string;
-
-  // Operational
   securityRequired: boolean;
   securityDetails: string;
   parkingProvided: boolean;
   parkingDetails: string;
   guestListCount: string;
-
-  // Signatures
   artistSignerName: string;
   artistSignerTitle: string;
   artistSignature: string;
@@ -85,16 +70,12 @@ export interface ContractForm {
   clientSignerTitle: string;
   clientSignature: string;
   signedDate: string;
-
-  // Standard Legal Protections
   severabilityClause?: string;
   entireAgreementClause?: string;
   electronicSignatureClause?: string;
   amendmentClause?: string;
   waiverClause?: string;
   governingJurisdiction?: string;
-
-  // UI/Operational fields
   bookingPreset: string;
   deliverySubject: string;
   deliveryMessage: string;
@@ -131,7 +112,6 @@ export interface ContractPreviewProps {
   showStandardClauses?: boolean;
 }
 
-// Alberta-focused default clauses. These are drafting defaults, not a substitute for legal advice.
 export const DEFAULT_LEGAL_TEXT = {
   depositTerms: "A deposit of the stated percentage is payable upon acceptance of this Agreement and is applied toward the total Fee. The remaining balance is due on or before the date specified in the Compensation section. Amounts paid and obligations arising under this Agreement are subject to the cancellation provisions below.",
   latePaymentPenalty: "Any overdue undisputed amount may accrue interest at a rate of 1.5% per month, calculated monthly, or the maximum rate permitted by applicable law, whichever is lower. The Artist may suspend further services where an undisputed payment remains overdue after written notice.",

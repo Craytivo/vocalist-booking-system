@@ -1,16 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  MoreHorizontal,
-  Plus,
-  Download,
-  Calendar,
-  FileText,
-  BarChart3,
-  Circle,
-  Play,
-  LogOut,
-  User,
-} from "lucide-react";
+import { MoreHorizontal, Plus, Download, Calendar, FileText, BarChart3, Circle, Play, LogOut, User, ChevronDown } from "lucide-react";
 
 interface HeaderProps {
   readinessScore: number;
@@ -47,178 +36,123 @@ export default function Header({
   userEmail,
   handleLogout,
 }: HeaderProps) {
+  const actions = [
+    { label: "New Contract", icon: Plus, action: startNewContract },
+    { label: "Download PDF", icon: Download, action: downloadPdf },
+    { label: "Add to Calendar", icon: Calendar, action: generateCalendarEvent },
+    { label: "Templates", icon: FileText, action: () => setShowTemplateLibrary(true) },
+    { label: "Analytics", icon: BarChart3, action: () => setShowAnalytics(true) },
+  ];
+
   return (
     <motion.header
-      initial={{ y: -100, opacity: 0 }}
+      initial={{ y: -12, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="sticky top-0 z-50 h-16 bg-slate-900/90 backdrop-blur-xl border-b border-primary/20 px-4 text-white shadow-lg shadow-slate-900/10 lg:px-8"
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="sticky top-0 z-50 border-b border-slate-800/80 bg-slate-950/95 text-white shadow-lg shadow-slate-950/10 backdrop-blur-xl"
     >
-      <div className="flex h-full items-center justify-between max-w-[1600px] mx-auto">
-        {/* Left side - Branding */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="flex items-center gap-4"
-        >
-          <motion.div
-            whileHover={{ scale: 1.05, rotate: 5 }}
-            transition={{ duration: 0.2 }}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-primary/25 bg-slate-800 shadow-md shadow-black/20"
-          >
-            <Play size={18} fill="currentColor" className="text-primary" />
-          </motion.div>
-          <div className="flex flex-col">
-            <h1 className="text-lg font-semibold text-white tracking-tight font-display">Setlist</h1>
-            <motion.span
-              key={readinessScore}
-              initial={{ scale: 0.8, opacity: 0.5 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="text-xs text-slate-400"
-            >
-              {readinessScore}% ready
-            </motion.span>
+      <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between gap-4 px-4 lg:px-8">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/10">
+            <Play size={16} fill="currentColor" className="text-indigo-300" />
           </div>
-        </motion.div>
+          <div className="min-w-0">
+            <h1 className="truncate text-[15px] font-semibold tracking-tight text-white">Setlist</h1>
+            <div className="mt-0.5 flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden="true" />
+              <span className="text-[11px] font-medium text-slate-400">{readinessScore}% ready</span>
+            </div>
+          </div>
+        </div>
 
-        {/* Center - Quick Actions */}
-        <div className="hidden lg:flex items-center">
+        <div className="hidden lg:flex items-center gap-2">
+          <button
+            type="button"
+            onClick={startNewContract}
+            className="inline-flex items-center gap-2 rounded-lg bg-white px-3.5 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+          >
+            <Plus size={16} />
+            New Contract
+          </button>
+
           <div className="relative">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <button
               type="button"
               onClick={() => setShowQuickActions(!showQuickActions)}
               aria-expanded={showQuickActions}
               aria-haspopup="menu"
               aria-controls="quick-actions-menu"
-              className="flex items-center gap-2 rounded-lg border border-primary/25 bg-primary/10 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/20"
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-600 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
             >
               <MoreHorizontal size={16} />
-              Quick Actions
-              <motion.div
-                animate={{ rotate: showQuickActions ? 180 : 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-              </motion.div>
-            </motion.button>
+              More
+              <ChevronDown size={14} className={`transition-transform ${showQuickActions ? "rotate-180" : ""}`} />
+            </button>
+
             <AnimatePresence>
               {showQuickActions && (
                 <motion.div
-                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                  initial={{ opacity: 0, y: -5, scale: 0.98 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  id="quick-actions-menu" role="menu" className="absolute top-full mt-2 left-0 w-48 rounded-lg border border-slate-200 bg-white shadow-xl shadow-slate-900/10 py-1 z-50 dark:border-slate-700 dark:bg-slate-900"
+                  exit={{ opacity: 0, y: -5, scale: 0.98 }}
+                  id="quick-actions-menu"
+                  role="menu"
+                  className="absolute right-0 top-full mt-2 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-2xl shadow-slate-950/15 dark:border-slate-700 dark:bg-slate-900"
                 >
-                  <motion.button
-                    whileHover={{ x: 4 }}
+                  {actions.slice(1).map(({ label, icon: Icon, action }) => (
+                    <button
+                      key={label}
+                      type="button"
+                      role="menuitem"
+                      onClick={() => { action(); setShowQuickActions(false); }}
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                    >
+                      <Icon size={16} className="text-slate-500 dark:text-slate-400" />
+                      {label}
+                    </button>
+                  ))}
+                  <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
+                  <button
                     type="button"
-                    onClick={() => { startNewContract(); setShowQuickActions(false); }}
                     role="menuitem"
-                    className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-3 dark:text-slate-200 dark:hover:bg-slate-800"
-                  >
-                    <Plus size={16} />
-                    New Contract
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ x: 4 }}
-                    type="button"
-                    onClick={() => { downloadPdf(); setShowQuickActions(false); }}
-                    role="menuitem"
-                    className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-3 dark:text-slate-200 dark:hover:bg-slate-800"
-                  >
-                    <Download size={16} />
-                    Download PDF
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ x: 4 }}
-                    type="button"
-                    onClick={() => { generateCalendarEvent(); setShowQuickActions(false); }}
-                    role="menuitem"
-                    className="w-full px-4 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-primary transition-colors flex items-center gap-3 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-primary"
-                  >
-                    <Calendar size={16} />
-                    Add to Calendar
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ x: 4 }}
-                    type="button"
-                    onClick={() => { setShowTemplateLibrary(true); setShowQuickActions(false); }}
-                    role="menuitem"
-                    className="w-full px-4 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-primary transition-colors flex items-center gap-3 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-primary"
-                  >
-                    <FileText size={16} />
-                    Templates
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ x: 4 }}
-                    type="button"
-                    onClick={() => { setShowAnalytics(true); setShowQuickActions(false); }}
-                    role="menuitem"
-                    className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-3 dark:text-slate-200 dark:hover:bg-slate-800"
-                  >
-                    <BarChart3 size={16} />
-                    Analytics
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ x: 4 }}
-                    type="button"
                     onClick={() => { setFocusMode(!focusMode); setShowQuickActions(false); }}
-                    role="menuitem"
-                    className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-3 dark:text-slate-200 dark:hover:bg-slate-800"
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                   >
-                    <Circle size={16} />
-                    {focusMode ? "Exit Focus Mode" : "Enter Focus Mode"}
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ x: 4 }}
+                    <Circle size={16} className="text-slate-500" />
+                    {focusMode ? "Exit Focus Mode" : "Focus Mode"}
+                  </button>
+                  <button
                     type="button"
-                    onClick={() => { setWizardMode(!wizardMode); setShowQuickActions(false); if (!wizardMode) setWizardStep(1); }}
                     role="menuitem"
-                    className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-3 dark:text-slate-200 dark:hover:bg-slate-800"
+                    onClick={() => { setWizardMode(!wizardMode); setShowQuickActions(false); if (!wizardMode) setWizardStep(1); }}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                   >
-                    <Play size={16} />
-                    {wizardMode ? "Exit Wizard Mode" : "Enter Wizard Mode"}
-                  </motion.button>
+                    <Play size={16} className="text-slate-500" />
+                    {wizardMode ? "Exit Wizard" : "Guided Wizard"}
+                  </button>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
         </div>
 
-        {/* Right side - User */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="flex items-center"
-        >
-          <div className="flex items-center gap-3">
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white shadow-sm shadow-primary/30"
-            >
-              <User size={16} />
-            </motion.div>
-            <p className="text-sm font-medium text-white/90 hidden sm:block">{userEmail || "User"}</p>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              type="button"
-              onClick={handleLogout}
-              className="p-2 rounded-lg text-white hover:bg-primary/10 transition-all focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
-              title="Sign out"
-              aria-label="Sign out"
-            >
-              <LogOut size={18} />
-            </motion.button>
+        <div className="flex items-center gap-2">
+          <div className="hidden max-w-[180px] items-center gap-2 rounded-lg bg-white/5 px-2.5 py-1.5 sm:flex">
+            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-indigo-500/20 text-indigo-200">
+              <User size={15} />
+            </span>
+            <span className="truncate text-xs font-medium text-slate-300">{userEmail || "User"}</span>
           </div>
-        </motion.div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="rounded-lg p-2 text-slate-400 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+            title="Sign out"
+            aria-label="Sign out"
+          >
+            <LogOut size={17} />
+          </button>
+        </div>
       </div>
     </motion.header>
   );

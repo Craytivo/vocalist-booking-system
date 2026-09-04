@@ -39,6 +39,7 @@ class QueryBuilder implements PromiseLike<{ data: any; error: any }> {
   private maybeSingleMode = false;
   private orderField: string | null = null;
   private ascending = true;
+  private limitCount: number | null = null;
 
   constructor(table: string) {
     this.table = table;
@@ -76,6 +77,11 @@ class QueryBuilder implements PromiseLike<{ data: any; error: any }> {
   order(field: string, options?: { ascending?: boolean }) {
     this.orderField = field;
     this.ascending = options?.ascending !== false;
+    return this;
+  }
+
+  limit(count: number) {
+    this.limitCount = Math.max(0, Math.floor(count));
     return this;
   }
 
@@ -154,6 +160,9 @@ class QueryBuilder implements PromiseLike<{ data: any; error: any }> {
           const comparison = av > bv ? 1 : av < bv ? -1 : 0;
           return this.ascending ? comparison : -comparison;
         });
+      }
+      if (this.limitCount !== null) {
+        result = result.slice(0, this.limitCount);
       }
       const projected = result.map((row) => this.project(row));
       if (this.singleMode) {

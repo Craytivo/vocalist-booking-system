@@ -1,54 +1,38 @@
-// Dynamically import html2pdf to avoid SSR issues
+// Client-side PDF export for the contract document.
 let html2pdfLib: any = null;
 
 function getPageSize(pdf: any) {
   const pageSize = pdf.internal?.pageSize;
   const width = typeof pageSize?.getWidth === "function" ? pageSize.getWidth() : pageSize?.width;
   const height = typeof pageSize?.getHeight === "function" ? pageSize.getHeight() : pageSize?.height;
-
   return { width, height };
 }
 
 export function addPdfPageNumbers(pdf: any) {
-  const totalPages =
-    typeof pdf.internal?.getNumberOfPages === "function"
-      ? pdf.internal.getNumberOfPages()
-      : pdf.getNumberOfPages?.();
-
-  if (!totalPages) {
-    return;
-  }
-
+  const totalPages = typeof pdf.internal?.getNumberOfPages === "function"
+    ? pdf.internal.getNumberOfPages()
+    : pdf.getNumberOfPages?.();
+  if (!totalPages) return;
   const { width, height } = getPageSize(pdf);
-
-  if (!width || !height) {
-    return;
-  }
+  if (!width || !height) return;
 
   for (let pageNumber = 1; pageNumber <= totalPages; pageNumber++) {
     pdf.setPage(pageNumber);
-    pdf.setFontSize(9);
-    pdf.setTextColor(100);
-    pdf.text(`Page ${pageNumber} of ${totalPages}`, width - 12, height - 7, {
-      align: "right",
-    });
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(8);
+    pdf.setTextColor(110);
+    pdf.text(`Page ${pageNumber} of ${totalPages}`, width - 18, height - 9, { align: "right" });
+    pdf.setDrawColor(210);
+    pdf.setLineWidth(0.2);
+    pdf.line(18, height - 13, width - 18, height - 13);
   }
 }
 
 async function getHtml2pdfLib() {
-  if (html2pdfLib) {
-    return html2pdfLib;
-  }
-  
-  try {
-    const module = await import('html2pdf.js');
-    html2pdfLib = module.default;
-    console.log('html2pdf library imported successfully');
-    return html2pdfLib;
-  } catch (err) {
-    console.error('Failed to import html2pdf:', err);
-    throw new Error('Failed to load html2pdf library');
-  }
+  if (html2pdfLib) return html2pdfLib;
+  const module = await import("html2pdf.js");
+  html2pdfLib = module.default;
+  return html2pdfLib;
 }
 
 export async function downloadPdf(
@@ -60,159 +44,71 @@ export async function downloadPdf(
 ) {
   try {
     setIsLoading(true);
-    
-    if (!previewRef.current) {
-      showToast("Unable to locate preview container. Please try refreshing.", "error");
+    const source = previewRef.current?.querySelector("article[role=\"document\"]") || previewRef.current?.querySelector("article");
+    if (!source) {
+      showToast("Unable to locate the contract document.", "error");
       return;
     }
 
-    // Find the contract article element
-    let contractElement = previewRef.current.querySelector('article[role="document"]');
-    
-    if (!contractElement) {
-      contractElement = previewRef.current.querySelector('article');
-    }
-    
-    if (!contractElement) {
-      console.error("Contract element not found");
-      showToast("Unable to locate contract. Please ensure preview is loaded.", "error");
-      return;
-    }
+    showToast("Preparing professional PDF...", "info");
+    const Html2pdf = await getHtml2pdfLib();
+    const cloned = source.cloneNode(true) as HTMLElement;
 
-    // Show loading message
-    showToast("Preparing PDF...", "info");
+    cloned.querySelectorAll("button, input, textarea, select, .no-print, .print\:hidden, .zoom-controls").forEach((el) => el.remove());
+    cloned.style.cssText = "background:#fff;color:#111827;box-shadow:none;border:0;margin:0;padding:0;font-family:Georgia,'Times New Roman',serif;font-size:10.5pt;line-height:1.55;";
 
-    console.log("Getting html2pdf library...");
-    // Get html2pdf library
-    let Html2pdf;
-    try {
-      Html2pdf = await getHtml2pdfLib();
-    } catch (err) {
-      console.error("html2pdf library failed to load:", err);
-      showToast("PDF library is not available. Please try again.", "error");
-      return;
-    }
-
-    console.log("Starting PDF generation...");
-
-    // Clone and clean the element
-    const clonedElement = contractElement.cloneNode(true) as HTMLElement;
-
-    // Remove hidden UI elements
-    const hiddenSelectors = [
-      '[class*="print:hidden"]',
-      '[class*="no-print"]',
-      'button',
-      '.zoom-controls'
-    ];
-
-    hiddenSelectors.forEach(selector => {
-      try {
-        clonedElement.querySelectorAll(selector).forEach((el) => {
-          el.remove();
-        });
-      } catch (e) {
-        // Continue if selector fails
-      }
+    cloned.querySelectorAll("*").forEach((el: any) => {
+      const classes = typeof el.className === "string" ? el.className.split(/\s+/) : [];
+      el.className = classes.filter((c: string) =>
+        !c.startsWith("shadow-") &&
+        !c.startsWith("backdrop-") &&
+        !c.startsWith("hover:") &&
+        !c.startsWith("focus:") &&
+        !c.startsWith("dark:") &&
+        c !== "hidden"
+      ).join(" ");
+      if (el.tagName === "H1") el.style.cssText += "font-family:Arial,Helvetica,sans-serif;font-size:18pt;font-weight:700;color:#111827;margin-bottom:5pt;";
+      if (el.tagName === "H2") el.style.cssText += "font-family:Arial,Helvetica,sans-serif;font-size:12pt;font-weight:700;color:#111827;break-after:avoid;";
+      if (el.tagName === "H3") el.style.cssText += "font-family:Arial,Helvetica,sans-serif;font-size:10pt;font-weight:700;color:#374151;break-after:avoid;";
     });
 
-    // Clean Tailwind styling classes that may interfere
-    let classList: string[] = clonedElement.className.split(/\s+/);
-    classList = classList.filter((c: string) => {
-      return !(
-        c.startsWith('shadow-') ||
-        c.startsWith('backdrop-') ||
-        c.includes('dark:') ||
-        c.startsWith('hover:') ||
-        c.startsWith('focus:')
-      );
-    });
-    clonedElement.className = classList.join(' ');
+    const safeName = (eventName || "vocal-performance-agreement")
+      .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "vocal-performance-agreement";
+    const date = new Date().toISOString().slice(0, 10);
+    const filename = `${safeName}-${date}.pdf`;
 
-    // Apply export styles
-    Object.assign(clonedElement.style, {
-      boxShadow: 'none !important',
-      border: 'none !important',
-      backgroundColor: '#ffffff !important'
-    });
-
-    // Recursively clean child elements
-    clonedElement.querySelectorAll('*').forEach((el: any) => {
-      const classStr = typeof el.className === "string" ? el.className : '';
-      let classes: string[] = classStr.split(/\s+/);
-      classes = classes.filter((c: string) => {
-        return !(
-          c.startsWith('shadow-') ||
-          c.startsWith('backdrop-') ||
-          c.includes('dark:') ||
-          c.startsWith('hover:') ||
-          c.startsWith('focus:') ||
-          c.includes('border-gray-') ||
-          c.includes('bg-white/') ||
-          c === 'print:hidden' ||
-          c === 'hidden'
-        );
-      });
-      el.className = classes.join(' ');
-    });
-
-    // Generate filename
-    const timestamp = new Date().toISOString().split('T')[0];
-    const filename = eventName && eventName.trim()
-      ? `${eventName.toLowerCase().replace(/[^a-z0-9-]/g, '-').substring(0, 50)}-${timestamp}.pdf`
-      : `vocal-performance-agreement-${timestamp}.pdf`;
-
-    console.log("Generating PDF:", filename);
-
-    // PDF options
     const options = {
-      margin: [12, 12, 12, 12],
-      filename: filename,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { 
+      margin: [18, 18, 22, 18],
+      filename,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: {
         scale: 2,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#ffffff',
+        backgroundColor: "#ffffff",
         letterRendering: true,
-        foreignObjectRendering: false
       },
-      jsPDF: { 
-        format: 'a4',
-        orientation: 'portrait',
+      jsPDF: {
+        unit: "mm",
+        format: "letter",
+        orientation: "portrait",
         compress: true,
-        unit: 'mm'
       },
-      pagebreak: { 
-        mode: ['avoid-all', 'css', 'legacy'],
-        prevent: ['.no-break']
-      }
+      pagebreak: {
+        mode: ["css", "legacy"],
+        before: [".break-before-page", ".signatures", ".signature-section"],
+        avoid: ["section", ".break-inside-avoid", ".signature-section", ".signatures"],
+      },
     };
 
-    // Execute PDF generation and wait for completion
-    try {
-      const pdfWorker = Html2pdf()
-        .set(options)
-        .from(clonedElement)
-        .toPdf();
-
-      await pdfWorker.get("pdf").then((pdf: any) => {
-        addPdfPageNumbers(pdf);
-      });
-
-      await pdfWorker.save();
-      
-      console.log("PDF generated successfully");
-      showToast(`PDF downloaded: ${filename}`, "success");
-    } catch (err: any) {
-      console.error("PDF save error:", err);
-      showToast(`PDF generation failed: ${err?.message || 'Unknown error'}`, "error");
-    }
-
+    const worker = Html2pdf().set(options).from(cloned).toPdf();
+    await worker.get("pdf").then((pdf: any) => addPdfPageNumbers(pdf));
+    await worker.save();
+    showToast(`PDF ready: ${filename}`, "success");
   } catch (error) {
-    console.error("PDF download error:", error);
-    const msg = error instanceof Error ? error.message : String(error);
-    showToast(`Error: ${msg}`, "error");
+    console.error("PDF export error:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    showToast(`PDF generation failed: ${message}`, "error");
   } finally {
     setIsLoading(false);
   }

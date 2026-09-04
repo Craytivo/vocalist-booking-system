@@ -37,9 +37,6 @@ export function useContractForm({ initialForm }: UseContractFormProps) {
   const handleTextChange = (field: keyof ContractForm) => (event: ChangeEvent<HTMLInputElement>) => updateField(field, event.target.value);
   const handleTextareaChange = (field: keyof ContractForm) => (event: ChangeEvent<HTMLTextAreaElement>) => updateField(field, event.target.value);
 
-  // Dedicated wizard -> preview bridge. It uses a custom event rather than
-  // intercepting native input/change events, so controlled wizard inputs remain
-  // fully interactive while the contract preview updates immediately.
   useEffect(() => {
     const handleWizardFieldChange = (event: Event) => {
       const detail = (event as CustomEvent<{ label?: string; value?: string }>).detail;
@@ -48,8 +45,17 @@ export function useContractForm({ initialForm }: UseContractFormProps) {
       if (!field) return;
       updateField(field, detail.value ?? "");
     };
+    const handleWizardServicesChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ services?: string[] }>).detail;
+      if (!Array.isArray(detail?.services)) return;
+      setForm(currentForm => ({ ...currentForm, services: detail.services }));
+    };
     window.addEventListener("contract:wizard-field-change", handleWizardFieldChange);
-    return () => window.removeEventListener("contract:wizard-field-change", handleWizardFieldChange);
+    window.addEventListener("contract:wizard-services-change", handleWizardServicesChange);
+    return () => {
+      window.removeEventListener("contract:wizard-field-change", handleWizardFieldChange);
+      window.removeEventListener("contract:wizard-services-change", handleWizardServicesChange);
+    };
   }, []);
 
   const validateField = (fieldName: string, value: any) => {

@@ -54,7 +54,7 @@ export async function downloadPdf(
     const Html2pdf = await getHtml2pdfLib();
     const cloned = source.cloneNode(true) as HTMLElement;
 
-    cloned.querySelectorAll("button, input, textarea, select, .no-print, .print\:hidden, .zoom-controls").forEach((el) => el.remove());
+    cloned.querySelectorAll("button, input, textarea, select, .no-print, [class~='print:hidden'], .zoom-controls").forEach((el) => el.remove());
     cloned.style.cssText = "background:#fff;color:#111827;box-shadow:none;border:0;margin:0;padding:0;font-family:Georgia,'Times New Roman',serif;font-size:10.5pt;line-height:1.55;";
 
     cloned.querySelectorAll("*").forEach((el: any) => {

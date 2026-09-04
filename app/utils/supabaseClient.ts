@@ -187,6 +187,12 @@ const auth = {
     if (isBrowser()) window.localStorage.removeItem("setlist:current-user");
     return { error: null };
   },
+  async signInWithOAuth(_options: { provider: string; options?: Record<string, any> }) {
+    return {
+      data: null,
+      error: { message: "Google sign-in is unavailable in local workspace mode." },
+    };
+  },
   onAuthStateChange(callback: (event: string, session: { user: StoredUser } | null) => void) {
     let active = true;
     void auth.getUser().then(({ data }) => {

@@ -44,7 +44,7 @@ const WIZARD_FIELD_MAP: Record<string, keyof ContractForm> = {
 };
 
 function normalizedLabel(value: string) {
-  return value.replace(/\s+/g, " ").trim().toLowerCase();
+  return value.replace(/[\*•:]/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
 }
 
 export function useContractForm({ initialForm }: UseContractFormProps) {
@@ -55,9 +55,9 @@ export function useContractForm({ initialForm }: UseContractFormProps) {
   const handleTextChange = (field: keyof ContractForm) => (event: ChangeEvent<HTMLInputElement>) => updateField(field, event.target.value);
   const handleTextareaChange = (field: keyof ContractForm) => (event: ChangeEvent<HTMLTextAreaElement>) => updateField(field, event.target.value);
 
-  // The new booking wizard mirrors values into the legacy form controls so the
-  // existing contract preview can remain the single source of rendered output.
-  // Listen for those native events and immediately hydrate the React form state.
+  // The booking wizard is rendered inside the existing contract form. Its
+  // controls mirror into the legacy DOM fields via native input/change events.
+  // Capture those events here so the preview's React state updates immediately.
   useEffect(() => {
     const handleWizardInput = (event: Event) => {
       const target = event.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null;
@@ -87,7 +87,7 @@ export function useContractForm({ initialForm }: UseContractFormProps) {
       case "artistName": if (!value || value.trim() === "") errors.artistName = "Please enter your artist or stage name"; else if (value.trim().length > 100) errors.artistName = "Name is too long (max 100 characters)"; break;
       case "artistEmail": if (!value || value.trim() === "") errors.artistEmail = "Please enter your email address"; else if (!/^([^\s@]+)@([^\s@]+)\.([^\s@]+)$/.test(value)) errors.artistEmail = "Please enter a valid email address"; else if (value.trim().length > 255) errors.artistEmail = "Email is too long (max 255 characters)"; break;
       case "clientName": if (!value || value.trim() === "") errors.clientName = "Please enter the client or organization name"; else if (value.trim().length > 100) errors.clientName = "Name is too long (max 100 characters)"; break;
-      case "email": if (!value || value.trim() === "") errors.email = "Please enter the client's email address"; else if (!/^([^\s@]+)@([^\s@]+)\.([^\s@]+)$/.test(value)) errors.email = "Please enter a valid email address"; else if (value.trim().length > 255) errors.email = "Email is too long (max 255 characters)"; break;
+      case "email": if (!value || value.trim() === "") errors.email = "Please enter the client's email address"; else if (!/^([^\s@]+)@([^\s@]+)\.([^\s@]+)$/.test(value)) errors.email = "Please enter a valid email address"; break;
       case "eventName": if (!value || value.trim() === "") errors.eventName = "Please enter the event or performance name"; else if (value.trim().length > 200) errors.eventName = "Event name is too long (max 200 characters)"; break;
       case "eventDates": if (!value || value.trim() === "") errors.eventDates = "Please enter the event date(s)"; break;
       case "venueLocation": if (!value || value.trim() === "") errors.venueLocation = "Please enter the venue location or address"; else if (value.trim().length > 200) errors.venueLocation = "Location is too long (max 200 characters)"; break;

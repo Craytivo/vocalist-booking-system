@@ -1,4 +1,4 @@
-import { useState, useEffect, ChangeEvent } from "react";
+import { useState, ChangeEvent } from "react";
 import { ContractForm, DEFAULT_LEGAL_TEXT } from "../types/contract";
 
 interface UseContractFormProps { initialForm: ContractForm; }
@@ -24,29 +24,6 @@ function migrateLegalDefaults(form: ContractForm): ContractForm {
   return next;
 }
 
-const WIZARD_FIELD_MAP: Record<string, keyof ContractForm> = {
-  "Artist Name": "artistName",
-  "Artist Email": "artistEmail",
-  "Client / Organization Name": "clientName",
-  "Representative Name": "representativeName",
-  "Email": "email",
-  "Phone Number": "phoneNumber",
-  "Event / Project Name": "eventName",
-  "Event Date(s)": "eventDates",
-  "Venue / Location": "venueLocation",
-  "Performance Duration": "performanceDuration",
-  "Total Fee": "totalFee",
-  "Deposit Percentage (%)": "depositPercentage",
-  "Payment Method": "paymentMethod",
-  "Travel Terms": "travelTerms",
-  "Cancellation Terms": "cancellationTerms",
-  "Booking Preset": "bookingPreset",
-};
-
-function normalizedLabel(value: string) {
-  return value.replace(/[\*•:]/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
-}
-
 export function useContractForm({ initialForm }: UseContractFormProps) {
   const [form, setForm] = useState<ContractForm>(() => migrateLegalDefaults(initialForm));
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -54,32 +31,6 @@ export function useContractForm({ initialForm }: UseContractFormProps) {
   const updateField = (field: keyof ContractForm, value: string | boolean) => setForm((currentForm) => ({ ...currentForm, [field]: value }));
   const handleTextChange = (field: keyof ContractForm) => (event: ChangeEvent<HTMLInputElement>) => updateField(field, event.target.value);
   const handleTextareaChange = (field: keyof ContractForm) => (event: ChangeEvent<HTMLTextAreaElement>) => updateField(field, event.target.value);
-
-  // The booking wizard is rendered inside the existing contract form. Its
-  // controls mirror into the legacy DOM fields via native input/change events.
-  // Capture those events here so the preview's React state updates immediately.
-  useEffect(() => {
-    const handleWizardInput = (event: Event) => {
-      const target = event.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null;
-      if (!target || !target.closest("main") || target instanceof HTMLInputElement && target.type === "checkbox") return;
-
-      const label = target.closest("label");
-      const labelText = label?.querySelector(":scope > span")?.textContent || label?.textContent || "";
-      const normalized = normalizedLabel(labelText);
-      const entry = Object.entries(WIZARD_FIELD_MAP).find(([name]) => normalizedLabel(name) === normalized);
-      if (!entry) return;
-
-      const [, field] = entry;
-      updateField(field, target.value);
-    };
-
-    document.addEventListener("input", handleWizardInput, true);
-    document.addEventListener("change", handleWizardInput, true);
-    return () => {
-      document.removeEventListener("input", handleWizardInput, true);
-      document.removeEventListener("change", handleWizardInput, true);
-    };
-  }, []);
 
   const validateField = (fieldName: string, value: any) => {
     const errors: Record<string, string> = {};

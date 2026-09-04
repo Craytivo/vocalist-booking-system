@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../utils/supabaseClient";
 
 export interface LocalUser {
   id: string;
@@ -17,46 +16,28 @@ interface UseContractAuthProps {
 export function useContractAuth({ getErrorMessage, showToast, onLogout }: UseContractAuthProps) {
   const router = useRouter();
   const [authUser, setAuthUser] = useState<LocalUser | null>(null);
-  const [authStatus, setAuthStatus] = useState("Loading workspace...");
+  const [authStatus, setAuthStatus] = useState("Local workspace ready");
   const [userEmail, setUserEmail] = useState("");
   const [sessionTimeout, setSessionTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   const handleLogout = useCallback(async () => {
     try {
-      await supabase.auth.signOut();
       onLogout?.();
       setAuthUser(null);
       setUserEmail("");
       setAuthStatus("Local workspace ready");
+      router.push("/dashboard");
     } catch (error) {
       console.error("Logout error:", error);
       showToast(getErrorMessage(error, "workspace"), "error");
     }
-  }, [getErrorMessage, showToast, onLogout]);
+  }, [getErrorMessage, showToast, onLogout, router]);
 
   useEffect(() => {
-    let mounted = true;
-    supabase.auth.getUser().then(({ data }) => {
-      if (!mounted) return;
-      const user = data.user as LocalUser | null;
-      setAuthUser(user);
-      setUserEmail(user?.email || "");
-      setAuthStatus(user ? `Workspace: ${user.email}` : "Local workspace ready");
-    });
-
-    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!mounted) return;
-      const user = session?.user as LocalUser | null;
-      setAuthUser(user);
-      setUserEmail(user?.email || "");
-      setAuthStatus(user ? `Workspace: ${user.email}` : "Local workspace ready");
-    });
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, [router]);
+    // Authentication is intentionally local-only. The contract workspace does not
+    // depend on a remote authentication or database provider.
+    setAuthStatus("Local workspace ready");
+  }, []);
 
   useEffect(() => {
     const SESSION_TIMEOUT = 30 * 60 * 1000;

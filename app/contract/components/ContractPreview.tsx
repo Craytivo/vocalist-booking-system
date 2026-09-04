@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { ContractForm, ContractPreviewProps } from "../types/contract";
 import { getSectionNumber } from "../utils/sectionNumbering";
 import { PRINT_STYLES } from "./ContractPrintStyles";
-import { FONT_SIZE_CLASSES, LINE_HEIGHT_CLASSES, FONT_FAMILY_CLASSES } from "./ContractTypography";
+import { FONT_SIZE_CLASSES, FONT_FAMILY_CLASSES } from "./ContractTypography";
 import {
   EngagementDetailsSection,
   ScopeOfServicesSection,
@@ -33,7 +33,47 @@ export default function ContractPreview({ form, previewRef, draftId, showStandar
       if (label !== "create contract") return;
 
       event.preventDefault();
-      window.setTimeout(() => window.print(), 0);
+      event.stopPropagation();
+
+      // Print a standalone copy of the contract. This avoids the CRM layout,
+      // hidden ancestors, transforms, and overflow containers affecting print.
+      const contract = document.querySelector(".print-contract") as HTMLElement | null;
+      if (!contract) return;
+
+      const printWindow = window.open("", "contract-print", "width=900,height=1200");
+      if (!printWindow) {
+        window.print();
+        return;
+      }
+
+      const styles = Array.from(document.querySelectorAll("style"))
+        .map((style) => style.textContent || "")
+        .join("\n");
+      const linkedStyles = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+        .map((link) => `<link rel="stylesheet" href="${(link as HTMLLinkElement).href}">`)
+        .join("\n");
+
+      printWindow.document.open();
+      printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Vocal Performance Agreement</title>${linkedStyles}<style>${styles}</style><style>
+        html, body { margin: 0; padding: 0; background: #fff; }
+        body { padding: 18mm; box-sizing: border-box; }
+        .print-contract { display: block !important; visibility: visible !important; position: static !important; width: 100% !important; max-width: none !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; border: 0 !important; }
+        .print-contract, .print-contract * { visibility: visible !important; }
+        button, input, textarea, select, .no-print, .print-hidden, .zoom-controls { display: none !important; }
+        @page { size: Letter; margin: 0; }
+        @media print { body { padding: 18mm; } }
+      </style></head><body>${contract.outerHTML}</body></html>`);
+      printWindow.document.close();
+
+      const doPrint = () => {
+        printWindow.focus();
+        printWindow.print();
+      };
+      if (printWindow.document.readyState === "complete") {
+        window.setTimeout(doPrint, 150);
+      } else {
+        printWindow.addEventListener("load", () => window.setTimeout(doPrint, 150), { once: true });
+      }
     };
 
     document.addEventListener("submit", handleCreateContract, true);
@@ -77,69 +117,14 @@ export default function ContractPreview({ form, previewRef, draftId, showStandar
           <div className={`rotate-[-45deg] ${FONT_SIZE_CLASSES.contractTitle} font-bold text-slate-900 uppercase tracking-[0.2em] whitespace-nowrap ${FONT_FAMILY_CLASSES.heading}`}>DRAFT</div>
         </div>
       )}
-
       <style>{PRINT_STYLES}</style>
-
       <article role="document" className="print-contract w-full max-w-[794px] overflow-hidden bg-white shadow-xl shadow-slate-900/10 ring-1 ring-slate-200 print:max-w-none print:shadow-none print:ring-0" style={{ padding: "15mm" }}>
-        <header className="border-b border-slate-300 pb-6 mb-8">
-          <div className="flex items-start justify-between gap-6">
-            <div className="min-w-0">
-              <div className="mb-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">Contract No. {draftId ? draftId.slice(0, 8).toUpperCase() : "DRAFT"}</div>
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-1">Vocal Performance Agreement</h1>
-              <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">Professional Artist Services Agreement</p>
-            </div>
-            {form.artistLogo && <img src={form.artistLogo} alt="Artist Logo" className="h-16 w-auto max-w-[150px] object-contain shrink-0" />}
-          </div>
-        </header>
-
-        <section className="mb-7 grid grid-cols-1 sm:grid-cols-2 gap-5 border-b border-slate-200 pb-6 break-inside-avoid">
-          <div><p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Artist</p><p className="text-sm font-semibold text-slate-900 break-words">{artistName}</p><p className="text-xs text-slate-600 break-words">{artistEmail}</p></div>
-          <div className="sm:text-right"><p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Client</p><p className="text-sm font-semibold text-slate-900 break-words">{displayValue(form.clientName)}</p><p className="text-xs text-slate-600 break-words">{displayValue(form.email)}</p></div>
-        </section>
-
+        <header className="border-b border-slate-300 pb-6 mb-8"><div className="flex items-start justify-between gap-6"><div className="min-w-0"><div className="mb-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">Contract No. {draftId ? draftId.slice(0, 8).toUpperCase() : "DRAFT"}</div><h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-1">Vocal Performance Agreement</h1><p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">Professional Artist Services Agreement</p></div>{form.artistLogo && <img src={form.artistLogo} alt="Artist Logo" className="h-16 w-auto max-w-[150px] object-contain shrink-0" />}</div></header>
+        <section className="mb-7 grid grid-cols-1 sm:grid-cols-2 gap-5 border-b border-slate-200 pb-6 break-inside-avoid"><div><p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Artist</p><p className="text-sm font-semibold text-slate-900 break-words">{artistName}</p><p className="text-xs text-slate-600 break-words">{artistEmail}</p></div><div className="sm:text-right"><p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Client</p><p className="text-sm font-semibold text-slate-900 break-words">{displayValue(form.clientName)}</p><p className="text-xs text-slate-600 break-words">{displayValue(form.email)}</p></div></section>
         {form.dateOfAgreement && <div className="mb-7 text-xs font-medium text-slate-600"><span className="font-bold uppercase tracking-[0.12em] text-slate-400">Date of Agreement</span><span className="mx-2 text-slate-300">|</span>{form.dateOfAgreement}</div>}
-
-        <section className="mb-8 border border-slate-300 bg-slate-50 p-5 break-inside-avoid">
-          <h2 className="mb-4 border-b border-slate-200 pb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Commercial Summary</h2>
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-            <div><p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Total Fee</p><p className="mt-1 text-base font-bold text-slate-900">{totalFee}</p></div>
-            <div><p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Deposit</p><p className="mt-1 text-sm font-semibold text-slate-900">{form.totalFee ? `${money(depositAmount)} (${depositPercentageNumber}%)` : "________"}</p></div>
-            <div><p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Balance</p><p className="mt-1 text-sm font-semibold text-slate-900">{form.totalFee ? money(balanceAmount) : "________"}</p></div>
-            <div><p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Payment Method</p><p className="mt-1 text-sm font-semibold text-slate-900 break-words">{displayValue(form.paymentMethod)}</p></div>
-            {(() => {
-              const hasMultiple = (form.eventDates || "").includes("\n");
-              const firstLine = (form.eventDates || "").split(/\r?\n/).map(s => s.trim()).filter(Boolean)[0] || form.eventDates || "";
-              return <><div><p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Event Date</p><p className="mt-1 text-sm font-semibold text-slate-900 break-words">{displayValue(hasMultiple ? firstLine : form.eventDates)}</p></div><div><p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Venue</p><p className="mt-1 text-sm font-semibold text-slate-900 break-words">{displayValue(hasMultiple ? "Multiple locations" : form.venueLocation)}</p></div></>;
-            })()}
-            <div className="col-span-2"><p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Services</p><p className="mt-1 text-sm font-semibold text-slate-900 break-words">{form.services.length > 0 ? form.services.join(" · ") : "To be determined"}</p></div>
-          </div>
-        </section>
-
-        <div className="space-y-8 text-sm leading-relaxed text-slate-800">
-          <EngagementDetailsSection form={form} number={engagementNumber} />
-          <ScopeOfServicesSection form={form} number={scopeNumber} />
-          <CompensationSection form={form} number={compensationNumber} />
-          {form.travelRequired && <TravelExpensesSection form={form} number={travelNumber} />}
-          <CancellationTermsSection form={form} number={cancellationNumber} />
-          <TechnicalRequirementsSection form={form} number={technicalNumber} />
-          {form.technicalRiderRequired && <TechnicalRiderSection form={form} number={technicalRiderNumber} />}
-          {form.mediaRightsAllowed && <MediaRightsSection form={form} number={mediaRightsNumber} />}
-          {form.forceMajeureIncluded && <ForceMajeureSection form={form} number={forceMajeureNumber} />}
-          <IndependentContractorSection form={form} number={independentContractorNumber} />
-          {(form.rehearsalRequired || form.soundCheckRequired || form.hospitalityRequired) && <PerformanceRequirementsSection form={form} number={performanceRequirementsNumber} />}
-          <FinancialLegalTermsSection form={form} number={financialLegalNumber} />
-          {(form.imageUsageAllowed || form.merchandiseSalesAllowed) && <RightsUsageSection form={form} number={rightsUsageNumber} />}
-          {form.accommodationRequired && <AccommodationSection form={form} number={accommodationNumber} />}
-          {form.perDiemRequired && <PerDiemSection form={form} number={perDiemNumber} />}
-          {form.publicityTermsRequired && <CreditPublicitySection form={form} number={publicityNumber} />}
-          {(form.securityRequired || form.parkingProvided) && <OperationalDetailsSection form={form} number={operationalNumber} />}
-          {showStandardClauses && <StandardLegalProtectionsSection form={form} number={standardLegalNumber} />}
-          <div className="signatures"><ContractSignatures form={form} sectionNumber={signaturesNumber} /></div>
-        </div>
-
-        <footer className="mt-12 border-t border-slate-300 pt-5 text-center break-inside-avoid">
-          <p className="text-[9px] leading-4 text-slate-500">This Agreement is intended to record the parties' commercial understanding. It is governed by the laws of Alberta and the applicable federal laws of Canada. Each party should obtain independent legal advice where appropriate.</p>
-        </footer>
+        <section className="mb-8 border border-slate-300 bg-slate-50 p-5 break-inside-avoid"><h2 className="mb-4 border-b border-slate-200 pb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Commercial Summary</h2><div className="grid grid-cols-2 gap-x-6 gap-y-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Total Fee</p><p className="mt-1 text-base font-bold text-slate-900">{totalFee}</p></div><div><p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Deposit</p><p className="mt-1 text-sm font-semibold text-slate-900">{form.totalFee ? `${money(depositAmount)} (${depositPercentageNumber}%)` : "________"}</p></div><div><p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Balance</p><p className="mt-1 text-sm font-semibold text-slate-900">{form.totalFee ? money(balanceAmount) : "________"}</p></div><div><p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Payment Method</p><p className="mt-1 text-sm font-semibold text-slate-900 break-words">{displayValue(form.paymentMethod)}</p></div>{(() => { const hasMultiple = (form.eventDates || "").includes("\n"); const firstLine = (form.eventDates || "").split(/\r?\n/).map(s => s.trim()).filter(Boolean)[0] || form.eventDates || ""; return <><div><p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Event Date</p><p className="mt-1 text-sm font-semibold text-slate-900 break-words">{displayValue(hasMultiple ? firstLine : form.eventDates)}</p></div><div><p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Venue</p><p className="mt-1 text-sm font-semibold text-slate-900 break-words">{displayValue(hasMultiple ? "Multiple locations" : form.venueLocation)}</p></div></> })()}<div className="col-span-2"><p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Services</p><p className="mt-1 text-sm font-semibold text-slate-900 break-words">{form.services.length > 0 ? form.services.join(" · ") : "To be determined"}</p></div></div></section>
+        <div className="space-y-8 text-sm leading-relaxed text-slate-800"><EngagementDetailsSection form={form} number={engagementNumber} /><ScopeOfServicesSection form={form} number={scopeNumber} /><CompensationSection form={form} number={compensationNumber} />{form.travelRequired && <TravelExpensesSection form={form} number={travelNumber} />}<CancellationTermsSection form={form} number={cancellationNumber} /><TechnicalRequirementsSection form={form} number={technicalNumber} />{form.technicalRiderRequired && <TechnicalRiderSection form={form} number={technicalRiderNumber} />}{form.mediaRightsAllowed && <MediaRightsSection form={form} number={mediaRightsNumber} />}{form.forceMajeureIncluded && <ForceMajeureSection form={form} number={forceMajeureNumber} />}<IndependentContractorSection form={form} number={independentContractorNumber} />{(form.rehearsalRequired || form.soundCheckRequired || form.hospitalityRequired) && <PerformanceRequirementsSection form={form} number={performanceRequirementsNumber} />}<FinancialLegalTermsSection form={form} number={financialLegalNumber} />{(form.imageUsageAllowed || form.merchandiseSalesAllowed) && <RightsUsageSection form={form} number={rightsUsageNumber} />}{form.accommodationRequired && <AccommodationSection form={form} number={accommodationNumber} />}{form.perDiemRequired && <PerDiemSection form={form} number={perDiemNumber} />}{form.publicityTermsRequired && <CreditPublicitySection form={form} number={publicityNumber} />}{(form.securityRequired || form.parkingProvided) && <OperationalDetailsSection form={form} number={operationalNumber} />}{showStandardClauses && <StandardLegalProtectionsSection form={form} number={standardLegalNumber} />}<div className="signatures"><ContractSignatures form={form} sectionNumber={signaturesNumber} /></div></div>
+        <footer className="mt-12 border-t border-slate-300 pt-5 text-center break-inside-avoid"><p className="text-[9px] leading-4 text-slate-500">This Agreement is intended to record the parties' commercial understanding. It is governed by the laws of Alberta and the applicable federal laws of Canada. Each party should obtain independent legal advice where appropriate.</p></footer>
       </article>
     </div>
   );

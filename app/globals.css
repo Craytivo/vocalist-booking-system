@@ -5,46 +5,28 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body { margin: 0; background: #f6f7fb; color: #0f172a; font-family: var(--font-body), system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
-
-:root {
-  --font-heading: var(--font-heading); --font-body: var(--font-body); --font-legal: var(--font-legal);
-  --color-primary: #4f46e5; --color-primary-light: #6366f1; --color-primary-dark: #4338ca;
-  --color-secondary: #f59e0b; --color-accent: #14b8a6; --color-success: #10b981; --color-warning: #f59e0b; --color-error: #f43f5e;
-  --text-xs: .75rem; --text-sm: .875rem; --text-base: 1rem; --text-lg: 1.125rem; --text-xl: 1.25rem; --text-2xl: 1.5rem; --text-3xl: 1.875rem; --text-4xl: 2.25rem; --text-5xl: 3rem; --text-6xl: 3.75rem;
-  --leading-tight: 1.25; --leading-normal: 1.5; --leading-relaxed: 1.625;
-  --tracking-tight: -.025em; --tracking-normal: 0; --tracking-wide: .025em; --tracking-wider: .05em; --tracking-widest: .1em;
-}
-
-.font-display, .font-heading { font-family: var(--font-heading), system-ui, sans-serif; }
-.font-body { font-family: var(--font-body), system-ui, sans-serif; }
+:root { --font-heading: var(--font-heading); --font-body: var(--font-body); --font-legal: var(--font-legal); --color-primary: #4f46e5; --color-primary-light: #6366f1; --color-primary-dark: #4338ca; --color-secondary: #f59e0b; --color-accent: #14b8a6; --color-success: #10b981; --color-warning: #f59e0b; --color-error: #f43f5e; --text-xs: .75rem; --text-sm: .875rem; --text-base: 1rem; --text-lg: 1.125rem; --text-xl: 1.25rem; --text-2xl: 1.5rem; --text-3xl: 1.875rem; --text-4xl: 2.25rem; --text-5xl: 3rem; --text-6xl: 3.75rem; --leading-tight: 1.25; --leading-normal: 1.5; --leading-relaxed: 1.625; --tracking-tight: -.025em; --tracking-normal: 0; --tracking-wide: .025em; --tracking-wider: .05em; --tracking-widest: .1em; }
+.font-display, .font-heading { font-family: var(--font-heading), system-ui, sans-serif; } .font-body { font-family: var(--font-body), system-ui, sans-serif; }
 .text-xs { font-size: var(--text-xs); } .text-sm { font-size: var(--text-sm); } .text-base { font-size: var(--text-base); } .text-lg { font-size: var(--text-lg); } .text-xl { font-size: var(--text-xl); } .text-2xl { font-size: var(--text-2xl); } .text-3xl { font-size: var(--text-3xl); } .text-4xl { font-size: var(--text-4xl); } .text-5xl { font-size: var(--text-5xl); } .text-6xl { font-size: var(--text-6xl); }
 .leading-tight { line-height: var(--leading-tight); } .leading-normal { line-height: var(--leading-normal); } .leading-relaxed { line-height: var(--leading-relaxed); }
 .tracking-tight { letter-spacing: var(--tracking-tight); } .tracking-normal { letter-spacing: var(--tracking-normal); } .tracking-wide { letter-spacing: var(--tracking-wide); } .tracking-wider { letter-spacing: var(--tracking-wider); } .tracking-widest { letter-spacing: var(--tracking-widest); }
 button, input, textarea, select { font: inherit; } button { -webkit-tap-highlight-color: transparent; }
-::selection { background: rgb(99 102 241 / .16); }
-:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+::selection { background: rgb(99 102 241 / .16); } :focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
 ::-webkit-scrollbar { width: 8px; height: 8px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgb(100 116 139 / .22); border-radius: 999px; } ::-webkit-scrollbar-thumb:hover { background: rgb(100 116 139 / .36); } * { scrollbar-width: thin; scrollbar-color: rgb(100 116 139 / .22) transparent; }
 
-/* Contract workspace redesign. Scoped with :has() so the dashboard keeps its existing appearance. */
+/* Contract workspace redesign. Scoped so the dashboard can have its own SaaS treatment. */
 main:has(.print-contract-container) { background: #f7f8fa !important; color: #111827 !important; }
 main:has(.print-contract-container) > header { background: #fff !important; color: #111827 !important; border-bottom: 1px solid #e5e7eb !important; box-shadow: 0 1px 3px rgb(15 23 42 / .06) !important; backdrop-filter: none !important; }
 main:has(.print-contract-container) > header h1, main:has(.print-contract-container) > header span, main:has(.print-contract-container) > header button { color: #111827 !important; }
-main:has(.print-contract-container) > header button { background: #fff !important; border-color: #e5e7eb !important; }
-main:has(.print-contract-container) > header button:hover { background: #f9fafb !important; border-color: #d1d5db !important; }
-
+main:has(.print-contract-container) > header button { background: #fff !important; border-color: #e5e7eb !important; } main:has(.print-contract-container) > header button:hover { background: #f9fafb !important; border-color: #d1d5db !important; }
 main:has(.print-contract-container) form { color: #111827; }
 main:has(.print-contract-container) form > fieldset { border: 1px solid #e5e7eb; border-radius: 16px; background: #fff; padding: 24px; box-shadow: 0 1px 2px rgb(15 23 42 / .03); }
 main:has(.print-contract-container) form > fieldset > legend { padding: 0 8px; font-size: 1rem; font-weight: 650; color: #111827 !important; letter-spacing: -.01em; }
 main:has(.print-contract-container) form input, main:has(.print-contract-container) form textarea, main:has(.print-contract-container) form select { color: #111827 !important; background: #fff !important; border-color: #d1d5db !important; box-shadow: none !important; }
 main:has(.print-contract-container) form input::placeholder, main:has(.print-contract-container) form textarea::placeholder { color: #9ca3af !important; }
 main:has(.print-contract-container) form input:focus, main:has(.print-contract-container) form textarea:focus, main:has(.print-contract-container) form select:focus { border-color: #111827 !important; box-shadow: 0 0 0 3px rgb(17 24 39 / .08) !important; }
-
-/* Make the opening three steps feel like a guided booking intake. */
 main:has(.print-contract-container) form > fieldset:first-of-type::before, main:has(.print-contract-container) form > fieldset:nth-of-type(2)::before, main:has(.print-contract-container) form > fieldset:nth-of-type(3)::before { display: block; margin-bottom: 16px; font-size: .7rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #6b7280; }
-main:has(.print-contract-container) form > fieldset:first-of-type::before { content: "01 · Artist"; }
-main:has(.print-contract-container) form > fieldset:nth-of-type(2)::before { content: "02 · Booking"; }
-main:has(.print-contract-container) form > fieldset:nth-of-type(3)::before { content: "03 · Client"; }
-
+main:has(.print-contract-container) form > fieldset:first-of-type::before { content: "01 · Artist"; } main:has(.print-contract-container) form > fieldset:nth-of-type(2)::before { content: "02 · Booking"; } main:has(.print-contract-container) form > fieldset:nth-of-type(3)::before { content: "03 · Client"; }
 main:has(.print-contract-container) .rounded-2xl.border-gray-200\/80, main:has(.print-contract-container) .rounded-xl.border-gray-300, main:has(.print-contract-container) .rounded-xl.border-gray-200 { background: #fff !important; border-color: #e5e7eb !important; box-shadow: 0 1px 2px rgb(15 23 42 / .04) !important; backdrop-filter: none !important; }
 main:has(.print-contract-container) .bg-gray-100, main:has(.print-contract-container) .bg-gray-50\/40, main:has(.print-contract-container) .bg-white\/80, main:has(.print-contract-container) .bg-white\/60 { background-color: #fff !important; }
 main:has(.print-contract-container) .text-stone-700, main:has(.print-contract-container) .text-stone-600, main:has(.print-contract-container) .text-gray-700, main:has(.print-contract-container) .text-gray-800 { color: #374151 !important; }
@@ -54,52 +36,31 @@ main:has(.print-contract-container) .bg-stone-950 { background: #111827 !importa
 main:has(.print-contract-container) .border-gray-200, main:has(.print-contract-container) .border-gray-300, main:has(.print-contract-container) .border-gray-400\/20 { border-color: #e5e7eb !important; }
 main:has(.print-contract-container) .print-contract-container { background: #fff !important; border-color: #e5e7eb !important; box-shadow: 0 8px 30px rgb(15 23 42 / .06) !important; backdrop-filter: none !important; }
 main:has(.print-contract-container) .print-contract-container > .absolute { display: none; }
-
-/* Improve section rhythm and readability. */
 main:has(.print-contract-container) form > div.space-y-8 > * { border-color: #e5e7eb; }
 main:has(.print-contract-container) form > div.space-y-8 .rounded-xl, main:has(.print-contract-container) form > div.space-y-8 .rounded-2xl { border-radius: 14px; }
-
-/* Contract-page contrast pass. Every control gets an explicit readable text color. */
 main:has(.print-contract-container) button { color: #1f2937 !important; }
-main:has(.print-contract-container) button.bg-stone-950,
-main:has(.print-contract-container) button.bg-neutral-950,
-main:has(.print-contract-container) button.bg-slate-950,
-main:has(.print-contract-container) button.bg-indigo-600,
-main:has(.print-contract-container) button.bg-indigo-700,
-main:has(.print-contract-container) button[class*="bg-gradient-"] { color: #fff !important; }
+main:has(.print-contract-container) button.bg-stone-950, main:has(.print-contract-container) button.bg-neutral-950, main:has(.print-contract-container) button.bg-slate-950, main:has(.print-contract-container) button.bg-indigo-600, main:has(.print-contract-container) button.bg-indigo-700, main:has(.print-contract-container) button[class*="bg-gradient-"] { color: #fff !important; }
 main:has(.print-contract-container) button:disabled { color: #6b7280 !important; }
-main:has(.print-contract-container) button.bg-stone-950:disabled,
-main:has(.print-contract-container) button.bg-neutral-950:disabled,
-main:has(.print-contract-container) button.bg-slate-950:disabled,
-main:has(.print-contract-container) button.bg-indigo-600:disabled,
-main:has(.print-contract-container) button.bg-indigo-700:disabled { color: #fff !important; opacity: .5; }
-
-/* The Form / Preview switch is intentionally high contrast on every viewport. */
+main:has(.print-contract-container) button.bg-stone-950:disabled, main:has(.print-contract-container) button.bg-neutral-950:disabled, main:has(.print-contract-container) button.bg-slate-950:disabled, main:has(.print-contract-container) button.bg-indigo-600:disabled, main:has(.print-contract-container) button.bg-indigo-700:disabled { color: #fff !important; opacity: .5; }
 main:has(.print-contract-container) button[class*="min-h-[48px]"] { color: #374151 !important; background: #fff !important; border: 1px solid #e5e7eb !important; }
 main:has(.print-contract-container) button[class*="min-h-[48px]"][class*="bg-stone-950"] { color: #fff !important; background: #111827 !important; border-color: #111827 !important; }
+main:has(.print-contract-container) .text-gray-400, main:has(.print-contract-container) .text-gray-500, main:has(.print-contract-container) .text-stone-400, main:has(.print-contract-container) .text-stone-500, main:has(.print-contract-container) .text-neutral-400, main:has(.print-contract-container) .text-neutral-500 { color: #6b7280 !important; }
 
-/* Small muted copy should remain readable against white/light panels. */
-main:has(.print-contract-container) .text-gray-400,
-main:has(.print-contract-container) .text-gray-500,
-main:has(.print-contract-container) .text-stone-400,
-main:has(.print-contract-container) .text-stone-500,
-main:has(.print-contract-container) .text-neutral-400,
-main:has(.print-contract-container) .text-neutral-500 { color: #6b7280 !important; }
+/* Linear × Attio visual language: restrained motion, crisp hierarchy, indigo used only for meaning. */
+main:not(:has(.print-contract-container)) h1, main:not(:has(.print-contract-container)) h2, main:not(:has(.print-contract-container)) h3 { letter-spacing: -.025em; }
+main:not(:has(.print-contract-container)) a, main:not(:has(.print-contract-container)) button, main:not(:has(.print-contract-container)) article, main:not(:has(.print-contract-container)) input, main:not(:has(.print-contract-container)) select { transition-duration: 180ms; transition-timing-function: cubic-bezier(.2,.8,.2,1); }
+main:not(:has(.print-contract-container)) article[draggable="true"] { cursor: grab; }
+main:not(:has(.print-contract-container)) article[draggable="true"]:active { cursor: grabbing; transform: rotate(.35deg) scale(.99); }
+main:not(:has(.print-contract-container)) .animate-pulse { animation-duration: 1.4s; }
 
-@media (min-width: 768px) {
-  main:has(.print-contract-container) form > fieldset:nth-of-type(3) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 18px; }
-  main:has(.print-contract-container) form > fieldset:nth-of-type(3) > legend { grid-column: 1 / -1; }
-}
+@media (min-width: 768px) { main:has(.print-contract-container) form > fieldset:nth-of-type(3) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 18px; } main:has(.print-contract-container) form > fieldset:nth-of-type(3) > legend { grid-column: 1 / -1; } }
 @media (max-width: 767px) { main:has(.print-contract-container) form > fieldset { padding: 18px; border-radius: 14px; } }
 
-/* Print-specific styles */
 @media print {
   @page { size: A4 portrait; margin: .75in; margin-bottom: 1.2in; }
-  html, body { margin: 0; padding: 0; height: auto; width: 100%; background: white !important; }
-  body > * { display: none !important; }
+  html, body { margin: 0; padding: 0; height: auto; width: 100%; background: white !important; } body > * { display: none !important; }
   [role="document"], .print-contract-container { display: block !important; margin: 0 !important; padding: 0 !important; box-shadow: none !important; border: none !important; background: white !important; width: 100% !important; height: auto !important; }
-  [role="document"] *, .print-contract-container * { opacity: 1 !important; visibility: visible !important; }
-  [style*="transform: scale"] { transform: none !important; }
+  [role="document"] *, .print-contract-container * { opacity: 1 !important; visibility: visible !important; } [style*="transform: scale"] { transform: none !important; }
   [role="document"], .print-contract-container { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color: #000 !important; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color: #000 !important; background-color: transparent !important; text-shadow: none !important; box-shadow: none !important; }
   .break-inside-avoid { break-inside: avoid; } .break-before-page { break-before: page; } .break-after-avoid { break-after: avoid; }

@@ -1,6 +1,6 @@
 // Contract Form Types for Production-Ready Contract System
 
-export type ContractStatus = "Draft" | "Negotiating" | "Confirmed" | "Completed" | "Cancelled";
+export type ContractStatus = "Draft" | "Negotiating" | "Confirmed" | "Completed" | "Cancelled" | "Ready" | "Sent" | "Signed";
 
 export interface ContractForm {
   artistName: string;

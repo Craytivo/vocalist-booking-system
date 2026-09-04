@@ -150,9 +150,6 @@ export default function ContractWizard({
       }));
     }
 
-    // The legacy form may hydrate asynchronously when editing an existing contract.
-    // Once the user touches services in this wizard, the wizard becomes the source of truth
-    // so the polling sync cannot undo a click 750ms later.
     if (!servicesTouchedRef.current) {
       setServices(readServiceSelection());
     }
@@ -163,11 +160,6 @@ export default function ContractWizard({
     const interval = window.setInterval(syncFromLegacyForm, 750);
     return () => window.clearInterval(interval);
   }, [syncFromLegacyForm]);
-
-  useEffect(() => {
-    const safe = Math.min(Math.max(externalWizardStep || 1, 1), 5);
-    setStep(safe);
-  }, [externalWizardStep]);
 
   const update = useCallback((key: keyof typeof values, label: string, value: string) => {
     formTouchedRef.current = true;

@@ -153,6 +153,13 @@ export function useContractAutosave({
         return;
       }
 
+      if (!data?.id) {
+        const missingDataError = new Error("The contract was saved but no contract ID was returned.");
+        setSaveStatus(getErrorMessage(missingDataError, "save"));
+        console.error("Autosave insert error: no contract ID returned", data);
+        return;
+      }
+
       setDraftId(data.id);
       setSaveStatus("Draft saved");
       if (!skipRefreshRef.current) {

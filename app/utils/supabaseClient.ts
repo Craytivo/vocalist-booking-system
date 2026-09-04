@@ -79,9 +79,13 @@ class QueryBuilder implements PromiseLike<{ data: any; error: any }> {
     return this;
   }
 
+  // `.single()` follows the same contract as a single-row database query:
+  // a successful result is one record; zero/multiple records are represented
+  // by an error. Keeping the successful data type non-null lets TypeScript
+  // correctly model callers that have already handled `error`.
   single<T = Row>() {
     this.singleMode = true;
-    return this as QueryBuilder & PromiseLike<{ data: T | null; error: any }>;
+    return this as QueryBuilder & PromiseLike<{ data: T; error: any }>;
   }
 
   maybeSingle<T = Row>() {

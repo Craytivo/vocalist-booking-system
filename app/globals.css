@@ -2,99 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
-  background: #f8fafc;
+  background: #f6f7fb;
   color: #0f172a;
-  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* Typography Scale */
 :root {
-  --font-inter: var(--font-inter);
-  --font-playfair: var(--font-playfair);
-  
-  /* Typography sizes */
-  --text-xs: 0.75rem; /* 12px */
-  --text-sm: 0.875rem; /* 14px */
-  --text-base: 1rem; /* 16px */
-  --text-lg: 1.125rem; /* 18px */
-  --text-xl: 1.25rem; /* 20px */
-  --text-2xl: 1.5rem; /* 24px */
-  --text-3xl: 1.875rem; /* 30px */
-  --text-4xl: 2.25rem; /* 36px */
-  --text-5xl: 3rem; /* 48px */
-  --text-6xl: 3.75rem; /* 60px */
-  
-  /* Line heights */
+  --font-heading: var(--font-heading);
+  --font-body: var(--font-body);
+  --font-legal: var(--font-legal);
+  --color-primary: #4f46e5;
+  --color-primary-light: #6366f1;
+  --color-primary-dark: #4338ca;
+  --color-secondary: #f59e0b;
+  --color-accent: #14b8a6;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #f43f5e;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
   --leading-tight: 1.25;
   --leading-normal: 1.5;
   --leading-relaxed: 1.625;
-  
-  /* Letter spacing */
   --tracking-tight: -0.025em;
   --tracking-normal: 0;
   --tracking-wide: 0.025em;
   --tracking-wider: 0.05em;
   --tracking-widest: 0.1em;
-  
-  /* Color Palette - Refined */
-  --color-primary: #4f46e5; /* Indigo */
-  --color-primary-light: #6366f1;
-  --color-primary-dark: #4338ca;
-  
-  --color-secondary: #f59e0b; /* Amber */
-  --color-secondary-light: #fbbf24;
-  --color-secondary-dark: #d97706;
-  
-  --color-accent: #14b8a6; /* Teal */
-  --color-accent-light: #2dd4bf;
-  --color-accent-dark: #0d9488;
-  
-  /* Neutral scale - Slate */
-  --color-slate-50: #f8fafc;
-  --color-slate-100: #f1f5f9;
-  --color-slate-200: #e2e8f0;
-  --color-slate-300: #cbd5e1;
-  --color-slate-400: #94a3b8;
-  --color-slate-500: #64748b;
-  --color-slate-600: #475569;
-  --color-slate-700: #334155;
-  --color-slate-800: #1e293b;
-  --color-slate-900: #0f172a;
-  
-  /* Semantic colors */
-  --color-success: #10b981; /* Emerald */
-  --color-warning: #f59e0b; /* Amber */
-  --color-error: #f43f5e; /* Rose */
-  
-  /* Spacing scale - 8px base */
-  --space-1: 0.25rem; /* 4px */
-  --space-2: 0.5rem; /* 8px */
-  --space-3: 0.75rem; /* 12px */
-  --space-4: 1rem; /* 16px */
-  --space-5: 1.25rem; /* 20px */
-  --space-6: 1.5rem; /* 24px */
-  --space-8: 2rem; /* 32px */
-  --space-10: 2.5rem; /* 40px */
-  --space-12: 3rem; /* 48px */
-  --space-16: 4rem; /* 64px */
-  --space-20: 5rem; /* 80px */
-  --space-24: 6rem; /* 96px */
 }
 
-/* Typography utility classes */
-.font-display {
-  font-family: var(--font-playfair), Georgia, serif;
-}
-
-.font-body {
-  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
-}
+.font-display, .font-heading { font-family: var(--font-heading), system-ui, sans-serif; }
+.font-body { font-family: var(--font-body), system-ui, sans-serif; }
 
 .text-xs { font-size: var(--text-xs); }
 .text-sm { font-size: var(--text-sm); }
@@ -117,57 +71,28 @@ body {
 .tracking-wider { letter-spacing: var(--tracking-wider); }
 .tracking-widest { letter-spacing: var(--tracking-widest); }
 
-/* Custom Scrollbar Styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+button, input, textarea, select { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+
+::selection { background: rgb(99 102 241 / 0.16); }
+
+:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
 }
 
-::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
-}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgb(100 116 139 / 0.22); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: rgb(100 116 139 / 0.36); }
+* { scrollbar-width: thin; scrollbar-color: rgb(100 116 139 / 0.22) transparent; }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
-}
-
-/* Firefox Scrollbar Styling */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.05);
-}
-
-/* Print-specific styles to ensure PDF matches preview */
+/* Print-specific styles */
 @media print {
-  @page {
-    size: A4 portrait;
-    margin: 0.75in;
-    margin-bottom: 1.2in;
-  }
-
-  /* Page setup */
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: auto;
-    width: 100%;
-    background: white !important;
-  }
-
-  /* Hide everything by default */
-  body > * {
-    display: none !important;
-  }
-
-  /* Show the contract preview section */
-  [role="document"],
-  .print-contract-container {
+  @page { size: A4 portrait; margin: 0.75in; margin-bottom: 1.2in; }
+  html, body { margin: 0; padding: 0; height: auto; width: 100%; background: white !important; }
+  body > * { display: none !important; }
+  [role="document"], .print-contract-container {
     display: block !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -177,29 +102,16 @@ body {
     width: 100% !important;
     height: auto !important;
   }
-
-  /* Show all content inside contract */
-  [role="document"] *,
-  .print-contract-container * {
-    display: inherit;
+  [role="document"] *, .print-contract-container * {
     opacity: 1 !important;
     visibility: visible !important;
   }
-
-  /* Override any transform scaling */
-  [style*="transform: scale"] {
-    transform: none !important;
-  }
-
-  /* Ensure proper text rendering */
-  [role="document"],
-  .print-contract-container {
+  [style*="transform: scale"] { transform: none !important; }
+  [role="document"], .print-contract-container {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     color: #000 !important;
   }
-
-  /* Force black text for readability */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
@@ -208,36 +120,9 @@ body {
     text-shadow: none !important;
     box-shadow: none !important;
   }
-
-  /* Page break handling */
-  .break-inside-avoid {
-    break-inside: avoid;
-  }
-
-  .break-before-page {
-    break-before: page;
-  }
-
-  .break-after-avoid {
-    break-after: avoid;
-  }
-
-  /* Footer styling */
-  .print-footer {
-    position: static;
-    page-break-inside: avoid;
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 1px solid #000;
-  }
-
-  /* Hide print UI elements */
-  .print:hidden,
-  .no-print,
-  button,
-  .zoom-controls,
-  .shadow-lg,
-  .border-gray-300 {
-    display: none !important;
-  }
+  .break-inside-avoid { break-inside: avoid; }
+  .break-before-page { break-before: page; }
+  .break-after-avoid { break-after: avoid; }
+  .print-footer { position: static; page-break-inside: avoid; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #000; }
+  .print\:hidden, .no-print, button, .zoom-controls, .shadow-lg, .border-gray-300 { display: none !important; }
 }

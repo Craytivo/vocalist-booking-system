@@ -56,6 +56,49 @@ main:not(:has(.print-contract-container)) .animate-pulse { animation-duration: 1
 @media (min-width: 768px) { main:has(.print-contract-container) form > fieldset:nth-of-type(3) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 18px; } main:has(.print-contract-container) form > fieldset:nth-of-type(3) > legend { grid-column: 1 / -1; } }
 @media (max-width: 767px) { main:has(.print-contract-container) form > fieldset { padding: 18px; border-radius: 14px; } }
 
+/* Contract workspace responsive hardening. The contract page intentionally stays single-column below lg. */
+main:has(.print-contract-container) { min-width: 0; overflow-x: hidden; }
+main:has(.print-contract-container) > div { min-width: 0; }
+main:has(.print-contract-container) > div > * { min-width: 0; }
+main:has(.print-contract-container) form, main:has(.print-contract-container) .print-contract-container { min-width: 0; max-width: 100%; }
+main:has(.print-contract-container) form * { min-width: 0; }
+main:has(.print-contract-container) img, main:has(.print-contract-container) svg { max-width: 100%; }
+main:has(.print-contract-container) textarea { overflow-wrap: anywhere; }
+main:has(.print-contract-container) input, main:has(.print-contract-container) select, main:has(.print-contract-container) textarea { max-width: 100%; }
+
+@media (max-width: 1023px) {
+  main:has(.print-contract-container) > div { width: 100%; max-width: 100%; }
+  main:has(.print-contract-container) .print-contract-container { width: 100% !important; }
+}
+
+@media (max-width: 767px) {
+  main:has(.print-contract-container) > header { position: sticky; top: 0; z-index: 40; }
+  main:has(.print-contract-container) > header > div { min-width: 0; padding-left: 14px; padding-right: 14px; }
+  main:has(.print-contract-container) > header h1 { min-width: 0; max-width: 46vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .95rem !important; }
+  main:has(.print-contract-container) > header button { min-height: 40px; }
+  main:has(.print-contract-container) > div { gap: 16px !important; padding: 16px !important; }
+  main:has(.print-contract-container) form > fieldset { padding: 16px; border-radius: 12px; }
+  main:has(.print-contract-container) form > fieldset > legend { font-size: .95rem; }
+  main:has(.print-contract-container) form > fieldset:first-of-type::before, main:has(.print-contract-container) form > fieldset:nth-of-type(2)::before, main:has(.print-contract-container) form > fieldset:nth-of-type(3)::before { margin-bottom: 12px; }
+  main:has(.print-contract-container) .new-contract-workflow { margin-left: 0 !important; margin-right: 0 !important; border-radius: 14px; }
+  main:has(.print-contract-container) .new-contract-workflow > div { min-width: 0; }
+  main:has(.print-contract-container) .new-contract-workflow input, main:has(.print-contract-container) .new-contract-workflow select, main:has(.print-contract-container) .new-contract-workflow textarea { width: 100%; min-width: 0; }
+  main:has(.print-contract-container) .print-contract-container { border-radius: 12px !important; box-shadow: 0 4px 18px rgb(15 23 42 / .05) !important; }
+}
+
+@media (max-width: 479px) {
+  main:has(.print-contract-container) > header > div { padding-left: 10px; padding-right: 10px; }
+  main:has(.print-contract-container) > header h1 { max-width: 40vw; font-size: .875rem !important; }
+  main:has(.print-contract-container) > div { padding: 10px !important; gap: 12px !important; }
+  main:has(.print-contract-container) form > fieldset { padding: 14px; }
+  main:has(.print-contract-container) form > fieldset > legend { font-size: .9rem; }
+  main:has(.print-contract-container) .new-contract-workflow { border-radius: 12px; }
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  main:has(.print-contract-container) > div { padding-left: 18px; padding-right: 18px; gap: 18px !important; }
+}
+
 @media print {
   @page { size: A4 portrait; margin: .75in; margin-bottom: 1.2in; }
   html, body { margin: 0; padding: 0; height: auto; width: 100%; background: white !important; } body > * { display: none !important; }

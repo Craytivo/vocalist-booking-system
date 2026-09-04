@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ContractForm, ContractPreviewProps } from "../types/contract";
 import { getSectionNumber } from "../utils/sectionNumbering";
 import { PRINT_STYLES } from "./ContractPrintStyles";
@@ -26,6 +26,20 @@ import {
 import { ContractSignatures } from "./ContractSignatures";
 
 export default function ContractPreview({ form, previewRef, draftId, showStandardClauses = true }: ContractPreviewProps) {
+  useEffect(() => {
+    const handleCreateContract = (event: SubmitEvent) => {
+      const submitter = event.submitter as HTMLElement | null;
+      const label = submitter?.textContent?.replace(/\s+/g, " ").trim().toLowerCase();
+      if (label !== "create contract") return;
+
+      event.preventDefault();
+      window.setTimeout(() => window.print(), 0);
+    };
+
+    document.addEventListener("submit", handleCreateContract, true);
+    return () => document.removeEventListener("submit", handleCreateContract, true);
+  }, []);
+
   const displayValue = (value: string) => value || "________";
   const artistName = displayValue(form.artistName);
   const artistEmail = displayValue(form.artistEmail);

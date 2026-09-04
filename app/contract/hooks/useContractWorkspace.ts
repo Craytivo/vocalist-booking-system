@@ -46,6 +46,14 @@ export function useContractWorkspace({ authUser, showToast, getErrorMessage, app
       showToast(message, "error");
       return;
     }
+
+    if (!data) {
+      const message = "Unable to create artist workspace.";
+      setWorkspaceStatus(message);
+      showToast(message, "error");
+      return;
+    }
+
     setWorkspace(data);
     setWorkspaceStatus(`Workspace: ${data.artist_name || data.share_slug}`);
     applyWorkspaceToForm(data);

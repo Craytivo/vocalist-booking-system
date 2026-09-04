@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2, Download, FileUp, HardDrive, ShieldCheck, Trash2 } from "lucide-react";
 
@@ -17,6 +17,7 @@ type BackupPayload = {
 
 function collectStorage(): Record<string, string> {
   const storage: Record<string, string> = {};
+  if (typeof window === "undefined") return storage;
   for (let index = 0; index < localStorage.length; index += 1) {
     const key = localStorage.key(index);
     if (!key || IGNORED_KEYS.has(key)) continue;
@@ -26,19 +27,25 @@ function collectStorage(): Record<string, string> {
   return storage;
 }
 
+function getStorageSizeLabel(storage: Record<string, string>): string {
+  const bytes = new Blob([JSON.stringify(storage)]).size;
+  if (bytes < 1024) return `${bytes} B`;
+  return `${(bytes / 1024).toFixed(1)} KB`;
+}
+
 export default function BackupPage() {
   const [keys, setKeys] = useState(0);
+  const [sizeLabel, setSizeLabel] = useState("0 B");
   const [lastBackup, setLastBackup] = useState<string | null>(null);
   const [message, setMessage] = useState("");
 
-  const refresh = () => setKeys(Object.keys(collectStorage()).length);
-  useEffect(() => refresh(), []);
+  const refresh = () => {
+    const storage = collectStorage();
+    setKeys(Object.keys(storage).length);
+    setSizeLabel(getStorageSizeLabel(storage));
+  };
 
-  const sizeLabel = useMemo(() => {
-    const bytes = new Blob([JSON.stringify(collectStorage())]).size;
-    if (bytes < 1024) return `${bytes} B`;
-    return `${(bytes / 1024).toFixed(1)} KB`;
-  }, [keys, lastBackup]);
+  useEffect(() => refresh(), []);
 
   const exportBackup = () => {
     const payload: BackupPayload = { app: "Setlist", version: BACKUP_VERSION, exportedAt: new Date().toISOString(), origin: window.location.origin, storage: collectStorage() };
@@ -51,6 +58,7 @@ export default function BackupPage() {
     URL.revokeObjectURL(url);
     setLastBackup(new Date().toLocaleString());
     setMessage("Backup exported successfully.");
+    refresh();
   };
 
   const importBackup = async (event: ChangeEvent<HTMLInputElement>) => {

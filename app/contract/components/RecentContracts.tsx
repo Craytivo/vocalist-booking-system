@@ -11,7 +11,7 @@ interface RecentContractsProps {
   supabaseEnabled: boolean;
 }
 
-const STATUSES = ["All", "Draft", "Ready", "Sent", "Signed"];
+const STATUSES = ["All", "Draft", "Negotiating", "Confirmed", "Completed", "Cancelled"];
 
 export default function RecentContracts({ activeDraftId, contracts, onLoadContract, onDeleteContract, onStatusFilterChange, statusFilter, supabaseEnabled }: RecentContractsProps) {
   const [requestedDraftId, setRequestedDraftId] = useState<string | null>(null);
@@ -53,5 +53,5 @@ export default function RecentContracts({ activeDraftId, contracts, onLoadContra
   );
 }
 
-function StatusBadge({ status }: { status: string }) { const styles: Record<string, string> = { Draft: "bg-slate-100 text-slate-600", Ready: "bg-emerald-50 text-emerald-700", Sent: "bg-blue-50 text-blue-700", Signed: "bg-indigo-50 text-indigo-700" }; return <span className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-wide ${styles[status] || styles.Draft}`}>{status}</span>; }
+function StatusBadge({ status }: { status: string }) { const styles: Record<string, string> = { Draft: "bg-slate-100 text-slate-600", Negotiating: "bg-amber-50 text-amber-700", Confirmed: "bg-indigo-50 text-indigo-700", Completed: "bg-emerald-50 text-emerald-700", Cancelled: "bg-red-50 text-red-700" }; return <span className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-wide ${styles[status] || styles.Draft}`}>{status}</span>; }
 function EmptyState({ title, description }: { title: string; description: string }) { return <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-10 text-center"><span className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm ring-1 ring-slate-200"><FileText size={18} strokeWidth={1.7} /></span><p className="text-sm font-semibold text-slate-800">{title}</p><p className="mt-1 max-w-[230px] text-xs leading-5 text-slate-500">{description}</p></div>; }

@@ -1,140 +1,125 @@
-// Print-specific styles and utilities for contract PDF generation
-
-/**
- * Print CSS classes that should be applied to the contract document
- * These can be added to a style tag or used with Tailwind's @layer utilities
- */
+// Professional print styles for contract documents.
 export const PRINT_STYLES = `
   @media print {
-    /* Reset print margins and page size */
     @page {
-      size: A4;
-      margin: 15mm;
+      size: Letter;
+      margin: 18mm 18mm 20mm;
     }
 
-    /* Hide everything by default */
-    body * {
-      visibility: hidden;
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #fff !important;
+      color: #111827 !important;
     }
 
-    /* Show only the contract container and its contents */
-    .print-contract, .print-contract * {
-      visibility: visible;
-    }
+    body * { visibility: hidden; }
+    .print-contract, .print-contract * { visibility: visible; }
 
-    /* Position the contract properly */
     .print-contract {
       position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-      margin: 0;
-      padding: 0;
-    }
-
-    /* Hide UI elements in print */
-    .no-print {
-      display: none !important;
-    }
-
-    /* Ensure text doesn't overflow - contract-appropriate font sizing */
-    .print-contract {
+      inset: 0;
+      width: auto !important;
+      max-width: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #fff !important;
+      color: #111827 !important;
+      box-shadow: none !important;
+      border: 0 !important;
+      font-family: Georgia, "Times New Roman", serif !important;
+      font-size: 10.5pt !important;
+      line-height: 1.55 !important;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
-      color: #000 !important;
-      text-shadow: none !important;
-      box-shadow: none !important;
-      border: none !important;
-      font-size: 11pt !important;
-      line-height: 1.4 !important;
-      orphans: 2;
-      widows: 2;
+      orphans: 3;
+      widows: 3;
     }
 
-    /* Contract headings */
     .print-contract h1 {
-      font-size: 16pt !important;
-      font-weight: bold !important;
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 18pt !important;
+      line-height: 1.15 !important;
+      letter-spacing: .01em !important;
+      margin: 0 0 4pt !important;
+      color: #111827 !important;
       break-after: avoid;
-      break-inside: avoid;
     }
 
-    .print-contract h2, .print-contract h3 {
+    .print-contract h2 {
+      font-family: Arial, Helvetica, sans-serif !important;
       font-size: 12pt !important;
-      font-weight: bold !important;
+      line-height: 1.25 !important;
+      color: #111827 !important;
+      margin-top: 16pt !important;
+      margin-bottom: 6pt !important;
       break-after: avoid;
       break-inside: avoid;
     }
 
-    /* Prevent page breaks inside critical sections */
-    .break-inside-avoid {
+    .print-contract h3 {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 10pt !important;
+      line-height: 1.3 !important;
+      color: #374151 !important;
+      margin-top: 12pt !important;
+      margin-bottom: 4pt !important;
+      break-after: avoid;
+    }
+
+    .print-contract p,
+    .print-contract li {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .print-contract p { margin-top: 0 !important; margin-bottom: 7pt !important; }
+
+    .break-inside-avoid,
+    .print-contract section,
+    .print-contract table,
+    .print-contract blockquote {
       break-inside: avoid !important;
       page-break-inside: avoid !important;
     }
 
-    .break-after-avoid {
-      break-after: avoid !important;
-      page-break-after: avoid !important;
-    }
-
-    .break-before-avoid {
-      break-before: avoid !important;
-      page-break-before: avoid !important;
-    }
-
-    /* Force page break before signatures */
     .break-before-page {
       break-before: page !important;
       page-break-before: always !important;
     }
 
-    /* Add space between sections */
-    .print-contract > div > div {
-      margin-bottom: 24pt !important;
-      break-inside: avoid !important;
-      page-break-inside: avoid !important;
+    .break-after-page {
+      break-after: page !important;
+      page-break-after: always !important;
     }
 
-    /* Prevent paragraphs from being split at the end of pages */
-    .print-contract p {
-      orphans: 3 !important;
-      widows: 3 !important;
-      break-inside: avoid !important;
-      page-break-inside: avoid !important;
+    .no-print,
+    .print-hidden,
+    button,
+    input,
+    textarea,
+    select,
+    .zoom-controls {
+      display: none !important;
     }
 
-    /* Prevent lists from being split */
-    .print-contract ul, .print-contract ol {
-      break-inside: avoid !important;
-      page-break-inside: avoid !important;
+    .print-contract .signature-section,
+    .print-contract .signatures {
+      break-before: page !important;
+      page-break-before: always !important;
     }
 
-    /* Remove all margins/padding for body during print */
-    body, html {
-      margin: 0 !important;
-      padding: 0 !important;
-      background: white !important;
-    }
-
-    /* Adobe Reader compatibility */
-    @supports (-ms-ime-align: auto) {
-      .print-contract {
-        -ms-text-size-adjust: 100%;
-        -webkit-text-size-adjust: 100%;
-      }
-    }
+    .print-contract a { color: #111827 !important; text-decoration: none !important; }
+    .print-contract img { max-width: 100% !important; break-inside: avoid; }
   }
 `;
 
-/**
- * Page break utilities for React components
- */
 export const PageBreakBefore = () => (
-  <div className="hidden print:block break-before-page" />
+  <div className="hidden print:block break-before-page" aria-hidden="true" />
 );
 
 export const PageBreakAfter = () => (
-  <div className="hidden print:block break-after-page" />
+  <div className="hidden print:block break-after-page" aria-hidden="true" />
 );
 
 export const NoPrint = ({ children }: { children: React.ReactNode }) => (
@@ -145,46 +130,22 @@ export const PrintOnly = ({ children }: { children: React.ReactNode }) => (
   <div className="hidden print:block">{children}</div>
 );
 
-/**
- * Helper to determine if a section should break after
- * based on content length and position
- */
 export function shouldBreakAfterSection(
   sectionContentLength: number,
   currentPageContent: number,
   maxContentPerPage: number = 2000
 ): boolean {
   const remainingSpace = maxContentPerPage - currentPageContent;
-  
-  // If remaining space is less than 30% of max, break before this section
-  if (remainingSpace < maxContentPerPage * 0.3) {
-    return true;
-  }
-  
-  // If section content is very long, break before it
-  if (sectionContentLength > maxContentPerPage * 0.5) {
-    return true;
-  }
-  
-  return false;
+  return remainingSpace < maxContentPerPage * 0.3 || sectionContentLength > maxContentPerPage * 0.5;
 }
 
-/**
- * Calculate estimated page count for PDF generation
- */
-export function calculatePageCount(
-  totalContentLength: number,
-  charsPerPage: number = 2000
-): number {
+export function calculatePageCount(totalContentLength: number, charsPerPage: number = 2000): number {
   return Math.ceil(totalContentLength / charsPerPage);
 }
 
-/**
- * Get print-specific CSS classes for contract elements
- */
 export const PRINT_CLASSES = {
-  container: "print:shadow-none print:border-none print:box-border print:px-14 print:py-20 print:text-sm",
-  section: "print:pb-8 break-after-avoid print:break-inside-avoid",
-  footer: "print:fixed print:bottom-0 print:left-0 print:right-0 print:border-t print:border-neutral-300 print:bg-white print:px-14 print:py-4",
+  container: "print:shadow-none print:border-none print:box-border print:px-0 print:py-0 print:text-sm",
+  section: "print:pb-5 break-after-avoid print:break-inside-avoid",
+  footer: "print:border-t print:border-neutral-300 print:bg-white print:px-0 print:py-3",
   watermark: "print:hidden",
 } as const;

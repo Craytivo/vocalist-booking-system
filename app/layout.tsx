@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
+import "./contract/booking-responsive.css";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { validateEnv } from "./utils/env";
 import { Plus_Jakarta_Sans, Inter, Merriweather } from "next/font/google";

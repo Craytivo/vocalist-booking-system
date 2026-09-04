@@ -1,21 +1,5 @@
 import { useState, ChangeEvent } from "react";
-import { DEFAULT_LEGAL_TEXT } from "../types/contract";
-
-interface ContractForm {
-  artistName: string; artistEmail: string; artistLogo: string; bookingPreset: string; contractStatus: string;
-  clientName: string; representativeName: string; email: string; phoneNumber: string; eventName: string; eventDates: string;
-  venueLocation: string; services: string[]; totalFee: string; depositPercentage: string; travelRequired: boolean;
-  depositTerms: string; travelTerms: string; cancellationTerms: string; technicalRequirements: string; performanceDuration: string; paymentMethod: string; dateOfAgreement: string;
-  mediaRightsAllowed: boolean; mediaRightsTerms: string; forceMajeureIncluded: boolean; forceMajeureTerms: string; independentContractorClause: string;
-  artistSignerName: string; clientSignerName: string; artistSignerTitle: string; clientSignerTitle: string; artistSignature: string; clientSignature: string; signedDate: string;
-  deliverySubject: string; deliveryMessage: string; invoiceNumber: string; invoiceDate: string; invoiceStatus: string; invoiceDueDate: string; invoiceNotes: string;
-  rehearsalRequired: boolean; rehearsalDetails: string; soundCheckRequired: boolean; soundCheckDetails: string; hospitalityRequired: boolean; hospitalityDetails: string;
-  latePaymentPenalty: string; cancellationFee: string; insuranceRequired: boolean; insuranceDetails: string; imageUsageAllowed: boolean; imageUsageTerms: string;
-  merchandiseSalesAllowed: boolean; merchandiseTerms: string; guestListCount: string; securityRequired: boolean; securityDetails: string; parkingProvided: boolean; parkingDetails: string;
-  governingLaw: string; disputeResolution: string; technicalRiderRequired: boolean; technicalRiderDetails: string; accommodationRequired: boolean; accommodationDetails: string;
-  perDiemRequired: boolean; perDiemDetails: string; publicityTermsRequired: boolean; publicityTerms: string;
-  indemnificationClause: string; confidentialityClause: string; equipmentLiabilityClause: string; attorneyFeesClause: string;
-}
+import { ContractForm, DEFAULT_LEGAL_TEXT } from "../types/contract";
 
 interface UseContractFormProps { initialForm: ContractForm; }
 

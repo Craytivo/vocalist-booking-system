@@ -1,3 +1,5 @@
+import { FileText, Trash2 } from "lucide-react";
+
 interface RecentContractsProps {
   activeDraftId: string | null;
   contracts: any[];
@@ -8,6 +10,8 @@ interface RecentContractsProps {
   supabaseEnabled: boolean;
 }
 
+const STATUSES = ["All", "Draft", "Ready", "Sent", "Signed"];
+
 export default function RecentContracts({
   activeDraftId,
   contracts,
@@ -17,129 +21,156 @@ export default function RecentContracts({
   statusFilter,
   supabaseEnabled,
 }: RecentContractsProps) {
+  const counts = STATUSES.reduce<Record<string, number>>((acc, status) => {
+    acc[status] = status === "All"
+      ? contracts.length
+      : contracts.filter((contract) => (contract.contract_status || contract.status || "Draft") === status).length;
+    return acc;
+  }, {});
+
   return (
-    <div className="mt-8 rounded-xl border border-neutral-300 bg-white p-4 shadow-md">
-      <div className="flex items-center justify-between gap-3 mb-4">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-neutral-900">
-          Recent Contracts
-        </h2>
-        <div className="flex flex-wrap gap-1">
-          {["All", "Draft", "Ready", "Sent", "Signed"].map((status) => (
-            <button
-              key={status}
-              type="button"
-              onClick={() => onStatusFilterChange(status)}
-              className={`px-3 py-1 text-xs font-medium transition-all ${
-                statusFilter === status
-                  ? "text-neutral-900 border-b-2 border-neutral-900"
-                  : "text-neutral-400 hover:text-neutral-600"
-              }`}
-            >
-              {status}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {!supabaseEnabled ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-neutral-100 mb-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10 9 9 9 8 9"/>
-            </svg>
+    <section className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5">
+      <div className="border-b border-slate-100 px-4 pb-3 pt-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold tracking-tight text-slate-900">Recent contracts</p>
+            <p className="mt-0.5 text-xs text-slate-500">Open a saved contract to continue editing</p>
           </div>
-          <p className="text-sm font-medium text-neutral-900 mb-1">Connect Supabase</p>
-          <p className="text-xs text-neutral-500">Add credentials to save contracts</p>
+          <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-slate-100 px-2 text-xs font-semibold text-slate-600">
+            {contracts.length}
+          </span>
         </div>
-      ) : contracts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-neutral-100 mb-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10 9 9 9 8 9"/>
-            </svg>
-          </div>
-          <p className="text-sm font-medium text-neutral-900 mb-1">No contracts yet</p>
-          <p className="text-xs text-neutral-500">Your drafts will appear here</p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {contracts.map((contract) => {
-            const title = contract.client_name || "Untitled client";
-            const subtitle = contract.event_name || "Untitled event";
-            const date = contract.event_dates || "No date set";
-            const fee = contract.total_fee
-              ? `$${Number(contract.total_fee).toLocaleString("en-CA")} CAD`
-              : "Fee not set";
-            const status = contract.contract_status || contract.status || "Draft";
-            const isActive = contract.id === activeDraftId;
 
+        <div className="mt-4 flex gap-1 overflow-x-auto rounded-xl bg-slate-50 p-1" role="tablist" aria-label="Contract status">
+          {STATUSES.map((status) => {
+            const active = statusFilter === status;
             return (
-              <div key={contract.id} className="relative group">
-                <button
-                  type="button"
-                  onClick={() => onLoadContract(contract)}
-                  className={`w-full rounded-lg border px-4 py-3 text-left transition-all ${
-                    isActive
-                      ? "border-neutral-900 bg-neutral-50"
-                      : "border-neutral-300 bg-white hover:border-neutral-300 hover:bg-neutral-50"
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-neutral-900 truncate">
-                        {title}
-                      </p>
-                      <p className="mt-0.5 text-xs text-neutral-500 truncate">
-                        {subtitle}
-                      </p>
-                      <p className="mt-0.5 text-xs text-neutral-400">
-                        {date} · {fee}
-                      </p>
-                    </div>
-                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                      <span className={`text-[10px] font-medium uppercase tracking-wide ${
-                        status === "Draft" ? "text-neutral-500" :
-                        status === "Ready" ? "text-emerald-600" :
-                        status === "Sent" ? "text-blue-600" :
-                        status === "Signed" ? "text-neutral-900" :
-                        "text-neutral-500"
-                      }`}>
-                        {status}
-                      </span>
-                      {isActive && (
-                        <span className="w-2 h-2 rounded-full bg-neutral-900" />
-                      )}
-                    </div>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDeleteContract(contract.id);
-                  }}
-                  className="absolute top-2 right-2 p-1.5 rounded text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
-                  title="Delete contract"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M3 6h18"></path>
-                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                  </svg>
-                </button>
-              </div>
+              <button
+                key={status}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => onStatusFilterChange(status)}
+                className={`flex min-w-fit items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 ${
+                  active
+                    ? "bg-white text-slate-900 shadow-sm ring-1 ring-slate-200"
+                    : "text-slate-500 hover:bg-white/70 hover:text-slate-700"
+                }`}
+              >
+                {status}
+                <span className={`rounded-full px-1.5 py-0.5 text-[10px] leading-none ${
+                  active ? "bg-slate-100 text-slate-600" : "bg-slate-200/70 text-slate-500"
+                }`}>
+                  {counts[status]}
+                </span>
+              </button>
             );
           })}
         </div>
-      )}
+      </div>
+
+      <div className="p-3">
+        {!supabaseEnabled ? (
+          <EmptyState
+            title="Connect Supabase"
+            description="Add your Supabase credentials to save contracts."
+          />
+        ) : contracts.length === 0 ? (
+          <EmptyState
+            title={statusFilter === "All" ? "No contracts yet" : `No ${statusFilter.toLowerCase()} contracts`}
+            description={statusFilter === "All" ? "Your saved contracts will appear here." : "Try another status filter or create a new contract."}
+          />
+        ) : (
+          <div className="space-y-2">
+            {contracts.map((contract) => {
+              const title = contract.client_name || "Untitled client";
+              const subtitle = contract.event_name || "Untitled event";
+              const date = contract.event_dates || "No date set";
+              const fee = contract.total_fee
+                ? `$${Number(contract.total_fee).toLocaleString("en-CA")} CAD`
+                : "Fee not set";
+              const status = contract.contract_status || contract.status || "Draft";
+              const isActive = contract.id === activeDraftId;
+
+              return (
+                <div
+                  key={contract.id}
+                  className={`group relative rounded-xl border transition-all ${
+                    isActive
+                      ? "border-indigo-200 bg-indigo-50/50 shadow-sm"
+                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60"
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => onLoadContract(contract)}
+                    className="w-full rounded-xl px-3.5 py-3 pr-11 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-inset"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                        isActive ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-500"
+                      }`}>
+                        <FileText size={16} strokeWidth={1.8} />
+                      </span>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="truncate text-sm font-semibold text-slate-900">{title}</p>
+                          {isActive && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-500" aria-label="Currently open" />}
+                        </div>
+                        <p className="mt-0.5 truncate text-xs text-slate-500">{subtitle}</p>
+                        <p className="mt-1 truncate text-[11px] text-slate-400">{date} · {fee}</p>
+                      </div>
+
+                      <StatusBadge status={status} />
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onDeleteContract(contract.id);
+                    }}
+                    className="absolute right-2 top-2 rounded-lg p-2 text-slate-400 opacity-100 transition-all hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 md:opacity-0 md:group-hover:opacity-100"
+                    title="Delete contract"
+                    aria-label={`Delete ${title}`}
+                  >
+                    <Trash2 size={15} strokeWidth={1.8} />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const styles: Record<string, string> = {
+    Draft: "bg-slate-100 text-slate-600",
+    Ready: "bg-emerald-50 text-emerald-700",
+    Sent: "bg-blue-50 text-blue-700",
+    Signed: "bg-indigo-50 text-indigo-700",
+  };
+
+  return (
+    <span className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-wide ${styles[status] || styles.Draft}`}>
+      {status}
+    </span>
+  );
+}
+
+function EmptyState({ title, description }: { title: string; description: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-10 text-center">
+      <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm ring-1 ring-slate-200">
+        <FileText size={18} strokeWidth={1.7} />
+      </span>
+      <p className="text-sm font-semibold text-slate-800">{title}</p>
+      <p className="mt-1 max-w-[230px] text-xs leading-5 text-slate-500">{description}</p>
     </div>
   );
 }

@@ -1,5 +1,4 @@
-import { useEffect, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { FileText, Trash2 } from "lucide-react";
 
 interface RecentContractsProps {
@@ -23,9 +22,15 @@ export default function RecentContracts({
   statusFilter,
   supabaseEnabled,
 }: RecentContractsProps) {
-  const searchParams = useSearchParams();
-  const requestedDraftId = searchParams.get("draftId");
+  const [requestedDraftId, setRequestedDraftId] = useState<string | null>(null);
   const autoLoadedDraftRef = useRef<string | null>(null);
+
+  // Read the query string on the client without useSearchParams(), so the /contract
+  // route can still be statically prerendered by Next.js/Vercel.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setRequestedDraftId(params.get("draftId"));
+  }, []);
 
   useEffect(() => {
     if (!requestedDraftId || !supabaseEnabled || activeDraftId === requestedDraftId) return;

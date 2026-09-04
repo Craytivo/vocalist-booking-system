@@ -59,6 +59,33 @@ main:has(.print-contract-container) .print-contract-container > .absolute { disp
 main:has(.print-contract-container) form > div.space-y-8 > * { border-color: #e5e7eb; }
 main:has(.print-contract-container) form > div.space-y-8 .rounded-xl, main:has(.print-contract-container) form > div.space-y-8 .rounded-2xl { border-radius: 14px; }
 
+/* Contract-page contrast pass. Every control gets an explicit readable text color. */
+main:has(.print-contract-container) button { color: #1f2937 !important; }
+main:has(.print-contract-container) button.bg-stone-950,
+main:has(.print-contract-container) button.bg-neutral-950,
+main:has(.print-contract-container) button.bg-slate-950,
+main:has(.print-contract-container) button.bg-indigo-600,
+main:has(.print-contract-container) button.bg-indigo-700,
+main:has(.print-contract-container) button[class*="bg-gradient-"] { color: #fff !important; }
+main:has(.print-contract-container) button:disabled { color: #6b7280 !important; }
+main:has(.print-contract-container) button.bg-stone-950:disabled,
+main:has(.print-contract-container) button.bg-neutral-950:disabled,
+main:has(.print-contract-container) button.bg-slate-950:disabled,
+main:has(.print-contract-container) button.bg-indigo-600:disabled,
+main:has(.print-contract-container) button.bg-indigo-700:disabled { color: #fff !important; opacity: .5; }
+
+/* The Form / Preview switch is intentionally high contrast on every viewport. */
+main:has(.print-contract-container) button[class*="min-h-[48px]"] { color: #374151 !important; background: #fff !important; border: 1px solid #e5e7eb !important; }
+main:has(.print-contract-container) button[class*="min-h-[48px]"][class*="bg-stone-950"] { color: #fff !important; background: #111827 !important; border-color: #111827 !important; }
+
+/* Small muted copy should remain readable against white/light panels. */
+main:has(.print-contract-container) .text-gray-400,
+main:has(.print-contract-container) .text-gray-500,
+main:has(.print-contract-container) .text-stone-400,
+main:has(.print-contract-container) .text-stone-500,
+main:has(.print-contract-container) .text-neutral-400,
+main:has(.print-contract-container) .text-neutral-500 { color: #6b7280 !important; }
+
 @media (min-width: 768px) {
   main:has(.print-contract-container) form > fieldset:nth-of-type(3) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 18px; }
   main:has(.print-contract-container) form > fieldset:nth-of-type(3) > legend { grid-column: 1 / -1; }

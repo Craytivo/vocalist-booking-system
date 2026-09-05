@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { ContractForm, ContractPreviewProps } from "../types/contract";
 import { getSectionNumber } from "../utils/sectionNumbering";
 import { PRINT_STYLES } from "./ContractPrintStyles";
@@ -12,51 +12,10 @@ import {
 } from "./ContractSections";
 import { ContractSignatures } from "./ContractSignatures";
 
-const WIZARD_FIELD_MAP: Record<string, keyof ContractForm> = {
-  "artist name": "artistName", "artist email": "artistEmail", "client / organization": "clientName",
-  "client / organization name": "clientName", "primary contact": "representativeName", "representative name": "representativeName",
-  "client email": "email", "email": "email", "phone": "phoneNumber", "phone number": "phoneNumber",
-  "event / project name": "eventName", "event name": "eventName", "event date(s)": "eventDates", "event date(s) *": "eventDates",
-  "venue / location": "venueLocation", "venue / location *": "venueLocation", "performance duration": "performanceDuration",
-  "total fee": "totalFee", "deposit percentage (%)": "depositPercentage", "payment method": "paymentMethod",
-  "travel terms": "travelTerms", "cancellation terms": "cancellationTerms", "booking preset": "bookingPreset",
-};
-
-function normalizeLabel(value: string) {
-  return value.replace(/[\*•:]/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
-}
-
-function getWizardField(target: HTMLElement): keyof ContractForm | null {
-  const label = target.closest("label");
-  if (!label) return null;
-  const text = normalizeLabel(label.querySelector(":scope > span")?.textContent || label.textContent || "");
-  return WIZARD_FIELD_MAP[text] || null;
-}
-
-export default function ContractPreview({ form: incomingForm, previewRef, draftId, showStandardClauses = true }: ContractPreviewProps) {
-  const [liveForm, setLiveForm] = useState<ContractForm>(incomingForm);
-
-  useEffect(() => {
-    setLiveForm(incomingForm);
-  }, [incomingForm]);
-
-  useEffect(() => {
-    const handleWizardInput = (event: Event) => {
-      const target = event.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null;
-      if (!target || (target instanceof HTMLInputElement && target.type === "checkbox")) return;
-      const field = getWizardField(target);
-      if (!field) return;
-      setLiveForm((current) => ({ ...current, [field]: target.value }));
-    };
-    document.addEventListener("input", handleWizardInput, true);
-    document.addEventListener("change", handleWizardInput, true);
-    return () => {
-      document.removeEventListener("input", handleWizardInput, true);
-      document.removeEventListener("change", handleWizardInput, true);
-    };
-  }, []);
-
-  const form = liveForm;
+export default function ContractPreview({ form, previewRef, draftId, showStandardClauses = true }: ContractPreviewProps) {
+  // The preview is intentionally a pure projection of the parent's form state.
+  // Do not maintain a second local copy here: doing so can make the form and
+  // preview drift apart and requires fragile DOM event listeners to synchronize them.
 
   useEffect(() => {
     const handleCreateContract = (event: SubmitEvent) => {

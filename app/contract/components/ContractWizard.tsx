@@ -102,7 +102,7 @@ export default function ContractWizard({ wizardStep: externalWizardStep, setWiza
   const labelClass = "mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500";
 
   return (
-    <div className="new-contract-workflow relative z-[100] pointer-events-auto -mx-1 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm" onPointerDown={event => event.stopPropagation()}>
+    <div className="new-contract-workflow relative z-10 pointer-events-auto -mx-1 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm" onPointerDown={event => event.stopPropagation()}>
       <div className="border-b border-neutral-200 bg-white px-5 py-5 sm:px-7 sm:py-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>

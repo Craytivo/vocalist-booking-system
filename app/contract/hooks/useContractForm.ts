@@ -47,8 +47,9 @@ export function useContractForm({ initialForm }: UseContractFormProps) {
     };
     const handleWizardServicesChange = (event: Event) => {
       const detail = (event as CustomEvent<{ services?: string[] }>).detail;
-      if (!Array.isArray(detail?.services)) return;
-      setForm(currentForm => ({ ...currentForm, services: detail.services }));
+      const services = detail?.services;
+      if (!Array.isArray(services)) return;
+      setForm(currentForm => ({ ...currentForm, services }));
     };
     window.addEventListener("contract:wizard-field-change", handleWizardFieldChange);
     window.addEventListener("contract:wizard-services-change", handleWizardServicesChange);
